@@ -1,252 +1,246 @@
 
 /**
- * Shows a toast notification
- * @param {string} type - 'success', 'error', 'warning', or 'info'
- * @param {string} message - The message to display
- * @param {number} duration - Duration in ms the toast should be visible (default: 5000)
+ * UI Utilities for Hack Club Spaces
+ * Centralized functions for common UI interactions
  */
-function showToast(type, message, duration = 5000) {
-  // Validate type
-  const validTypes = ['success', 'error', 'warning', 'info'];
-  if (!validTypes.includes(type)) {
-    type = 'info';
-  }
-  
-  // Get or create toast container
-  let toastContainer = document.getElementById('toast-container');
-  if (!toastContainer) {
-    toastContainer = document.createElement('div');
-    toastContainer.id = 'toast-container';
-    document.body.appendChild(toastContainer);
-  }
-  
-  // Get appropriate icon
-  const iconMap = {
-    'success': 'check-circle',
-    'error': 'exclamation-circle',
-    'warning': 'exclamation-triangle',
-    'info': 'info-circle'
-  };
-  const icon = iconMap[type];
-  
-  // Create toast element
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  toast.innerHTML = `
-    <div class="toast-content">
-      <i class="fas fa-${icon}"></i>
-      <div class="toast-message">${message}</div>
-    </div>
-    <button class="toast-close">&times;</button>
-  `;
-  
-  // Add event listener to close button
-  const closeBtn = toast.querySelector('.toast-close');
-  closeBtn.addEventListener('click', () => {
-    toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 300);
-  });
-  
-  // Add to container
-  toastContainer.appendChild(toast);
-  
-  // Trigger animation
-  setTimeout(() => {
-    toast.classList.add('show');
-  }, 10);
-  
-  // Auto remove after duration
-  setTimeout(() => {
-    if (toast.parentElement) {
-      toast.classList.remove('show');
-      setTimeout(() => toast.remove(), 300);
-    }
-  }, duration);
-  
-  // Return the toast element for potential further manipulation
-  return toast;
-}
 
-function openModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (!modal) return;
-  
-  modal.style.display = 'flex';
-  modal.offsetHeight; 
-  modal.classList.add('show');
-}
-
-function closeModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (!modal) return;
-  
-  modal.classList.remove('show');
-  setTimeout(() => {
-    modal.style.display = 'none';
-  }, 300);
-}
-
-function debounce(func, wait) {
-  let timeout;
-  return function(...args) {
-    const context = this;
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(context, args), wait);
-  };
-}
-
-function deploySite() {
-  openModal('deployModal');
-}
-
-function closeDeployModal() {
-  closeModal('deployModal');
-}
-
-function openDeployedSite() {
-  const slug = document.getElementById('site-slug').value;
-  window.open(`https://hackclub.space/s/${slug}`, '_blank');
-}
-
-function initModals() {
-  document.querySelectorAll('.modal').forEach(modal => {
-    modal.addEventListener('click', function(e) {
-      if (e.target === this) {
-        this.classList.remove('show');
-        setTimeout(() => {
-          this.style.display = 'none';
-        }, 300);
-      }
-    });
-  });
-  
-  document.querySelectorAll('.close-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const modal = this.closest('.modal');
-      modal.classList.remove('show');
-      setTimeout(() => {
-        modal.style.display = 'none';
-      }, 300);
-    });
-  });
-}
-
-function initTooltips() {
-  const tooltips = document.querySelectorAll('[data-tooltip]');
-  tooltips.forEach(element => {
-    const tooltipText = element.getAttribute('data-tooltip');
-    const tooltip = document.createElement('div');
-    tooltip.classList.add('tooltip');
-    tooltip.textContent = tooltipText;
-    
-    element.addEventListener('mouseenter', () => {
-      document.body.appendChild(tooltip);
-      const rect = element.getBoundingClientRect();
-      tooltip.style.left = `${rect.left + rect.width / 2 - tooltip.offsetWidth / 2}px`;
-      tooltip.style.top = `${rect.top - tooltip.offsetHeight - 10}px`;
-      setTimeout(() => tooltip.classList.add('visible'), 10);
-    });
-    
-    element.addEventListener('mouseleave', () => {
-      tooltip.classList.remove('visible');
-      setTimeout(() => {
-        if (tooltip.parentElement) {
-          tooltip.parentElement.removeChild(tooltip);
-        }
-      }, 300);
-    });
-  });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  initModals();
-  initTooltips();
-  
-  const splitViewToggle = document.getElementById('splitViewToggle');
-  if (splitViewToggle) {
-    splitViewToggle.style.position = 'fixed';
-    splitViewToggle.style.right = '20px';
-    splitViewToggle.style.bottom = '20px';
-    splitViewToggle.style.zIndex = '100';
-    splitViewToggle.style.backgroundColor = 'var(--primary)';
-    splitViewToggle.style.color = 'white';
-    splitViewToggle.style.width = '40px';
-    splitViewToggle.style.height = '40px';
-    splitViewToggle.style.borderRadius = '50%';
-    splitViewToggle.style.display = 'flex';
-    splitViewToggle.style.alignItems = 'center';
-    splitViewToggle.style.justifyContent = 'center';
-    splitViewToggle.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-    splitViewToggle.style.cursor = 'pointer';
-  }
-});
-/**
- * Unified toast notification system
- * @param {string} type - Type of toast: 'success', 'error', 'info', 'warning'
- * @param {string} message - Message to display in the toast
- * @param {number} duration - Duration in milliseconds (default: 3000)
- */
+// Toast notification system
 function showToast(type, message, duration = 3000) {
-    // Ensure toast container exists
-    let toastContainer = document.getElementById('toast-container');
+    const toastContainer = document.getElementById('toast-container');
+    
+    // Create toast container if it doesn't exist
     if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.id = 'toast-container';
-        document.body.appendChild(toastContainer);
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
     }
-
-    // Create toast element
+    
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    
-    // Determine icon based on type
+
+    // Choose icon based on type
     let icon = 'info-circle';
-    if (type === 'success') icon = 'check-circle';
-    else if (type === 'error') icon = 'exclamation-circle';
-    else if (type === 'warning') icon = 'exclamation-triangle';
-    
-    // Set inner HTML
+    switch(type) {
+        case 'success': icon = 'check-circle'; break;
+        case 'error': icon = 'exclamation-circle'; break;
+        case 'warning': icon = 'exclamation-triangle'; break;
+        case 'info': icon = 'info-circle'; break;
+    }
+
     toast.innerHTML = `
         <div class="toast-content">
             <i class="fas fa-${icon}"></i>
             <span class="toast-message">${message}</span>
         </div>
-        <button class="toast-close">&times;</button>
+        <button class="toast-close" onclick="this.parentNode.remove()">&times;</button>
     `;
+
+    // Add toast to container
+    const container = toastContainer || document.getElementById('toast-container');
+    container.appendChild(toast);
     
-    // Add to container
-    toastContainer.appendChild(toast);
+    // Force reflow to trigger animation
+    toast.offsetHeight;
     
-    // Animation timing
+    // Show toast
+    toast.classList.add('show');
+
+    // Auto remove after duration
     setTimeout(() => {
-        toast.classList.add('show');
-    }, 10);
-    
-    // Add close functionality
-    const closeBtn = toast.querySelector('.toast-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            toast.classList.remove('show');
-            setTimeout(() => {
-                toast.remove();
-            }, 300);
-        });
-    }
-    
-    // Auto dismiss
-    setTimeout(() => {
-        if (toast.parentNode) {
-            toast.classList.remove('show');
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.remove();
-                }
-            }, 300);
-        }
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
     }, duration);
-    
-    return toast;
 }
 
-// Global availability
-window.showToast = showToast;
+// Modal handling
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden'; // Prevent scrolling
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            document.body.style.overflow = '';
+        }, 300);
+    }
+}
+
+// Form validation helpers
+function validateForm(formId, rules) {
+    const form = document.getElementById(formId);
+    if (!form) return false;
+    
+    let isValid = true;
+    
+    // Clear previous errors
+    form.querySelectorAll('.form-error').forEach(el => el.remove());
+    
+    for (const field in rules) {
+        const input = form.querySelector(`[name="${field}"]`);
+        if (!input) continue;
+        
+        const value = input.value.trim();
+        const fieldRules = rules[field];
+        
+        // Required check
+        if (fieldRules.required && value === '') {
+            showFieldError(input, fieldRules.requiredMessage || 'This field is required');
+            isValid = false;
+            continue;
+        }
+        
+        // Minimum length
+        if (fieldRules.minLength && value.length < fieldRules.minLength) {
+            showFieldError(input, `Must be at least ${fieldRules.minLength} characters`);
+            isValid = false;
+            continue;
+        }
+        
+        // Maximum length
+        if (fieldRules.maxLength && value.length > fieldRules.maxLength) {
+            showFieldError(input, `Must be no more than ${fieldRules.maxLength} characters`);
+            isValid = false;
+            continue;
+        }
+        
+        // Email format
+        if (fieldRules.email && !validateEmail(value)) {
+            showFieldError(input, 'Please enter a valid email address');
+            isValid = false;
+            continue;
+        }
+        
+        // Match fields (like password confirmation)
+        if (fieldRules.matches) {
+            const matchInput = form.querySelector(`[name="${fieldRules.matches}"]`);
+            if (matchInput && value !== matchInput.value) {
+                showFieldError(input, fieldRules.matchesMessage || 'Fields do not match');
+                isValid = false;
+                continue;
+            }
+        }
+        
+        // Custom validation
+        if (fieldRules.custom && typeof fieldRules.custom === 'function') {
+            const customResult = fieldRules.custom(value, form);
+            if (customResult !== true) {
+                showFieldError(input, customResult || 'Invalid value');
+                isValid = false;
+                continue;
+            }
+        }
+    }
+    
+    return isValid;
+}
+
+function showFieldError(input, message) {
+    // Remove any existing error for this field
+    const existingError = input.parentNode.querySelector('.form-error');
+    if (existingError) existingError.remove();
+    
+    // Add error message
+    const errorElement = document.createElement('div');
+    errorElement.className = 'form-error';
+    errorElement.textContent = message;
+    errorElement.style.color = '#ec3750';
+    errorElement.style.fontSize = '0.85rem';
+    errorElement.style.marginTop = '0.25rem';
+    
+    // Insert after the input
+    input.parentNode.insertBefore(errorElement, input.nextSibling);
+    
+    // Highlight the input
+    input.style.borderColor = '#ec3750';
+    
+    // Remove error when input changes
+    const clearError = () => {
+        const error = input.parentNode.querySelector('.form-error');
+        if (error) error.remove();
+        input.style.borderColor = '';
+        input.removeEventListener('input', clearError);
+    };
+    
+    input.addEventListener('input', clearError);
+}
+
+function validateEmail(email) {
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+}
+
+// Copy to clipboard helper
+function copyToClipboard(text, successMessage = 'Copied to clipboard!') {
+    navigator.clipboard.writeText(text)
+        .then(() => showToast('success', successMessage))
+        .catch(() => showToast('error', 'Failed to copy to clipboard'));
+}
+
+// Utilities for handling API requests
+async function apiRequest(url, method = 'GET', data = null) {
+    try {
+        const options = {
+            method,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+        
+        if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+            options.body = JSON.stringify(data);
+        }
+        
+        const response = await fetch(url, options);
+        const responseData = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(responseData.error || 'An error occurred');
+        }
+        
+        return { success: true, data: responseData };
+    } catch (error) {
+        console.error('API Request Error:', error);
+        return { success: false, error: error.message || 'An error occurred' };
+    }
+}
+
+// Initialize UI when document is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up toast container if it doesn't exist
+    if (!document.getElementById('toast-container')) {
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+    }
+    
+    // Handle modal close buttons
+    document.querySelectorAll('.close-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const modal = button.closest('.modal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    document.body.style.overflow = '';
+                }, 300);
+            }
+        });
+    });
+    
+    // Close modals when clicking outside content
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    document.body.style.overflow = '';
+                }, 300);
+            }
+        });
+    });
+});
