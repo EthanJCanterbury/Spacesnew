@@ -1,38 +1,70 @@
 
-function showToast(type, message) {
-  const toastContainer = document.getElementById('toast-container');
-  if (!toastContainer) {
-    // Create toast container if it doesn't exist
-    const newContainer = document.createElement('div');
-    newContainer.id = 'toast-container';
-    document.body.appendChild(newContainer);
-    showToast(type, message);
-    return;
+/**
+ * Shows a toast notification
+ * @param {string} type - 'success', 'error', 'warning', or 'info'
+ * @param {string} message - The message to display
+ * @param {number} duration - Duration in ms the toast should be visible (default: 5000)
+ */
+function showToast(type, message, duration = 5000) {
+  // Validate type
+  const validTypes = ['success', 'error', 'warning', 'info'];
+  if (!validTypes.includes(type)) {
+    type = 'info';
   }
   
+  // Get or create toast container
+  let toastContainer = document.getElementById('toast-container');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'toast-container';
+    document.body.appendChild(toastContainer);
+  }
+  
+  // Get appropriate icon
+  const iconMap = {
+    'success': 'check-circle',
+    'error': 'exclamation-circle',
+    'warning': 'exclamation-triangle',
+    'info': 'info-circle'
+  };
+  const icon = iconMap[type];
+  
+  // Create toast element
   const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
+  toast.className = `toast toast-${type}`;
   toast.innerHTML = `
     <div class="toast-content">
-      <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
-      <span>${message}</span>
+      <i class="fas fa-${icon}"></i>
+      <div class="toast-message">${message}</div>
     </div>
-    <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+    <button class="toast-close">&times;</button>
   `;
   
+  // Add event listener to close button
+  const closeBtn = toast.querySelector('.toast-close');
+  closeBtn.addEventListener('click', () => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  });
+  
+  // Add to container
   toastContainer.appendChild(toast);
   
-  // Add show class after a small delay to trigger animation
+  // Trigger animation
   setTimeout(() => {
     toast.classList.add('show');
   }, 10);
   
+  // Auto remove after duration
   setTimeout(() => {
     if (toast.parentElement) {
       toast.classList.remove('show');
       setTimeout(() => toast.remove(), 300);
     }
-  }, 5000);
+  }, duration);
+  
+  // Return the toast element for potential further manipulation
+  return toast;
 }
 
 function openModal(modalId) {

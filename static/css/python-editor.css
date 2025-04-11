@@ -244,7 +244,7 @@
   }
 }
 
-/* Toast styles removed - using unified styles from style.css */
+/* Toast styles are now centralized in unified.css */
 
 /* Keyboard shortcuts modal */
 .shortcuts-modal {
