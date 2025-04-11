@@ -33,6 +33,12 @@
                 <a href="{{ url_for('documentation') }}">Documentation</a>
                 <a href="https://hackclub.com" target="_blank">Hack Club</a>
                 {% if current_user.is_authenticated %}
+                    {% if current_user.is_club_leader %}
+                        <a href="{{ url_for('club_dashboard') }}">Clubs</a>
+                    {% endif %}
+                    {% if current_user.is_admin %}
+                        <a href="{{ url_for('admin_panel') }}">Admin</a>
+                    {% endif %}
                     <a href="{{ url_for('welcome') }}" class="auth-button">Dashboard</a>
                 {% else %}
                     <a href="{{ url_for('login') }}" class="auth-button">Login</a>
