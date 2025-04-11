@@ -2,20 +2,20 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: #ff6b6b;
+    background: #fa5252;
     color: white;
     padding: 0.5rem 1rem;
     border-radius: 6px;
     text-decoration: none;
     font-weight: 500;
-    transition: background 0.2s;
+    transition: background 0.1s;
     width: 100%;
     justify-content: center;
     margin-bottom: 1rem;
 }
 
 .btn-hackatime:hover {
-    background: #fa5252;
+    background: #f03e3e;
 }
 
 
@@ -422,19 +422,22 @@ body.editor-page {
     color: var(--primary);
 }
 
-.nav-links .auth-button {
+.nav-links .auth-button, .nav-button {
     background: var(--primary);
     color: white !important;
-    padding: 0.5rem 1.25rem;
+    padding: 0.5rem 1rem;
     border-radius: 6px;
-    margin-left: 1rem;
-    transition: all 0.2s ease;
+    margin-left: 0.5rem;
+    transition: all 0.15s ease;
     border: none;
     font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.nav-links .auth-button:hover {
-    opacity: 0.9;
+.nav-links .auth-button:hover, .nav-button:hover {
+    background: #e03e3e;
     color: white !important;
 }
 
@@ -485,18 +488,22 @@ h1 {
 }
 
 .btn {
-    display: inline-block;
-    padding: 1rem 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
     border-radius: 8px;
     text-decoration: none;
     font-weight: bold;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    margin: 0 1rem;
+    transition: all 0.15s ease;
+    margin: 0 0.5rem;
+    border: none;
+    cursor: pointer;
 }
 
 .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn.primary {
@@ -505,7 +512,6 @@ h1 {
     font-family: var(--font-heading);
     font-weight: bold;
     letter-spacing: 0.02em;
-    padding: 1rem 2.5rem;
 }
 
 .btn.secondary {
@@ -514,8 +520,7 @@ h1 {
     font-family: var(--font-heading);
     font-weight: bold;
     letter-spacing: 0.02em;
-    padding: 1rem 2.5rem;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .features {
@@ -837,7 +842,7 @@ footer {
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(10px);
     }
     to {
         opacity: 1;
@@ -848,7 +853,7 @@ footer {
 @keyframes scaleIn {
     from {
         opacity: 0;
-        transform: scale(0.9);
+        transform: scale(0.95);
     }
     to {
         opacity: 1;

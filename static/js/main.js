@@ -66,40 +66,57 @@ async function createNewSite(event) {
     }
 }
 
-function toggleFolder(element) {
-    const header = element.closest('.folder-header');
-    const folder = header.closest('.folder');
-    const content = folder.querySelector('.folder-content');
-    const icon = header.querySelector('.fa-chevron-right, .fa-chevron-down');
-    
-    if (content.style.display === 'none') {
-        content.style.display = 'block';
-        icon.classList.replace('fa-chevron-right', 'fa-chevron-down');
-    } else {
-        content.style.display = 'none';
-        icon.classList.replace('fa-chevron-down', 'fa-chevron-right');
+function toggleFolder(header) {
+    if (!header) return;
+    const content = header.nextElementSibling;
+    if (content && content.classList.contains('folder-content')) {
+        content.style.display = content.style.display === 'none' ? 'block' : 'none';
     }
 }
 
 function openFile(element) {
+    if (!element) return;
     document.querySelectorAll('.file').forEach(f => f.classList.remove('active'));
-    
     element.classList.add('active');
-    
+}
+
+// Handle "Learn More" click safely
+function scrollToSection(event, id) {
+    if (!id) return;
+    const element = document.getElementById(id);
+    if (element) {
+        event.preventDefault();
+        element.scrollIntoView({ behavior: 'smooth' });
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     document.body.classList.add('loaded');
-    
+
+    // Safely bind folder headers
     document.querySelectorAll('.folder-header').forEach(header => {
-        header.addEventListener('click', () => toggleFolder(header));
+        if (header) {
+            header.addEventListener('click', () => toggleFolder(header));
+        }
     });
-    
+
+    // Safely bind file clicks
     document.querySelectorAll('.file').forEach(file => {
-        file.addEventListener('click', () => openFile(file));
+        if (file) {
+            file.addEventListener('click', () => openFile(file));
+        }
+    });
+
+    // Bind Learn More links
+    const learnMoreLinks = document.querySelectorAll('a[href="#features"]');
+    learnMoreLinks.forEach(link => {
+        if (link) {
+            link.addEventListener('click', (e) => scrollToSection(e, 'features'));
+        }
     });
 });
 
+// Improved animation observer with faster transition
 const observerOptions = {
     threshold: 0.1
 };
@@ -113,9 +130,13 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, observerOptions);
 
-document.querySelectorAll('.feature-card').forEach(card => {
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(20px)';
-    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-    observer.observe(card);
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.feature-card').forEach(card => {
+        if (card) {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(10px)';
+            card.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+            observer.observe(card);
+        }
+    });
 });

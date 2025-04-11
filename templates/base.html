@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/unified.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/modals.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modals.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/github-repo-details.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="{{ url_for('static', filename='js/error-handler.js') }}"></script>
@@ -20,12 +21,12 @@
     <nav class="navbar">
         <div class="nav-content">
             <a href="/" class="logo">
-                <img src="{{ url_for('static', filename='images/logo-rounded.png') }}" alt="HackClub" style="height: 30px; margin-right: 8px; vertical-align: middle;">
+                <img src="{{ url_for('static', filename='images/logo-rounded.png') }}" alt="Hack Club" style="height: 30px; margin-right: 8px; vertical-align: middle;">
                 <span style="vertical-align: middle;">Spaces</span>
             </a>
             <div class="nav-links">
-                <a href="{{ url_for('documentation') }}">Documentation</a>
                 <a href="/">Home</a>
+                <a href="{{ url_for('documentation') }}">Documentation</a>
                 <a href="https://hackclub.com" target="_blank">Hack Club</a>
             </div>
             <div class="nav-auth">
