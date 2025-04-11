@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="settings-container">
+    <br>
     <div class="settings-header">
         <h1>Account Settings</h1>
         <p class="settings-subtitle">Manage your profile and security settings</p>
@@ -15,7 +16,7 @@
             </div>
             <p class="integrations-description">Connect your favorite services to enhance your Hack Club experience.</p>
             <div class="integrations-cta">
-                <a href="{{ url_for('integrations') }}" class="btn-manage-integrations">
+                <a href="{{ url_for('integrations') }}" class="btn-manage-integrations full-width">
                     <i class="fas fa-cog"></i>
                     Manage Integrations
                 </a>
@@ -40,7 +41,7 @@
                     </label>
                     <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
                 </div>
-                <button type="submit" class="btn-gradient">
+                <button type="submit" class="btn-gradient full-width">
                     <i class="fas fa-save"></i>
                     Update Profile
                 </button>
@@ -73,7 +74,7 @@
                     </label>
                     <input type="password" id="confirm-password" required>
                 </div>
-                <button type="submit" class="btn-gradient">
+                <button type="submit" class="btn-gradient full-width">
                     <i class="fas fa-shield-alt"></i>
                     Change Password
                 </button>
