@@ -180,3 +180,73 @@ document.addEventListener('DOMContentLoaded', function() {
     splitViewToggle.style.cursor = 'pointer';
   }
 });
+/**
+ * Unified toast notification system
+ * @param {string} type - Type of toast: 'success', 'error', 'info', 'warning'
+ * @param {string} message - Message to display in the toast
+ * @param {number} duration - Duration in milliseconds (default: 3000)
+ */
+function showToast(type, message, duration = 3000) {
+    // Ensure toast container exists
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        document.body.appendChild(toastContainer);
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    // Determine icon based on type
+    let icon = 'info-circle';
+    if (type === 'success') icon = 'check-circle';
+    else if (type === 'error') icon = 'exclamation-circle';
+    else if (type === 'warning') icon = 'exclamation-triangle';
+    
+    // Set inner HTML
+    toast.innerHTML = `
+        <div class="toast-content">
+            <i class="fas fa-${icon}"></i>
+            <span class="toast-message">${message}</span>
+        </div>
+        <button class="toast-close">&times;</button>
+    `;
+    
+    // Add to container
+    toastContainer.appendChild(toast);
+    
+    // Animation timing
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+    
+    // Add close functionality
+    const closeBtn = toast.querySelector('.toast-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        });
+    }
+    
+    // Auto dismiss
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 300);
+        }
+    }, duration);
+    
+    return toast;
+}
+
+// Global availability
+window.showToast = showToast;

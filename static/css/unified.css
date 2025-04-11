@@ -1,7 +1,7 @@
 
 /* Unified CSS - Common styles extracted from duplicates */
 
-/* Toast Container Styles */
+/* Unified Toast Container Styles */
 #toast-container {
     position: fixed;
     bottom: 2rem;
@@ -28,10 +28,6 @@
     border-left: 4px solid;
     pointer-events: auto;
     width: 100%;
-}
-
-/* Light theme toasts */
-.toast {
     background: white;
     color: #333;
 }
@@ -58,6 +54,7 @@
 .toast-message {
     font-size: 0.95rem;
     line-height: 1.4;
+    color: inherit; /* Ensures text is visible in all contexts */
 }
 
 .toast-close {
@@ -91,9 +88,10 @@
     font-size: 1.25rem;
 }
 
-/* Toast variants */
+/* Toast variants - with consistent styling */
 .toast-success {
     border-color: #10B981;
+    background-color: #ecfdf5;
 }
 
 .toast-success i {
@@ -102,6 +100,7 @@
 
 .toast-error {
     border-color: #EF4444;
+    background-color: #fef2f2;
 }
 
 .toast-error i {
@@ -110,6 +109,7 @@
 
 .toast-info {
     border-color: #3B82F6;
+    background-color: #eff6ff;
 }
 
 .toast-info i {
@@ -118,10 +118,23 @@
 
 .toast-warning {
     border-color: #F59E0B;
+    background-color: #fffbeb;
 }
 
 .toast-warning i {
     color: #F59E0B;
+}
+
+/* Additional toast styling that might be used in various templates */
+.toast.success { border-color: #10B981; background-color: #ecfdf5; }
+.toast.error { border-color: #EF4444; background-color: #fef2f2; }
+.toast.info { border-color: #3B82F6; background-color: #eff6ff; }
+.toast.warning { border-color: #F59E0B; background-color: #fffbeb; }
+
+/* Animation for toast notifications */
+@keyframes toast-in-out {
+    0%, 100% { opacity: 0; transform: translateY(20px); }
+    10%, 90% { opacity: 1; transform: translateY(0); }
 }
 
 /* Common Input Styles */
