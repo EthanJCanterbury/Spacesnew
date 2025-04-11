@@ -259,7 +259,7 @@
 
 .nav-links {
     display: flex;
-    gap: 1rem;
+    gap: 0.5rem;
     align-items: center;
 }
 
@@ -425,9 +425,9 @@ body.editor-page {
 .nav-links .auth-button, .nav-button {
     background: var(--primary);
     color: white !important;
-    padding: 0.4rem 0.8rem;
+    padding: 0.35rem 0.7rem;
     border-radius: 6px;
-    margin-left: 0.3rem;
+    margin-left: 0.2rem;
     transition: all 0.15s ease;
     border: none;
     font-weight: 600;
