@@ -42,7 +42,7 @@ function closeNewSiteModal() {
 async function createNewSite(event) {
     event.preventDefault();
     const siteName = document.getElementById('siteName').value;
-
+    
     if (!siteName) {
         alert('Please enter a site name');
         return;
@@ -143,39 +143,3 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
-function showToast(type, message) {
-    const toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) {
-        const container = document.createElement('div');
-        container.id = 'toast-container';
-        document.body.appendChild(container);
-    }
-
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-
-    const icon = type === 'success' ? 'check-circle' : 
-                 type === 'error' ? 'exclamation-circle' :
-                 type === 'warning' ? 'exclamation-triangle' : 'info-circle';
-
-    toast.innerHTML = `
-        <div class="toast-content">
-            <i class="fas fa-${icon}"></i>
-            <span>${message}</span>
-        </div>
-    `;
-
-    document.getElementById('toast-container').appendChild(toast);
-
-    // Trigger animation
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 10);
-
-    // Remove toast after 4 seconds
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
-}
