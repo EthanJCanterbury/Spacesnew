@@ -42,7 +42,7 @@ function closeNewSiteModal() {
 async function createNewSite(event) {
     event.preventDefault();
     const siteName = document.getElementById('siteName').value;
-    
+
     if (!siteName) {
         alert('Please enter a site name');
         return;
@@ -143,3 +143,50 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Unified Toast Notification System
+function showToast(type, message, duration = 4000) {
+    // Make sure toast container exists
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        document.body.appendChild(toastContainer);
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+
+    // Select icon based on type
+    const icon = type === 'success' ? 'check-circle' : 
+                 type === 'error' ? 'exclamation-circle' :
+                 type === 'warning' ? 'exclamation-triangle' : 'info-circle';
+
+    // Create toast content
+    toast.innerHTML = `
+        <div class="toast-content">
+            <i class="fas fa-${icon}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+
+    // Add to container
+    toastContainer.appendChild(toast);
+
+    // Trigger animation
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+
+    // Remove after duration
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+
+    return toast;
+}
+
+// For backward compatibility with other toast systems
+window.showToast = showToast;

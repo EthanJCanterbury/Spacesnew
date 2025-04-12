@@ -1157,83 +1157,7 @@
     margin: 0;
 }
 
-/* Toast Notifications */
-#toast-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1100;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.toast {
-    min-width: 320px;
-    max-width: 450px;
-    padding: 16px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    transform: translateX(120%);
-    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-    overflow: hidden;
-    position: relative;
-}
-
-.toast::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-}
-
-.toast.show {
-    transform: translateX(0);
-}
-
-.toast-content {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.toast-success {
-    background-color: #f0fdf4;
-    color: #166534;
-}
-
-.toast-success::before {
-    background-color: #059669;
-}
-
-.toast-error {
-    background-color: #fef2f2;
-    color: #b91c1c;
-}
-
-.toast-error::before {
-    background-color: #dc2626;
-}
-
-.toast-info {
-    background-color: #fff1f2;
-    color: #be123c;
-}
-
-.toast-info::before {
-    background-color: #ec3750;
-}
-
-.toast-warning {
-    background-color: #fffbeb;
-    color: #b45309;
-}
-
-.toast-warning::before {
-    background-color: #d97706;
-}
+/* Toast styles moved to unified toast.css */
 
 /* Responsive Adjustments */
 @media (max-width: 992px) {
@@ -1298,42 +1222,7 @@
 </style>
 
 <script>
-// Toast notification
-function showToast(type, message) {
-    const toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) {
-        const container = document.createElement('div');
-        container.id = 'toast-container';
-        document.body.appendChild(container);
-    }
-
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-
-    const icon = type === 'success' ? 'check-circle' : 
-                 type === 'error' ? 'exclamation-circle' :
-                 type === 'warning' ? 'exclamation-triangle' : 'info-circle';
-
-    toast.innerHTML = `
-        <div class="toast-content">
-            <i class="fas fa-${icon}"></i>
-            <span>${message}</span>
-        </div>
-    `;
-
-    document.getElementById('toast-container').appendChild(toast);
-
-    // Trigger animation
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 10);
-
-    // Remove toast after 4 seconds
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
-}
+// Using the unified showToast function from main.js
 
 // Copy join code functionality
 function copyJoinCode() {
