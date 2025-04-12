@@ -9,8 +9,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
 window.addEventListener('scroll', () => {
     const navbar = document.querySelector('.navbar');
-    if (!navbar) return;
-    
     if (window.scrollY > 50) {
         navbar.style.background = 'rgba(255, 255, 255, 0.95)';
         navbar.style.backdropFilter = 'blur(12px) saturate(180%)';
@@ -116,24 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
             link.addEventListener('click', (e) => scrollToSection(e, 'features'));
         }
     });
-    
-    // Ensure toast container exists
-    if (!document.getElementById('toast-container')) {
-        const toastContainer = document.createElement('div');
-        toastContainer.id = 'toast-container';
-        document.body.appendChild(toastContainer);
-    }
 });
-
-// Global function to show a notification
-window.notify = function(type, message, duration) {
-    if (typeof showToast === 'function') {
-        return showToast(type, message, duration);
-    } else {
-        console.error('Toast function not found');
-        alert(message);
-    }
-};
 
 // Improved animation observer with faster transition
 const observerOptions = {

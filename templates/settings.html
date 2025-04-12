@@ -1,40 +1,28 @@
 {% extends "base.html" %}
 
-{% block head %}
-<title>Account Settings - Hack Club Spaces</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/unified.css') }}">
-{% endblock %}
-
 {% block content %}
 <div class="settings-container">
-    <div class="settings-header text-center">
+    <div class="settings-header">
         <h1>Account Settings</h1>
-        <p class="settings-subtitle">Manage your profile, integrations, and security</p>
+        <p class="settings-subtitle">Manage your profile and security settings</p>
     </div>
 
     <div class="settings-grid">
-        <!-- Integrations Card -->
-        <div class="settings-card">
-            <div class="card-icon">
-                <i class="fas fa-plug"></i>
+        <div class="settings-card integrations-card">
+            <div class="card-icon"><i class="fas fa-plug"></i></div>
+            <div class="integrations-header-section">
+                <h2>Integrations</h2>
             </div>
-            <h2>Integrations</h2>
-            <p class="integrations-description">
-                Connect your favorite services like GitHub, Hackatime, and Groq to enhance your development experience.
-            </p>
+            <p class="integrations-description">Connect your favorite services to enhance your Hack Club experience.</p>
             <div class="integrations-cta">
-                <a href="{{ url_for('integrations') }}" class="btn-gradient full-width">
+                <a href="{{ url_for('integrations') }}" class="btn-manage-integrations">
                     <i class="fas fa-cog"></i>
                     Manage Integrations
                 </a>
             </div>
         </div>
-
-        <!-- Profile Information Card -->
-        <div class="settings-card">
-            <div class="card-icon">
-                <i class="fas fa-user"></i>
-            </div>
+        <div class="settings-card profile-card">
+            <div class="card-icon"><i class="fas fa-user"></i></div>
             <h2>Profile Information</h2>
             <form id="profile-form" class="settings-form">
                 <input type="hidden" name="action" value="update_profile">
@@ -52,18 +40,15 @@
                     </label>
                     <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
                 </div>
-                <button type="submit" class="btn-gradient full-width">
+                <button type="submit" class="btn-gradient">
                     <i class="fas fa-save"></i>
                     Update Profile
                 </button>
             </form>
         </div>
 
-        <!-- Security Settings Card -->
-        <div class="settings-card">
-            <div class="card-icon">
-                <i class="fas fa-lock"></i>
-            </div>
+        <div class="settings-card security-card">
+            <div class="card-icon"><i class="fas fa-lock"></i></div>
             <h2>Security Settings</h2>
             <form id="password-form" class="settings-form">
                 <input type="hidden" name="action" value="change_password">
@@ -88,18 +73,14 @@
                     </label>
                     <input type="password" id="confirm-password" required>
                 </div>
-                <button type="submit" class="btn-gradient full-width">
+                <button type="submit" class="btn-gradient">
                     <i class="fas fa-shield-alt"></i>
                     Change Password
                 </button>
             </form>
         </div>
-
-        <!-- Club Membership Card -->
-        <div class="settings-card">
-            <div class="card-icon">
-                <i class="fas fa-users"></i>
-            </div>
+        <div class="settings-card club-card">
+            <div class="card-icon"><i class="fas fa-users"></i></div>
             <h2>Club Membership</h2>
             <div id="club-membership-list">
                 {% for membership in current_user.club_memberships %}
@@ -118,18 +99,15 @@
             </div>
             <div class="join-club-section">
                 <h3>Join a Club</h3>
-                <div class="join-code-form">
-                    <input type="text" id="joinClubCode" class="form-control" placeholder="Enter join code">
-                    <button type="button" onclick="showClubWarningModal()" class="btn-gradient">
-                        <i class="fas fa-users"></i> Join
-                    </button>
-                </div>
+                <form class="join-code-form">
+                    <input type="text" id="joinClubCode" class="settings-input" placeholder="Enter join code">
+                    <button type="button" onclick="showClubWarningModal()" class="btn-gradient">Join</button>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Toast Container -->
 <div id="toast-container"></div>
 
 <!-- Club Warning Modal -->
@@ -150,15 +128,13 @@
                 <p>This is similar to giving someone admin access to your work. Only join clubs led by people you trust.</p>
             </div>
             <div class="form-group">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="confirmClubPermissions" required>
-                    I understand and accept these permissions
-                </label>
+                <input type="checkbox" id="confirmClubPermissions" required>
+                <label for="confirmClubPermissions">I understand and accept these permissions</label>
             </div>
         </div>
         <div class="modal-actions">
-            <button class="btn btn-secondary" onclick="closeClubWarningModal()">Cancel</button>
-            <button class="btn btn-primary" id="confirmJoinBtn" onclick="confirmJoinClub()" disabled>
+            <button class="btn-secondary" onclick="closeClubWarningModal()">Cancel</button>
+            <button class="btn-primary" id="confirmJoinBtn" onclick="confirmJoinClub()" disabled>
                 <i class="fas fa-users"></i> Join Club
             </button>
         </div>
@@ -166,12 +142,7 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Checkbox listener for confirmation
-        document.getElementById('confirmClubPermissions').addEventListener('change', function() {
-            document.getElementById('confirmJoinBtn').disabled = !this.checked;
-        });
-    });
+    // ... (existing JavaScript functions remain unchanged) ...
 
     function showClubWarningModal() {
         const joinCode = document.getElementById('joinClubCode').value.trim();
@@ -183,17 +154,28 @@
         document.getElementById('confirmClubPermissions').checked = false;
         document.getElementById('confirmJoinBtn').disabled = true;
         const modal = document.getElementById('clubWarningModal');
-        modal.classList.add('show');
+        modal.style.display = 'flex';
+        modal.style.opacity = '1';
+        modal.style.visibility = 'visible';
         document.body.style.overflow = 'hidden'; // Prevent scrolling
     }
 
     function closeClubWarningModal() {
         const modal = document.getElementById('clubWarningModal');
-        modal.classList.remove('show');
+        modal.style.opacity = '0';
+        modal.style.visibility = 'hidden';
         setTimeout(() => {
+            modal.style.display = 'none';
             document.body.style.overflow = '';
         }, 300);
     }
+
+    // Add event listener to checkbox
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('confirmClubPermissions').addEventListener('change', function() {
+            document.getElementById('confirmJoinBtn').disabled = !this.checked;
+        });
+    });
 
     function confirmJoinClub() {
         if (!document.getElementById('confirmClubPermissions').checked) {
@@ -267,7 +249,6 @@
         }
     }
 
-    // Profile form submission
     document.getElementById('profile-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         const form = this;
@@ -289,7 +270,6 @@
         }
     });
 
-    // Password form submission
     document.getElementById('password-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         const form = this;
@@ -323,7 +303,6 @@
         }
     });
 
-    // Unified toast notification system
     function showToast(type, message) {
         const toastContainer = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -334,78 +313,374 @@
         toast.innerHTML = `
             <div class="toast-content">
                 <i class="fas fa-${icon}"></i>
-                <span class="toast-message">${message}</span>
+                <span>${message}</span>
             </div>
-            <button class="toast-close" onclick="this.parentNode.remove()">&times;</button>
         `;
 
         toastContainer.appendChild(toast);
 
-        // Force reflow to trigger animation
         toast.offsetHeight;
 
         toast.classList.add('show');
 
-        // Auto remove after 3 seconds
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
         }, 3000);
     }
+    async function disconnectSlack() {
+        try {
+            const response = await fetch('/api/slack/disconnect', {
+                method: 'POST'
+            });
+            if (response.ok) {
+                showToast('success', 'Disconnected from Slack');
+                location.reload();
+            } else {
+                showToast('error', 'Failed to disconnect from Slack');
+            }
+        } catch (error) {
+            showToast('error', 'Failed to disconnect from Slack');
+        }
+    }
 
-    // Service disconnection functions
     async function disconnectGithub() {
-        if (confirm('Are you sure you want to disconnect your GitHub account?')) {
-            try {
-                const response = await fetch('/api/github/disconnect-account', {
-                    method: 'POST'
-                });
-                if (response.ok) {
-                    showToast('success', 'Disconnected from GitHub');
-                    location.reload();
-                } else {
-                    showToast('error', 'Failed to disconnect from GitHub');
-                }
-            } catch (error) {
+        try {
+            const response = await fetch('/api/github/disconnect-account', {
+                method: 'POST'
+            });
+            if (response.ok) {
+                showToast('success', 'Disconnected from GitHub');
+                location.reload();
+            } else {
                 showToast('error', 'Failed to disconnect from GitHub');
             }
+        } catch (error) {
+            showToast('error', 'Failed to disconnect from GitHub');
         }
     }
 
     async function disconnectHackatime() {
-        if (confirm('Are you sure you want to disconnect your Hackatime account?')) {
-            try {
-                const response = await fetch('/hackatime/disconnect', {
-                    method: 'POST'
-                });
-                if (response.ok) {
-                    showToast('success', 'Disconnected from Hackatime');
-                    location.reload();
-                } else {
-                    showToast('error', 'Failed to disconnect from Hackatime');
-                }
-            } catch (error) {
+        try {
+            const response = await fetch('/hackatime/disconnect', {
+                method: 'POST'
+            });
+            if (response.ok) {
+                showToast('success', 'Disconnected from Hackatime');
+                location.reload();
+            } else {
                 showToast('error', 'Failed to disconnect from Hackatime');
             }
+        } catch (error) {
+            showToast('error', 'Failed to disconnect from Hackatime');
         }
     }
 
     async function disconnectGroq() {
-        if (confirm('Are you sure you want to disconnect your Groq account?')) {
-            try {
-                const response = await fetch('/groq/disconnect', {
-                    method: 'POST'
-                });
-                if (response.ok) {
-                    showToast('success', 'Disconnected from Groq');
-                    location.reload();
-                } else {
-                    showToast('error', 'Failed to disconnect from Groq');
-                }
-            } catch (error) {
+        try {
+            const response = await fetch('/groq/disconnect', {
+                method: 'POST'
+            });
+            if (response.ok) {
+                showToast('success', 'Disconnected from Groq');
+                location.reload();
+            } else {
                 showToast('error', 'Failed to disconnect from Groq');
             }
+        } catch (error) {
+            showToast('error', 'Failed to disconnect from Groq');
         }
     }
+
+    // Placeholder for dynamically loading club memberships
+    // This needs backend integration to fetch and display club memberships
+    // Example:  fetch('/api/clubs/memberships')...
+    //           .then(response => response.json())
+    //           .then(memberships => {
+    //              //Update the HTML with club membership data.
+    //           })
+
+
 </script>
+<style>
+/* Add styling for the integrations card */
+.integrations-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.integrations-card > h2,
+.integrations-card > .card-icon,
+.integrations-card > .integrations-header-section {
+    flex-shrink: 0;
+}
+
+/* Integrations section styles */
+.integrations-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.integrations-description {
+    color: var(--text-light);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-size: 1.05rem;
+}
+
+.integrations-cta {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+/* Enhanced manage integrations button */
+.btn-manage-integrations {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 118, 255, 0.2);
+    width: 90%;
+    max-width: 300px;
+}
+
+.btn-manage-integrations:hover {
+    background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 118, 255, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-manage-integrations:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 8px rgba(0, 118, 255, 0.2);
+}
+
+.club-card {
+    margin-bottom: 20px;
+}
+
+.club-membership-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: var(--surface-secondary);
+    margin-bottom: 15px;
+}
+
+.club-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.club-info h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.role-badge-leader {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #2e7d32;
+}
+
+.leave-club-btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+}
+
+.join-club-section {
+    margin-top: 10px;
+}
+
+.join-code-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    width: 100%;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.settings-input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 15px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--text-primary);
+    background-color: var(--surface-secondary);
+    box-sizing: border-box;
+}
+
+.join-code-form .btn-gradient {
+    white-space: nowrap;
+    padding: 10px 15px;
+    min-width: 80px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.integration-status-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-content {
+    background-color: #ffffff; /* Explicitly set white background */
+    margin: auto;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    position: relative;
+    animation: modalFadeIn 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-body {
+    padding: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: color 0.2s;
+}
+
+.close-btn:hover {
+    color: var(--text-primary);
+}
+
+/* Warning Modal Styles */
+.warning-message {
+    background-color: rgba(255, 244, 229, 1); /* More opaque background */
+    border-left: 4px solid #ff9800;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.warning-message p {
+    margin: 0 0 10px 0;
+    color: #d84315;
+}
+
+.warning-message ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.warning-message li {
+    margin-bottom: 8px;
+    color: #d84315;
+}
+
+.warning-message strong {
+    font-weight: 600;
+}
+
+.warning-message i {
+    margin-right: 8px;
+}
+
+#confirmClubPermissions {
+    margin-right: 10px;
+}
+
+.settings-container {
+    padding: 20px; /* Added padding to the container */
+    margin-top: 70px; /* Add top margin to account for fixed navbar */
+}
+</style>
 {% endblock %}

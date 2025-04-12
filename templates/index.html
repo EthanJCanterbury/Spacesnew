@@ -31,15 +31,9 @@
                 <a href="/">Home</a>
                 <a href="#features">Features</a>
                 <a href="{{ url_for('documentation') }}">Documentation</a>
+                <a href="https://hackclub.com" target="_blank">Hack Club</a>
                 {% if current_user.is_authenticated %}
-                    {% if current_user.is_club_leader %}
-                        <a href="{{ url_for('club_dashboard') }}" class="auth-button">Clubs</a>
-                    {% endif %}
-                    {% if current_user.is_admin %}
-                        <a href="{{ url_for('admin_panel') }}" class="auth-button">Admin</a>
-                    {% endif %}
                     <a href="{{ url_for('welcome') }}" class="auth-button">Dashboard</a>
-                    <a href="{{ url_for('settings') }}" class="auth-button">Settings</a>
                 {% else %}
                     <a href="{{ url_for('login') }}" class="auth-button">Login</a>
                 {% endif %}
@@ -138,6 +132,12 @@
                 <a href="https://github.com/hackclub">GitHub</a>
                 <a href="https://spaces.learnwillow.org/documentation">Documentation</a>
             </div>
+        </div>
+        <div id="webring-wrapper">
+          <a href="https://webring.hackclub.com/" id="previousBtn" class="webring-anchor" title="Previous">‹</a>
+          <a href="https://webring.hackclub.com/" class="webring-logo" title="Hack Club Webring" alt="Hack Club Webring"></a>
+          <a href="https://webring.hackclub.com/" id="nextBtn" class="webring-anchor" title="Next">›</a>
+          <script src="https://webring.hackclub.com/embed.min.js"></script>
         </div>
     </footer>
 

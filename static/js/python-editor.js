@@ -141,10 +141,10 @@ function initPythonEditor() {
         var line = cm.getLine(cursor.line);
         var prefix = line.slice(0, cursor.ch);
         var key = event.key || String.fromCharCode(event.keyCode);
-
+        
         // Don't trigger on modifier keys, arrows, etc.
         var ignoreKeys = [16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 45, 91, 93, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 144, 145];
-
+        
         // Only show hints if:
         // 1. User is actively typing (not just moving cursor)
         // 2. Autocomplete not already active
@@ -153,13 +153,13 @@ function initPythonEditor() {
         if (!cm.state.completionActive && 
             !ignoreKeys.includes(event.keyCode) &&
             /[a-zA-Z0-9_\.\(\[\{]/.test(key)) {
-
+            
             // Only trigger in specific scenarios:
             // 1. After a dot (object property/method)
             // 2. When prefix has at least 2 characters
             if (/\.$/.test(prefix) || 
                 (/[a-zA-Z0-9_]{2,}$/.test(prefix) && /[a-zA-Z0-9_]$/.test(key))) {
-
+                
                 cm.showHint({
                     hint: function(cm) {
                         return new Promise(function(resolve) {
@@ -167,10 +167,10 @@ function initPythonEditor() {
                                 var cursor = cm.getCursor();
                                 var line = cm.getLine(cursor.line);
                                 var prefix = line.slice(0, cursor.ch);
-
+                                
                                 // Custom hint function that combines Python hints with any-word
                                 var result = CodeMirror.hint.anyword(cm, { word: /[\w\.$]+/ });
-
+                                
                                 // Add Python-specific suggestions
                                 var builtins = ["abs", "all", "any", "ascii", "bin", "bool", "bytearray", 
                                     "bytes", "callable", "chr", "classmethod", "compile", "complex", 
@@ -181,7 +181,7 @@ function initPythonEditor() {
                                     "min", "next", "object", "oct", "open", "ord", "pow", "print", "property", 
                                     "range", "repr", "reversed", "round", "set", "setattr", "slice", "sorted", 
                                     "staticmethod", "str", "sum", "super", "tuple", "type", "vars", "zip"];
-
+                                
                                 if (!result) {
                                     result = {
                                         list: [],
@@ -189,7 +189,7 @@ function initPythonEditor() {
                                         to: CodeMirror.Pos(cursor.line, cursor.ch)
                                     };
                                 }
-
+                                
                                 // Add Python keywords
                                 if (/^[a-z]/i.test(prefix)) {
                                     var keywords = ["and", "as", "assert", "async", "await", "break", 
@@ -197,7 +197,7 @@ function initPythonEditor() {
                                         "finally", "for", "from", "global", "if", "import", "in", "is", 
                                         "lambda", "nonlocal", "not", "or", "pass", "raise", "return", 
                                         "try", "while", "with", "yield"];
-
+                                    
                                     // Filter and add keywords - only if prefix is 2+ chars
                                     var prefix_lower = prefix.toLowerCase();
                                     keywords.forEach(function(keyword) {
@@ -206,7 +206,7 @@ function initPythonEditor() {
                                             result.list.push(keyword);
                                         }
                                     });
-
+                                    
                                     // Add builtins - only if prefix is 2+ chars
                                     builtins.forEach(function(builtin) {
                                         if (builtin.indexOf(prefix_lower) === 0 && 
@@ -215,7 +215,7 @@ function initPythonEditor() {
                                         }
                                     });
                                 }
-
+                                
                                 // Sort results
                                 result.list.sort();
                                 resolve(result);
@@ -229,7 +229,7 @@ function initPythonEditor() {
             }
         }
     });
-
+    
     // Enhance Tab and other key behaviors
     pythonEditor.setOption('extraKeys', Object.assign(pythonEditor.getOption('extraKeys') || {}, {
         "Ctrl-Space": function(cm) {
@@ -507,58 +507,48 @@ function togglePythonSplitView() {
 
 // Toast notification system
 let toastTimeout = null;
-// Using unified toast system from ui-utils.js
-// This function is kept for backward compatibility
-function showToast(type, message, duration = 5000) {
-    // If the unified function is available, use it
-    if (typeof window.showToast === 'function') {
-        return window.showToast(type, message, duration);
+function showToast(type, message) {
+    const toastContainer = document.getElementById('toast-container');
+
+    // Clear any existing toasts first
+    while (toastContainer.firstChild) {
+        toastContainer.removeChild(toastContainer.firstChild);
     }
 
-    // Fallback implementation
-    const toastContainer = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
 
-    // Set the icon based on the toast type
-    let icon = 'info-circle';
-    if (type === 'success') icon = 'check-circle';
-    else if (type === 'error') icon = 'exclamation-circle';
-    else if (type === 'warning') icon = 'exclamation-triangle';
+    const icon = type === 'success' ? 'check-circle' : 
+                type === 'error' ? 'exclamation-circle' : 'info-circle';
 
     toast.innerHTML = `
         <div class="toast-content">
             <i class="fas fa-${icon}"></i>
-            <span class="toast-message">${message}</span>
+            <span>${message}</span>
         </div>
-        <button class="toast-close">&times;</button>
     `;
 
     toastContainer.appendChild(toast);
 
-    // Trigger animation
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 50);
+    // Force reflow
+    toast.offsetHeight;
 
-    // Add close button functionality
-    const closeBtn = toast.querySelector('.toast-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        });
+    toast.classList.add('show');
+
+    // Clear previous timeout
+    if (toastTimeout) {
+        clearTimeout(toastTimeout);
     }
 
-    // Auto dismiss
-    setTimeout(() => {
+    // Set new timeout
+    toastTimeout = setTimeout(() => {
         toast.classList.remove('show');
         setTimeout(() => {
-            toast.remove();
+            if (toastContainer.contains(toast)) {
+                toastContainer.removeChild(toast);
+            }
         }, 300);
-    }, duration);
-
-    return toast;
+    }, 3000);
 }
 
 // Apply saved preferences when editor loads
