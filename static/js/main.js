@@ -119,39 +119,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Unified Toast Notification Function
-function showToast(type, message) {
-    const toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) return;
-    
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-
-    const icon = type === 'success' ? 'check-circle' : 
-                 type === 'error' ? 'exclamation-circle' :
-                 type === 'warning' ? 'exclamation-triangle' : 'info-circle';
-
-    toast.innerHTML = `
-        <div class="toast-content">
-            <i class="fas fa-${icon}"></i>
-            <span>${message}</span>
-        </div>
-    `;
-
-    toastContainer.appendChild(toast);
-
-    // Trigger animation
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 10);
-
-    // Remove toast after 4 seconds
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
-}
-
 // Improved animation observer with faster transition
 const observerOptions = {
     threshold: 0.1
