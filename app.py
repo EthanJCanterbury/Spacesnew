@@ -512,7 +512,8 @@ def load_user(user_id):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    from datetime import datetime
+    return render_template('index.html', now=datetime.utcnow())
 
 
 @app.route('/login', methods=['GET', 'POST'])
