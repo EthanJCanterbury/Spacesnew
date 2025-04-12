@@ -1301,12 +1301,6 @@
 // Toast notification
 function showToast(type, message) {
     const toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) {
-        const container = document.createElement('div');
-        container.id = 'toast-container';
-        document.body.appendChild(container);
-    }
-
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
 
@@ -1321,7 +1315,7 @@ function showToast(type, message) {
         </div>
     `;
 
-    document.getElementById('toast-container').appendChild(toast);
+    toastContainer.appendChild(toast);
 
     // Trigger animation
     setTimeout(() => {

@@ -2081,32 +2081,13 @@ function removeClubMember(membershipId, username, clubId) {
 }
 
 function showToast(type, message) {
-    // Clear any existing toast timeout
-    if (window.toastTimeout) {
-        clearTimeout(window.toastTimeout);
-    }
-    
-    let toastContainer = document.getElementById('toast-container');
-    
-    // Create toast container if it doesn't exist
-    if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.id = 'toast-container';
-        document.body.appendChild(toastContainer);
-    }
-    
-    // Remove any existing toasts
-    while (toastContainer.firstChild) {
-        toastContainer.removeChild(toastContainer.firstChild);
-    }
-    
+    const toastContainer = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
 
     const icon = type === 'success' ? 'check-circle' : 
-                type === 'error' ? 'exclamation-circle' :
-                type === 'warning' ? 'exclamation-triangle' :
-                'info-circle';
+                 type === 'error' ? 'exclamation-circle' :
+                 type === 'warning' ? 'exclamation-triangle' : 'info-circle';
 
     toast.innerHTML = `
         <div class="toast-content">
@@ -2116,16 +2097,17 @@ function showToast(type, message) {
     `;
 
     toastContainer.appendChild(toast);
-    toast.offsetHeight;
-    toast.classList.add('show');
 
-    window.toastTimeout = setTimeout(() => {
+    // Trigger animation
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+
+    // Remove toast after 4 seconds
+    setTimeout(() => {
         toast.classList.remove('show');
-        setTimeout(() => {
-            toast.remove();
-            window.toastTimeout = null;
-        }, 300);
-    }, 3000);
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
 }
 
 async function saveUserChanges() {

@@ -237,6 +237,39 @@
 
 <div id="toast-container"></div>
 
+<script>
+// Unified Toast Notification Function
+function showToast(type, message) {
+    const toastContainer = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+
+    const icon = type === 'success' ? 'check-circle' : 
+                 type === 'error' ? 'exclamation-circle' :
+                 type === 'warning' ? 'exclamation-triangle' : 'info-circle';
+
+    toast.innerHTML = `
+        <div class="toast-content">
+            <i class="fas fa-${icon}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    // Trigger animation
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+
+    // Remove toast after 4 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+}
+</script>
+
 <div id="githubModal" class="modal" style="display: none; opacity: 1; visibility: visible;">
     <div class="github-modal-content">
         <div class="github-modal-header">
