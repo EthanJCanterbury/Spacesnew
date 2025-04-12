@@ -104,18 +104,18 @@
     }
     
     .toast-success {
-        background-color: rgba(5, 150, 105, 0.2);
+        background-color: rgba(5, 150, 105, 0.9);
     }
     
     .toast-error {
-        background-color: rgba(220, 38, 38, 0.2);
+        background-color: rgba(220, 38, 38, 0.9);
     }
     
     .toast-info {
-        background-color: rgba(59, 130, 246, 0.2);
+        background-color: rgba(59, 130, 246, 0.9);
     }
     
     .toast-warning {
-        background-color: rgba(217, 119, 6, 0.2);
+        background-color: rgba(217, 119, 6, 0.9);
     }
 }

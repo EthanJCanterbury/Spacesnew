@@ -1001,7 +1001,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const factAnimation = setInterval(() => {
         if (document.querySelector('.loading-fact')) {
             document.querySelector('.loading-fact').textContent = loadingFacts[factIndex];
-            factIndex = (factIndex = (factIndex + 1) % loadingFacts.length;
+            factIndex = (factIndex + 1) % loadingFacts.length;
         }
     }, 2000);
 
