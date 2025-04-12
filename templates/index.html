@@ -1,155 +1,657 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HackClub Spaces - Build. Collaborate. Deploy.</title>
+    <title>HackClub Spaces - Limitless Creativity for Hackers</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!--
-    <div class="unofficial-banner">
-        <div class="banner-content">
-            <span class="banner-icon">🚧</span>
-            <span class="banner-text">Getting ready for production!!</span>
-            <span class="banner-icon">🚀</span>
-        </div>
-        -->
-    </div>
-    <div class="background-animation"></div>
-    <a href="https://hackclub.com" target="_blank" class="flag-orpheus">
+    <div class="animated-gradient-background"></div>
+    <div id="particles-js"></div>
+    
+    <a href="https://hackclub.com" target="_blank" class="flag-orpheus animated">
         <img src="{{ url_for('static', filename='images/flag-orpheus-left.svg') }}" alt="Orpheus Flag">
     </a>
-    <nav class="navbar">
+    
+    <nav class="navbar glass-effect">
         <div class="nav-content">
-            <a href="/" class="logo">
-                <img src="{{ url_for('static', filename='images/logo-rounded.png') }}" alt="Hack Club" style="height: 30px; margin-right: 8px; vertical-align: middle;">
-                <span style="vertical-align: middle;">Spaces</span>
+            <a href="/" class="logo-container">
+                <img src="{{ url_for('static', filename='images/logo-rounded.png') }}" alt="Hack Club">
+                <span class="logo-text">Spaces</span>
             </a>
             <div class="nav-links">
-                <a href="/">Home</a>
-                <a href="#features">Features</a>
-                <a href="{{ url_for('documentation') }}">Documentation</a>
+                <a href="/" class="active"><i class="fas fa-home"></i> Home</a>
+                <a href="#features"><i class="fas fa-rocket"></i> Features</a>
+                <a href="{{ url_for('documentation') }}"><i class="fas fa-book"></i> Docs</a>
             </div>
             <div class="nav-auth">
                 {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('welcome') }}" class="nav-button">Dashboard</a>
+                    <a href="{{ url_for('welcome') }}" class="nav-button pulse"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
                     {% if current_user.is_authenticated and current_user.is_club_leader %}
-                    <a href="{{ url_for('club_dashboard') }}" class="nav-button">Clubs</a>
+                    <a href="{{ url_for('club_dashboard') }}" class="nav-button"><i class="fas fa-users"></i> Clubs</a>
                     {% endif %}
                     {% if current_user.is_authenticated and current_user.is_admin %}
-                    <a href="{{ url_for('admin_panel') }}" class="nav-button">Admin</a>
+                    <a href="{{ url_for('admin_panel') }}" class="nav-button"><i class="fas fa-shield-alt"></i> Admin</a>
                     {% endif %}
-                    <a href="{{ url_for('settings') }}" class="nav-button">Settings</a>
-                    <a href="{{ url_for('logout') }}" class="nav-button">Logout</a>
+                    <div class="dropdown">
+                        <button class="nav-button dropdown-toggle">
+                            <i class="fas fa-user-circle"></i> Account <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a href="{{ url_for('settings') }}"><i class="fas fa-cog"></i> Settings</a>
+                            <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
                 {% else %}
-                    <a href="{{ url_for('login') }}" class="nav-button">Login</a>
+                    <a href="{{ url_for('login') }}" class="nav-button"><i class="fas fa-sign-in-alt"></i> Login</a>
+                    <a href="{{ url_for('signup') }}" class="nav-button primary"><i class="fas fa-user-plus"></i> Sign Up</a>
                 {% endif %}
             </div>
+            <button class="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
     </nav>
 
-    <main class="banner-adjusted">
+    <main>
         <section class="hero">
             <div class="hero-content">
-                <h1>Make anything you can imagine!</h1>
-                <p class="subtitle">Free beginner friendly all-in-one platform to create, host and collaborate with on web-apps & other projects.</p>
+                <h1 class="animated-text">Code. Create. <span class="gradient-text">Conquer.</span></h1>
+                <p class="subtitle">The all-in-one platform for student hackers to build, deploy, and share amazing web projects with zero setup.</p>
                 <div class="cta-buttons">
                     {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('welcome') }}" class="btn primary">Go to Dashboard</a>
+                        <a href="{{ url_for('welcome') }}" class="btn primary pulse-btn"><i class="fas fa-rocket"></i> Go to Dashboard</a>
                     {% else %}
-                        <a href="{{ url_for('login') }}" class="btn primary">Login</a>
-                        <a href="{{ url_for('signup') }}" class="btn secondary">Sign Up</a>
+                        <a href="{{ url_for('login') }}" class="btn primary pulse-btn"><i class="fas fa-sign-in-alt"></i> Start Hacking</a>
+                        <a href="{{ url_for('signup') }}" class="btn secondary"><i class="fas fa-user-plus"></i> Create Account</a>
                     {% endif %}
-                    <a href="#features" class="btn secondary">Learn More</a>
+                    <a href="#features" class="btn outline scroll-btn"><i class="fas fa-chevron-down"></i> Learn More</a>
+                </div>
+                <div class="tech-badges">
+                    <div class="tech-badge">HTML5</div>
+                    <div class="tech-badge">CSS3</div>
+                    <div class="tech-badge">JavaScript</div>
+                    <div class="tech-badge">Python</div>
+                    <div class="tech-badge">React</div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="device-mockup">
+                    <div class="browser-mockup">
+                        <div class="browser-controls">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <div class="browser-content">
+                            <div class="code-editor-preview">
+                                <pre><code>&lt;div class="<span class="highlight">hack</span>"&gt;
+  <span class="comment">// Build anything</span>
+  <span class="highlight">createAwesome</span>();
+&lt;/div&gt;</code></pre>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="hero-backdrop"></div>
+            <div class="scroll-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </section>
 
         <section id="features" class="features">
-            <h2>Why Choose Spaces?</h2>
+            <div class="section-header">
+                <span class="section-badge">Features</span>
+                <h2>Everything You Need to <span class="gradient-text">Build Amazing Projects</span></h2>
+                <p class="section-subtitle">Spaces gives you all the tools to go from idea to fully deployed app in minutes</p>
+            </div>
+            
             <div class="feature-grid">
                 <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
                     <h3>Lightning Fast</h3>
-                    <p>Our Global CDN (Cloudflare) ensures your sites load instantly</p>
+                    <p>Our Global CDN (Cloudflare) ensures your sites load instantly from anywhere in the world</p>
                 </div>
                 <div class="feature-card">
-                    <h3>No Commands!</h3>
-                    <p>No terminal knowledge is required!!</p>
+                    <div class="feature-icon">
+                        <i class="fas fa-terminal"></i>
+                    </div>
+                    <h3>No Terminal Needed</h3>
+                    <p>Our intuitive interface makes deployment as simple as clicking a button</p>
                 </div>
                 <div class="feature-card">
-                    <h3>Always Free</h3>
-                    <p>No hidden costs or limitations (Fair use!!!)</p>
+                    <div class="feature-icon">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <h3>Forever Free</h3>
+                    <p>No hidden costs, no credit card required — build and learn without limits</p>
                 </div>
                 <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
                     <h3>Custom Domains</h3>
-                    <p>Use your own domain name or choose one from our list!</p>
+                    <p>Connect your own domain or use our free subdomain for your projects</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Collaboration</h3>
+                    <p>Work on projects with friends and club members in real-time</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Responsive Tools</h3>
+                    <p>Preview your site on different devices with our responsive testing tools</p>
+                </div>
+            </div>
+        </section>
+        
+        <section class="workflow-showcase">
+            <div class="section-header">
+                <span class="section-badge">How It Works</span>
+                <h2>From Code to Live Site in <span class="gradient-text">Seconds</span></h2>
+                <p class="section-subtitle">No complicated deployment pipelines or server setups</p>
+            </div>
+            
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Create Your Project</h3>
+                        <p>Start from scratch or use one of our starter templates</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Build Your Site</h3>
+                        <p>Use our powerful code editor with real-time preview</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Deploy Instantly</h3>
+                        <p>Click "Deploy" and your site is live on the web</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Share Your Creation</h3>
+                        <p>Show off your work with a custom URL</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="workflow-demo">
+                <div class="browser-mockup large">
+                    <div class="browser-controls">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <div class="browser-content">
+                        <div class="editor-preview">
+                            <div class="editor-actions">
+                                <button class="action-button"><i class="fas fa-play"></i> Run</button>
+                                <button class="action-button primary"><i class="fas fa-rocket"></i> Deploy</button>
+                            </div>
+                            <div class="editor-interface">
+                                <div class="file-explorer">
+                                    <div class="file active">index.html</div>
+                                    <div class="file">style.css</div>
+                                    <div class="file">script.js</div>
+                                </div>
+                                <div class="code-area">
+                                    <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;My Awesome Project&lt;/title&gt;
+    &lt;link rel="stylesheet" href="style.css"&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Hello, Hack Club!&lt;/h1&gt;
+    &lt;p&gt;This is my first project on Spaces&lt;/p&gt;
+    &lt;script src="script.js"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                                </div>
+                                <div class="preview-area">
+                                    <div class="preview-header">
+                                        <span>Live Preview</span>
+                                    </div>
+                                    <div class="preview-content">
+                                        <h1>Hello, Hack Club!</h1>
+                                        <p>This is my first project on Spaces</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="how-to-join" class="join-section">
+            <div class="section-header">
+                <span class="section-badge">Join Us</span>
+                <h2>Start Building <span class="gradient-text">Today</span></h2>
+                <p class="section-subtitle">Join thousands of student hackers building amazing projects</p>
+            </div>
+            
+            <div class="join-content">
+                <div class="join-card">
+                    <div class="card-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Join the Community</h3>
+                    <p>Connect with thousands of students in the Hack Club Slack where you can get help, share your work, and make friends.</p>
+                    <a href="https://hackclub.com/slack" class="btn secondary" target="_blank"><i class="fab fa-slack"></i> Join Slack</a>
+                </div>
+                <div class="join-card">
+                    <div class="card-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h3>Create an Account</h3>
+                    <p>Sign up for a free Spaces account to start building and deploying your web projects right away.</p>
+                    <a href="{{ url_for('signup') }}" class="btn secondary"><i class="fas fa-arrow-right"></i> Sign Up</a>
+                </div>
+                <div class="join-card">
+                    <div class="card-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3>Launch Your First Site</h3>
+                    <p>Follow our beginner-friendly tutorials to deploy your first website in just minutes.</p>
+                    <a href="{{ url_for('documentation') }}" class="btn secondary"><i class="fas fa-book"></i> View Tutorials</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="testimonials">
+            <div class="section-header">
+                <span class="section-badge">Testimonials</span>
+                <h2>What <span class="gradient-text">Hackers Say</span></h2>
+                <p class="section-subtitle">Hear from students who use Spaces for their projects</p>
+            </div>
+            
+            <div class="testimonial-slider">
+                <div class="testimonial">
+                    <div class="testimonial-content">
+                        <p>"Spaces made it so easy to deploy my first website. I went from knowing nothing about web development to having a live site in just one workshop!"</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://ui-avatars.com/api/?name=Alex+K&background=random" alt="Alex K">
+                        <div class="author-info">
+                            <h4>Alex K</h4>
+                            <p>High School Student</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial">
+                    <div class="testimonial-content">
+                        <p>"I used to struggle with deployment until I found Spaces. Now I can focus on coding and not worry about servers or configuration."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://ui-avatars.com/api/?name=Sarah+M&background=random" alt="Sarah M">
+                        <div class="author-info">
+                            <h4>Sarah M</h4>
+                            <p>Club Leader</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial">
+                    <div class="testimonial-content">
+                        <p>"Our club uses Spaces for all of our workshops. It's perfect for beginners and advanced hackers alike!"</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://ui-avatars.com/api/?name=Miguel+R&background=random" alt="Miguel R">
+                        <div class="author-info">
+                            <h4>Miguel R</h4>
+                            <p>Hack Club Organizer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-controls">
+                <button class="control-dot active" data-slide="0"></button>
+                <button class="control-dot" data-slide="1"></button>
+                <button class="control-dot" data-slide="2"></button>
+            </div>
+        </section>
+
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 class="counter" data-target="150">0+</h3>
+                    <p>Active Sites</p>
+                </div>
+                <div class="stat-card">
+                    <h3 class="counter" data-target="99.9">0%</h3>
+                    <p>Uptime</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Global</h3>
+                    <p>CDN Coverage</p>
+                </div>
+                <div class="stat-card">
+                    <h3 class="counter" data-target="1000">0+</h3>
+                    <p>Student Hackers</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="cta-content">
+                <h2>Ready to Start Building?</h2>
+                <p>Join thousands of students creating amazing projects with Hack Club Spaces</p>
+                <div class="cta-buttons">
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('welcome') }}" class="btn primary large"><i class="fas fa-rocket"></i> Go to Dashboard</a>
+                    {% else %}
+                        <a href="{{ url_for('signup') }}" class="btn primary large"><i class="fas fa-rocket"></i> Get Started for Free</a>
+                    {% endif %}
                 </div>
             </div>
         </section>
     </main>
 
-    <section id="how-to-join" class="join-section">
-        <h2>Start Building Today</h2>
-        <div class="join-content">
-            <div class="join-card">
-                <h3>Join the Community</h3>
-                <p>Spaces is exclusively available to Hack Club members. Join our vibrant Slack community where thousands of students build amazing things together.</p>
-                <a href="https://hackclub.com/slack" class="btn primary" target="_blank">Join the Slack →</a>
-            </div>
-            <div class="join-card">
-                <h3>Sign up</h3>
-                <p>Sign up for a free account on our website or with our slack bot</p>
-                <a href="{{ url_for('signup') }}" class="btn secondary">Sign up →</a>
-            </div>
-            <div class="join-card">
-                <h3>Ship Your Site</h3>
-                <p>Use our simple web editor to deploy your static site in seconds. Just click <code>deploy</code> and your site will be live!</p>
-                <a href="#cool" class="btn secondary">That's it!</a>
-            </div>
-        </div>
-    </section>
-
-    <section class="stats-section">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>150+</h3>
-                <p>Active Sites</p>
-            </div>
-            <div class="stat-card">
-                <h3>99.9%</h3>
-                <p>Uptime</p>
-            </div>
-            <div class="stat-card">
-                <h3>Global</h3>
-                <p>CDN (Thanks, Cloudflare)</p>
-            </div>
-        </div>
-    </section>
-
     <footer>
         <div class="footer-content">
             <div class="footer-section">
                 <h4>Hack Club Spaces</h4>
-                <p>Made with ❤️ by <a href="https://hackclub.com" target="_blank">Hack Club</a> & <a href="https://github.com/EthanCanterburyAtWillow">Ethan</a></p>
+                <p>The web development platform by students, for students.</p>
+                <div class="social-links">
+                    <a href="https://twitter.com/hackclub" target="_blank"><i class="fab fa-twitter"></i></a>
+                    <a href="https://github.com/hackclub" target="_blank"><i class="fab fa-github"></i></a>
+                    <a href="https://instagram.com/hackclub" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/c/HackClubHQ" target="_blank"><i class="fab fa-youtube"></i></a>
+                </div>
             </div>
             <div class="footer-section">
-                <h4>Links</h4>
-                <a href="https://hackclub.com/slack">Slack</a>
-                <a href="https://github.com/hackclub">GitHub</a>
-                <a href="https://spaces.learnwillow.org/documentation">Documentation</a>
+                <h4>Resources</h4>
+                <a href="{{ url_for('documentation') }}"><i class="fas fa-book"></i> Documentation</a>
+                <a href="https://hackclub.com/slack"><i class="fab fa-slack"></i> Slack</a>
+                <a href="https://github.com/hackclub"><i class="fab fa-github"></i> GitHub</a>
+                <a href="https://workshops.hackclub.com"><i class="fas fa-laptop-code"></i> Workshops</a>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <a href="mailto:team@hackclub.com"><i class="fas fa-envelope"></i> team@hackclub.com</a>
+                <p><i class="fas fa-heart"></i> Made with love by <a href="https://github.com/EthanCanterburyAtWillow" target="_blank">Ethan</a> &amp; the Hack Club community</p>
             </div>
         </div>
-        <div id="webring-wrapper">
-          <a href="https://webring.hackclub.com/" id="previousBtn" class="webring-anchor" title="Previous">‹</a>
-          <a href="https://webring.hackclub.com/" class="webring-logo" title="Hack Club Webring" alt="Hack Club Webring"></a>
-          <a href="https://webring.hackclub.com/" id="nextBtn" class="webring-anchor" title="Next">›</a>
-          <script src="https://webring.hackclub.com/embed.min.js"></script>
+        
+        <div class="footer-bottom">
+            <div id="webring-wrapper">
+              <a href="https://webring.hackclub.com/" id="previousBtn" class="webring-anchor" title="Previous">‹</a>
+              <a href="https://webring.hackclub.com/" class="webring-logo" title="Hack Club Webring" alt="Hack Club Webring"></a>
+              <a href="https://webring.hackclub.com/" id="nextBtn" class="webring-anchor" title="Next">›</a>
+              <script src="https://webring.hackclub.com/embed.min.js"></script>
+            </div>
+            <p>&copy; {{ now.year }} Hack Club. All rights reserved.</p>
         </div>
     </footer>
 
+    <div class="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize particles.js
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": {
+                        "value": 50,
+                        "density": {
+                            "enable": true,
+                            "value_area": 800
+                        }
+                    },
+                    "color": {
+                        "value": "#ec3750"
+                    },
+                    "shape": {
+                        "type": "circle",
+                        "stroke": {
+                            "width": 0,
+                            "color": "#000000"
+                        },
+                        "polygon": {
+                            "nb_sides": 5
+                        }
+                    },
+                    "opacity": {
+                        "value": 0.5,
+                        "random": false,
+                        "anim": {
+                            "enable": false,
+                            "speed": 1,
+                            "opacity_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "size": {
+                        "value": 3,
+                        "random": true,
+                        "anim": {
+                            "enable": false,
+                            "speed": 40,
+                            "size_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": "#ec3750",
+                        "opacity": 0.2,
+                        "width": 1
+                    },
+                    "move": {
+                        "enable": true,
+                        "speed": 2,
+                        "direction": "none",
+                        "random": false,
+                        "straight": false,
+                        "out_mode": "out",
+                        "bounce": false,
+                        "attract": {
+                            "enable": false,
+                            "rotateX": 600,
+                            "rotateY": 1200
+                        }
+                    }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": {
+                        "onhover": {
+                            "enable": true,
+                            "mode": "grab"
+                        },
+                        "onclick": {
+                            "enable": true,
+                            "mode": "push"
+                        },
+                        "resize": true
+                    },
+                    "modes": {
+                        "grab": {
+                            "distance": 140,
+                            "line_linked": {
+                                "opacity": 1
+                            }
+                        },
+                        "bubble": {
+                            "distance": 400,
+                            "size": 40,
+                            "duration": 2,
+                            "opacity": 8,
+                            "speed": 3
+                        },
+                        "repulse": {
+                            "distance": 200,
+                            "duration": 0.4
+                        },
+                        "push": {
+                            "particles_nb": 4
+                        },
+                        "remove": {
+                            "particles_nb": 2
+                        }
+                    }
+                },
+                "retina_detect": true
+            });
+            
+            // Animate counters
+            const counters = document.querySelectorAll('.counter');
+            counters.forEach(counter => {
+                const target = parseFloat(counter.getAttribute('data-target'));
+                const duration = 2000; // 2 seconds
+                const step = target / (duration / 16); // 60fps
+                let current = 0;
+                const isDecimal = String(target).includes('.');
+                
+                const updateCounter = () => {
+                    current += step;
+                    if (current < target) {
+                        counter.textContent = isDecimal ? current.toFixed(1) + "%" : Math.floor(current) + "+";
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counter.textContent = isDecimal ? target.toFixed(1) + "%" : target + "+";
+                    }
+                };
+                
+                // Start animation when element is in viewport
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            updateCounter();
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.5 });
+                
+                observer.observe(counter);
+            });
+            
+            // Testimonial slider
+            const testimonials = document.querySelectorAll('.testimonial');
+            const dots = document.querySelectorAll('.control-dot');
+            let currentSlide = 0;
+            
+            function showSlide(index) {
+                testimonials.forEach(testimonial => testimonial.style.display = 'none');
+                dots.forEach(dot => dot.classList.remove('active'));
+                
+                testimonials[index].style.display = 'block';
+                dots[index].classList.add('active');
+                currentSlide = index;
+            }
+            
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => showSlide(index));
+            });
+            
+            // Auto slide every 5 seconds
+            setInterval(() => {
+                currentSlide = (currentSlide + 1) % testimonials.length;
+                showSlide(currentSlide);
+            }, 5000);
+            
+            // Initialize first slide
+            showSlide(0);
+            
+            // Mobile menu toggle
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            const navAuth = document.querySelector('.nav-auth');
+            
+            mobileMenuToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('show');
+                navAuth.classList.toggle('show');
+                mobileMenuToggle.classList.toggle('active');
+            });
+            
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        window.scrollTo({
+                            top: target.offsetTop - 80, // Adjust for navbar height
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Back to top button
+            const backToTopBtn = document.querySelector('.back-to-top');
+            
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 500) {
+                    backToTopBtn.classList.add('show');
+                } else {
+                    backToTopBtn.classList.remove('show');
+                }
+            });
+            
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Dropdown toggle
+            const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+            
+            dropdownToggles.forEach(toggle => {
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const dropdown = toggle.nextElementSibling;
+                    dropdown.classList.toggle('show');
+                });
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            });
+            
+            // Prevent dropdown menu from closing when clicking inside it
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            });
+        });
+    </script>
 </body>
 </html>
