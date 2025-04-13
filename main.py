@@ -1,4 +1,3 @@
-
 import os
 import logging
 import subprocess
@@ -68,21 +67,29 @@ def stop_hackatime_service():
             app.logger.error(f"Error stopping service: {str(e)}")
             hackatime_process.kill()
 
+@app.route('/support')
+def support():
+    return render_template('support.html')
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
 if __name__ == '__main__':
     app.logger.info("Starting Hack Club Spaces application")
-    
+
     # Initialize database
     try:
         initialize_database()
     except Exception as e:
         app.logger.warning(f"Database initialization error: {e}")
-    
+
     # Start Hackatime service
     start_hackatime_service()
-    
+
     # Register the cleanup function to stop Hackatime service on exit
     atexit.register(stop_hackatime_service)
-    
+
     # Start the main Flask application
     port = int(os.environ.get('PORT', 3000))
     app.logger.info(f"Server running on http://0.0.0.0:{port}")
