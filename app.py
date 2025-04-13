@@ -4414,6 +4414,29 @@ def get_member_sites():
             # Additional debug logging - list all sites found
             for site in sites:
                 app.logger.info(f"Site found: {site.id} - {site.name} (Owner: {site.user_id})")
+                
+            # Format sites and return them
+            result = []
+            for site in sites:
+                user = User.query.get(site.user_id)
+                if user:
+                    site_data = {
+                        'id': site.id,
+                        'name': site.name,
+                        'type': site.site_type,
+                        'updated_at': site.updated_at.isoformat() if site.updated_at else None,
+                        'owner': {
+                            'id': user.id,
+                            'username': user.username
+                        }
+                    }
+                    result.append(site_data)
+            
+            return jsonify({'sites': result})
+            
+        except Exception as e:
+            app.logger.error(f'Error getting member sites: {str(e)}')
+            return jsonify({'error': f'Failed to get member sites: {str(e)}'}), 500
 
 @app.route('/api/clubs/<int:club_id>/assignments/<int:assignment_id>', methods=['GET'])
 @login_required
