@@ -2880,7 +2880,7 @@ function loadResources() {
                         <a href="${resource.url}" target="_blank" class="btn-primary btn-sm">
                             <i class="fas fa-external-link-alt"></i> Visit
                         </a>
-                        <button class="btn-icon" onclick="toggleResourceMenu(${resource.id})">
+                        <button class="btn-icon resource-menu-btn" onclick="toggleResourceMenu(${resource.id})">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
                         <div class="resource-menu" id="resource-menu-${resource.id}">
@@ -2914,7 +2914,7 @@ function toggleResourceMenu(resourceId) {
     menu.classList.toggle('active');
 
     // Close other open menus
-    document.querySelectorAll('.resource-menu.active').forEach(openMenu => {
+    document.querySelectorAll('.resource-menu.active, .post-menu.active').forEach(openMenu => {
         if (openMenu.id !== `resource-menu-${resourceId}`) {
             openMenu.classList.remove('active');
         }
@@ -2927,6 +2927,9 @@ function toggleResourceMenu(resourceId) {
             document.removeEventListener('click', closeMenuOutside);
         }
     });
+    
+    // Prevent the click event from propagating
+    event.stopPropagation();
 }
 
 // Edit resource
@@ -3602,8 +3605,47 @@ function toggleLike(postId) {
     color: var(--danger);
 }
 
-.post-menu button.delete-btn:hover {
+.post-menu button.delete-btn:hover,
+.resource-menu button.delete-btn:hover {
     background-color: rgba(220, 38, 38, 0.1);
+}
+
+.resource-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    display: none;
+    min-width: 150px;
+    padding: 8px 0;
+}
+
+.resource-menu.active {
+    display: block;
+}
+
+.resource-menu button {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    transition: background-color 0.2s;
+}
+
+.resource-menu button:hover {
+    background-color: var(--light);
+}
+
+.resource-actions {
+    position: relative;
 }
 </style>
 {% endblock %}
