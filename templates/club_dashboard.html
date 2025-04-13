@@ -111,7 +111,7 @@
                         </div>
                         <div class="post-footer">
                             <button class="post-action"><i class="far fa-heart"></i> Like</button>
-                            <button class="post-action"><i class="far fa-comment"></i> Comment</button>
+                            
                         </div>
                     </div>
                 </div>
@@ -790,7 +790,7 @@
 
 .club-empty-state p {
     margin: 0 0 2rem;
-    color: var(--text-secondary);
+    colorvar(--text-secondary);
     font-size: 1.25rem;
 }
 
@@ -1050,6 +1050,7 @@
 
 .post-actions {
     position: relative;
+    display: block !important;
 }
 
 .post-content {
@@ -2285,21 +2286,21 @@ function loadPosts() {
                             <h3>${post.user.username}</h3>
                             <span class="post-date">${formattedDate}</span>
                         </div>
-                        ${isCurrentUser ? `
                         <div class="post-actions">
                             <button class="btn-icon post-menu-btn" onclick="togglePostMenu(${post.id})">
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
                             <div class="post-menu" id="post-menu-${post.id}">
+                                ${isCurrentUser ? `
                                 <button onclick="editPost(${post.id})">
                                     <i class="fas fa-edit"></i> Edit
                                 </button>
+                                ` : ''}
                                 <button class="delete-btn" onclick="deletePost(${post.id})">
                                     <i class="fas fa-trash"></i> Delete
                                 </button>
                             </div>
                         </div>
-                        ` : ''}
                     </div>
                     <div class="post-content">
                         <p>${post.content}</p>
@@ -2309,7 +2310,7 @@ function loadPosts() {
                             <i class="${liked ? 'fas' : 'far'} fa-heart"></i> 
                             <span id="like-count-${post.id}">${likesCount}</span> Likes
                         </button>
-                        <button class="post-action"><i class="far fa-comment"></i> Comment</button>
+                        
                     </div>
                 `;
 
@@ -2334,7 +2335,7 @@ function togglePostMenu(postId) {
         console.error(`Menu element with ID post-menu-${postId} not found`);
         return;
     }
-    
+
     menu.classList.toggle('active');
 
     // Close other open menus
@@ -2351,7 +2352,7 @@ function togglePostMenu(postId) {
             document.removeEventListener('click', closeMenuOutside);
         }
     });
-    
+
     // Prevent the click event from propagating
     event.stopPropagation();
 }
@@ -2535,7 +2536,7 @@ function createPost() {
                 <button class="post-action" onclick="toggleLike(${data.post.id})">
                     <i class="far fa-heart"></i> <span id="like-count-${data.post.id}">0</span> Likes
                 </button>
-                <button class="post-action"><i class="far fa-comment"></i> Comment</button>
+                
             </div>
         `;
 
@@ -2980,7 +2981,7 @@ function toggleResourceMenu(resourceId) {
             document.removeEventListener('click', closeMenuOutside);
         }
     });
-    
+
     // Prevent the click event from propagating
     event.stopPropagation();
 }
@@ -3633,13 +3634,9 @@ function toggleLike(postId) {
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     z-index: 10;
-    display: none;
+    display: block; /* Always visible */
     min-width: 150px;
     padding: 8px 0;
-}
-
-.post-menu.active {
-    display: block;
 }
 
 .post-menu button {
@@ -3706,4 +3703,5 @@ function toggleLike(postId) {
     position: relative;
 }
 </style>
+
 {% endblock %}
