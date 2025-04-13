@@ -1445,21 +1445,29 @@ def toggle_club_leader(user_id):
     make_leader = data.get('is_club_leader', False)
 
     try:
+        app.logger.info(f"Attempt to {'make' if make_leader else 'remove'} {user.username} as club leader")
         existing_club = Club.query.filter_by(leader_id=user.id).first()
+        
+        # User is already in the requested state
+        if (make_leader and existing_club) or (not make_leader and not existing_club):
+            status_msg = f"{user.username} is already {'a club leader' if make_leader else 'not a club leader'}"
+            app.logger.info(status_msg)
+            return jsonify({
+                'message': status_msg,
+                'status': 'success'
+            })
 
         if make_leader:
-            if not existing_club:
-                # Create the club leader relationship without auto-creating a club
-                # The leader_id is what determines if someone is a club leader
-                club = Club(name=f"{user.username}'s Club",
-                            description="Temporary club (please edit)",
-                            leader_id=user.id)
-                db.session.add(club)
-
+            # Create a new club with this user as leader
+            club = Club(name=f"{user.username}'s Club",
+                        description="Temporary club (please edit)",
+                        leader_id=user.id)
+            db.session.add(club)
+            
+            # Record the activity
             activity = UserActivity(
                 activity_type="admin_action",
-                message=
-                f"Admin {{username}} made {user.username} a club leader",
+                message=f"Admin {{username}} made {user.username} a club leader",
                 username=current_user.username,
                 user_id=current_user.id)
             db.session.add(activity)
@@ -1472,25 +1480,26 @@ def toggle_club_leader(user_id):
             })
 
         elif not make_leader and existing_club:
+            # First delete all club memberships
             ClubMembership.query.filter_by(club_id=existing_club.id).delete()
-
+            
+            # Then delete the club itself
             db.session.delete(existing_club)
-
+            
+            # Record the activity
             activity = UserActivity(
                 activity_type="admin_action",
-                message=
-                f"Admin {{username}} removed {user.username} as a club leader",
+                message=f"Admin {{username}} removed {user.username} as a club leader",
                 username=current_user.username,
                 user_id=current_user.id)
             db.session.add(activity)
 
             db.session.commit()
+            app.logger.info(f"Successfully removed {user.username} as a club leader")
             return jsonify({
                 'message': f"Removed {user.username} as a club leader",
                 'status': 'success'
             })
-
-        return jsonify({'message': 'No changes made', 'status': 'success'})
 
     except Exception as e:
         db.session.rollback()

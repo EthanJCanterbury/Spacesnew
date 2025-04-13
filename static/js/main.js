@@ -192,17 +192,20 @@ function showToast(type, message, duration = 4000) {
 window.showToast = showToast;
 
 // Function to toggle club leader status (Admin Panel)
-async function toggleClubLeader(userId, username, makeLeader) {
+async function toggleClubLeader(userId, username, isCurrentlyLeader) {
+    // Always pass the opposite of the current state to change to that state
+    const makeLeader = !isCurrentlyLeader;
     const action = makeLeader ? 'make' : 'remove';
-    const confirmation = confirm(`Are you sure you want to ${action} ${username} as a club leader?`);
+    const confirmation = confirm(`Are you sure you want to ${action} ${username} ${makeLeader ? 'a' : 'as a'} club leader?`);
     if (!confirmation) return;
 
     try {
+        showToast('info', `Processing request...`);
+        
         const response = await fetch(`/api/admin/users/${userId}/club-leader`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                // Add any necessary CSRF token headers if your app uses them
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ is_club_leader: makeLeader })
         });
@@ -210,15 +213,12 @@ async function toggleClubLeader(userId, username, makeLeader) {
         const data = await response.json();
 
         if (response.ok) {
-            showToast('success', data.message || `Successfully ${action}d ${username} as club leader.`);
-            // Update the UI (e.g., toggle a badge)
-            const badge = document.getElementById(`club-leader-badge-${userId}`);
-            if (badge) {
-                badge.style.display = makeLeader ? 'inline-block' : 'none';
-            }
-            // Optionally, update the button text/icon in the dropdown if needed
-            // This might require more complex DOM manipulation depending on how the dropdown is structured
-            location.reload(); // Simple way to update UI for now
+            showToast('success', data.message || `Successfully ${makeLeader ? 'made' : 'removed'} ${username} ${makeLeader ? 'a' : 'as a'} club leader.`);
+            
+            // Force reload to update UI
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
         } else {
             showToast('error', data.message || `Failed to ${action} club leader status.`);
         }
