@@ -118,16 +118,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Hamburger menu toggle
-    const hamburger = document.querySelector('.hamburger');
-    const navLinks = document.getElementById('navLinks');
-
-    if (hamburger && navLinks) {
-        hamburger.addEventListener('click', function() {
+    // Hamburger menu toggle - improved with direct event binding
+    function setupHamburgerMenu() {
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.getElementById('navLinks');
+        
+        if (!hamburger || !navLinks) return;
+        
+        // Toggle menu when hamburger is clicked
+        hamburger.addEventListener('click', function(e) {
+            e.stopPropagation();
             navLinks.classList.toggle('active');
             hamburger.classList.toggle('active');
         });
-
+        
         // Close menu when clicking outside
         document.addEventListener('click', function(event) {
             if (!navLinks.contains(event.target) && !hamburger.contains(event.target) && navLinks.classList.contains('active')) {
@@ -135,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 hamburger.classList.remove('active');
             }
         });
-
+        
         // Close menu when clicking on a link
         const navLinkElements = navLinks.querySelectorAll('a');
         navLinkElements.forEach(link => {
@@ -145,6 +149,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+    
+    // Call the setup function
+    setupHamburgerMenu();
 });
 
 // Improved animation observer with faster transition
