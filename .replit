@@ -54,8 +54,4 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "kill -9 $(lsof -t -i:3000) 2>/dev/null || true"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python3 main.py"
+args = "python main.py"
