@@ -245,9 +245,9 @@
                                             <i class="fas fa-{{ 'user-check' if user.is_suspended else 'user-lock' }}"></i>
                                             <span>{{ 'Unsuspend' if user.is_suspended else 'Suspend' }}</span>
                                         </button>
-                                        <button class="dropdown-item" onclick="toggleClubLeader({{ user.id }}, '{{ user.username }}', {{ 'true' if user.is_club_leader else 'false' }})">
+                                        <button class="dropdown-item" onclick="toggleClubLeader({{ user.id }}, '{{ user.username }}', {{ 'true' if Club.query.filter_by(leader_id=user.id).first() else 'false' }})">
                                             <i class="fas fa-user-tag"></i>
-                                            <span>{{ 'Remove Club Leader' if user.is_club_leader else 'Make Club Leader' }}</span>
+                                            <span>{{ 'Remove Club Leader' if Club.query.filter_by(leader_id=user.id).first() else 'Make Club Leader' }}</span>
                                         </button>
                                         <button onclick="deleteAllSites({{ user.id }}, '{{ user.username }}')" class="dropdown-item">
                                             <i class="fas fa-trash-alt"></i>
