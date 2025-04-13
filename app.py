@@ -351,10 +351,15 @@ def orphy_chat_proxy():
         user_message = client_data.get('message', '')
         code_content = client_data.get('code', '')
         filename = client_data.get('filename', 'untitled')
+        documentation = client_data.get('documentation', '')
 
-        system_prompt = "You are Orphy, a friendly and helpful AI assistant for Hack Club Spaces. Your goal is to help users with their coding projects. Keep your responses concise, and primarily give suggestions rather than directly solving everything for them. Use friendly language with some emoji but not too many. Give guidance that encourages learning."
+        system_prompt = "You are Orphy, a friendly and helpful AI assistant for Hack Club Spaces. Your goal is to help users with their coding projects. Keep your responses concise, and primarily give suggestions rather than directly solving everything for them. Use friendly language with some emoji but not too many. Give guidance that encourages learning. You have access to the Hack Club Spaces documentation which you can reference to help users."
 
         user_prompt = f"I'm working on a file named {filename} with the following code:\n\n{code_content}\n\nHere's my question: {user_message}"
+        
+        # Add documentation context if available
+        if documentation:
+            user_prompt += f"\n\nHere is the relevant Hack Club Spaces documentation you can use to help answer my question:\n\n{documentation}"
 
         try:
             app.logger.info("Attempting to use Groq API")
