@@ -3941,10 +3941,10 @@ def club_assignments(club_id):
             }
         })
 
-@app.route('/api/clubs/<int:club_id>/assignments/<int:assignment_id>', methods=['PUT', 'DELETE'])
+@app.route('/api/clubs/<int:club_id>/assignments/<int:assignment_id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
 def manage_club_assignment(club_id, assignment_id):
-    """Update or delete a club assignment."""
+    """Get, update, or delete a club assignment."""
     from models import ClubAssignment
     
     assignment = ClubAssignment.query.get_or_404(assignment_id)
@@ -3953,18 +3953,43 @@ def manage_club_assignment(club_id, assignment_id):
     if assignment.club_id != club_id:
         return jsonify({'error': 'Assignment not found in this club'}), 404
         
-    # Check if user is authorized (creator or club leader/co-leader)
+    # Check if user is a member of the club
+    membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
+    if not membership and assignment.club.leader_id != current_user.id:
+        return jsonify({'error': 'You are not a member of this club'}), 403
+    
+    if request.method == 'GET':
+        # Get user info for creator
+        creator = User.query.get(assignment.created_by)
+        
+        return jsonify({
+            'assignment': {
+                'id': assignment.id,
+                'title': assignment.title,
+                'description': assignment.description,
+                'due_date': assignment.due_date.isoformat() if assignment.due_date else None,
+                'created_at': assignment.created_at.isoformat(),
+                'updated_at': assignment.updated_at.isoformat(),
+                'is_active': assignment.is_active,
+                'creator': {
+                    'id': creator.id,
+                    'username': creator.username
+                }
+            }
+        })
+    
+    # For PUT and DELETE methods, check for additional authorization
     is_authorized = False
     if assignment.created_by == current_user.id or assignment.club.leader_id == current_user.id:
         is_authorized = True
     else:
-        membership = ClubMembership.query.filter_by(
+        co_leader_membership = ClubMembership.query.filter_by(
             user_id=current_user.id, 
             club_id=club_id, 
             role='co-leader'
         ).first()
         
-        if membership:
+        if co_leader_membership:
             is_authorized = True
     
     if not is_authorized:
@@ -4075,10 +4100,10 @@ def club_resources(club_id):
             }
         })
 
-@app.route('/api/clubs/<int:club_id>/resources/<int:resource_id>', methods=['PUT', 'DELETE'])
+@app.route('/api/clubs/<int:club_id>/resources/<int:resource_id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
 def manage_club_resource(club_id, resource_id):
-    """Update or delete a club resource."""
+    """Get, update, or delete a club resource."""
     from models import ClubResource
     
     resource = ClubResource.query.get_or_404(resource_id)
@@ -4087,18 +4112,42 @@ def manage_club_resource(club_id, resource_id):
     if resource.club_id != club_id:
         return jsonify({'error': 'Resource not found in this club'}), 404
         
-    # Check if user is authorized (creator or club leader/co-leader)
+    # Check if user is a member of the club
+    membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
+    if not membership and resource.club.leader_id != current_user.id:
+        return jsonify({'error': 'You are not a member of this club'}), 403
+    
+    if request.method == 'GET':
+        # Get user info for creator
+        creator = User.query.get(resource.created_by)
+        
+        return jsonify({
+            'resource': {
+                'id': resource.id,
+                'title': resource.title,
+                'url': resource.url,
+                'description': resource.description,
+                'icon': resource.icon,
+                'created_at': resource.created_at.isoformat(),
+                'creator': {
+                    'id': creator.id,
+                    'username': creator.username
+                }
+            }
+        })
+    
+    # For PUT and DELETE methods, check for additional authorization
     is_authorized = False
     if resource.created_by == current_user.id or resource.club.leader_id == current_user.id:
         is_authorized = True
     else:
-        membership = ClubMembership.query.filter_by(
+        co_leader_membership = ClubMembership.query.filter_by(
             user_id=current_user.id, 
             club_id=club_id, 
             role='co-leader'
         ).first()
         
-        if membership:
+        if co_leader_membership:
             is_authorized = True
     
     if not is_authorized:
