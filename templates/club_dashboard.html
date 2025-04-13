@@ -3557,9 +3557,11 @@ function viewClub(clubId) {
 document.addEventListener('DOMContentLoaded', function() {
     // Make sure the active tab is set
     const activeTab = document.querySelector('.tab-btn.active');
-    if (activeTab) {
-        const tabName = activeTab.getAttribute('onclick').match(/openTab\('(.+?)'\)/)[1];
-        openTab(tabName);
+    if (activeTab && activeTab.getAttribute('onclick')) {
+        const match = activeTab.getAttribute('onclick').match(/openTab\('(.+?)'\)/);
+        if (match && match[1]) {
+            openTab(match[1]);
+        }
     }
 });
 
