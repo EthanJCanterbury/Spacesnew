@@ -3769,7 +3769,7 @@ def club_posts(club_id):
 @login_required
 def manage_club_post(club_id, post_id):
     """Update or delete a club post."""
-    from models import ClubPost
+    from models import ClubPost, ClubPostLike
     
     post = ClubPost.query.get_or_404(post_id)
     
@@ -3809,15 +3809,22 @@ def manage_club_post(club_id, post_id):
         })
         
     elif request.method == 'DELETE':
-        # First delete all likes associated with this post
-        from models import ClubPostLike
-        ClubPostLike.query.filter_by(post_id=post_id).delete()
-        
-        # Then delete the post itself
-        db.session.delete(post)
-        db.session.commit()
-        
-        return jsonify({'message': 'Post deleted successfully'})
+        try:
+            # First delete all likes associated with this post
+            db.session.execute(
+                db.text("DELETE FROM club_post_like WHERE post_id = :post_id"),
+                {"post_id": post_id}
+            )
+            
+            # Then delete the post itself
+            db.session.delete(post)
+            db.session.commit()
+            
+            return jsonify({'message': 'Post deleted successfully'})
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f'Error deleting post: {str(e)}')
+            return jsonify({'error': f'Failed to delete post: {str(e)}'}), 500
 
 
 @app.route('/api/clubs/<int:club_id>/posts/<int:post_id>/like', methods=['POST'])
