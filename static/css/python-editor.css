@@ -243,7 +243,7 @@
   }
 }
 
-/* Toast styles removed - using unified styles from style.css */
+/* Toast styles moved to toast.css */
 
 /* Keyboard shortcuts modal */
 .shortcuts-modal {

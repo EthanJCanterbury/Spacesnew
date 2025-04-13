@@ -42,10 +42,12 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    color: #000000;
 }
 
 .toast-content i {
     font-size: 1.25rem;
+    color: #000000;
 }
 
 .toast-success {
