@@ -70,6 +70,92 @@ class ClubMembership(db.Model):
         return f'<ClubMembership {self.user.username} in {self.club.name} as {self.role}>'
 
 
+class ClubPost(db.Model):
+    __tablename__ = 'club_post'
+    id = db.Column(db.Integer, primary_key=True)
+    club_id = db.Column(db.Integer, db.ForeignKey('club.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    club = db.relationship('Club', backref=db.backref('posts', lazy=True, order_by='desc(ClubPost.created_at)'))
+    user = db.relationship('User', backref=db.backref('club_posts', lazy=True))
+    
+    def __repr__(self):
+        return f'<ClubPost {self.id} by {self.user.username} in {self.club.name}>'
+
+
+class ClubAssignment(db.Model):
+    __tablename__ = 'club_assignment'
+    id = db.Column(db.Integer, primary_key=True)
+    club_id = db.Column(db.Integer, db.ForeignKey('club.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    due_date = db.Column(db.DateTime, nullable=True)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
+    
+    club = db.relationship('Club', backref=db.backref('assignments', lazy=True))
+    creator = db.relationship('User', backref=db.backref('created_assignments', lazy=True))
+    
+    def __repr__(self):
+        return f'<ClubAssignment {self.title} for {self.club.name}>'
+
+
+class ClubResource(db.Model):
+    __tablename__ = 'club_resource'
+    id = db.Column(db.Integer, primary_key=True)
+    club_id = db.Column(db.Integer, db.ForeignKey('club.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    url = db.Column(db.String(500), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    icon = db.Column(db.String(50), default='link')
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    club = db.relationship('Club', backref=db.backref('resources', lazy=True))
+    creator = db.relationship('User', backref=db.backref('created_resources', lazy=True))
+    
+    def __repr__(self):
+        return f'<ClubResource {self.title} for {self.club.name}>'
+
+
+class ClubChatChannel(db.Model):
+    __tablename__ = 'club_chat_channel'
+    id = db.Column(db.Integer, primary_key=True)
+    club_id = db.Column(db.Integer, db.ForeignKey('club.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    club = db.relationship('Club', backref=db.backref('chat_channels', lazy=True))
+    creator = db.relationship('User', backref=db.backref('created_channels', lazy=True))
+    
+    __table_args__ = (db.UniqueConstraint('club_id', 'name', name='uix_club_channel'),)
+    
+    def __repr__(self):
+        return f'<ClubChatChannel {self.name} for {self.club.name}>'
+
+
+class ClubChatMessage(db.Model):
+    __tablename__ = 'club_chat_message'
+    id = db.Column(db.Integer, primary_key=True)
+    channel_id = db.Column(db.Integer, db.ForeignKey('club_chat_channel.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    channel = db.relationship('ClubChatChannel', backref=db.backref('messages', lazy=True, order_by='ClubChatMessage.created_at'))
+    user = db.relationship('User', backref=db.backref('chat_messages', lazy=True))
+    
+    def __repr__(self):
+        return f'<ClubChatMessage by {self.user.username} in {self.channel.name}>'
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)

@@ -3282,29 +3282,89 @@ def settings():
 
 
 @app.route('/club-dashboard')
+@app.route('/club-dashboard/<int:club_id>')
 @login_required
-def club_dashboard():
+def club_dashboard(club_id=None):
     """Club dashboard for club leaders to manage their clubs."""
-    # Import Club and ClubMembership at the beginning of the function
-    from models import Club, ClubMembership
-
-    # Check if user is a club leader
-    club = Club.query.filter_by(leader_id=current_user.id).first()
-
-    # User doesn't have a club and isn't a leader
-    if not club:
-        flash('You do not have permission to access the club dashboard.',
-              'error')
-        return redirect(url_for('welcome'))
-
-    # Get all memberships for the club if it exists
+    from models import Club, ClubMembership, ClubChatChannel
+    
+    # If no club ID is provided, try to find user's club
+    if club_id is None:
+        # Check if user is a club leader
+        club = Club.query.filter_by(leader_id=current_user.id).first()
+        
+        # If not a leader, check if they belong to any clubs
+        if not club:
+            club_memberships = ClubMembership.query.filter_by(user_id=current_user.id).all()
+            
+            if not club_memberships:
+                # User doesn't have any club associations
+                return render_template('club_dashboard.html', club=None)
+                
+            if len(club_memberships) == 1:
+                # If user is a member of only one club, show that club
+                club = club_memberships[0].club
+                club_id = club.id
+            else:
+                # If user belongs to multiple clubs, show club selection interface
+                return render_template('club_dashboard.html', 
+                                      club=None, 
+                                      memberships=club_memberships)
+    else:
+        # Club ID was provided, show that specific club
+        club = Club.query.get_or_404(club_id)
+        
+        # Verify user is a member or leader of this club
+        if club.leader_id != current_user.id:
+            membership = ClubMembership.query.filter_by(
+                user_id=current_user.id,
+                club_id=club_id
+            ).first()
+            
+            if not membership:
+                flash('You are not a member of this club.', 'error')
+                return redirect(url_for('welcome'))
+    
+    # Get all memberships for the club
     memberships = []
     if club:
         memberships = ClubMembership.query.filter_by(club_id=club.id).all()
-
+        
+        # Get the default chat channel
+        default_channel = ClubChatChannel.query.filter_by(
+            club_id=club.id,
+            name='general'
+        ).first()
+        
+        # If no general channel exists, create it
+        if not default_channel:
+            default_channel = ClubChatChannel(
+                club_id=club.id,
+                name='general',
+                description='General discussions',
+                created_by=club.leader_id
+            )
+            db.session.add(default_channel)
+            db.session.commit()
+    
+    # Check if user is a leader or co-leader
+    is_leader = (club and club.leader_id == current_user.id)
+    is_co_leader = False
+    
+    if club and not is_leader:
+        membership = ClubMembership.query.filter_by(
+            user_id=current_user.id,
+            club_id=club.id,
+            role='co-leader'
+        ).first()
+        
+        is_co_leader = (membership is not None)
+    
     return render_template('club_dashboard.html',
                            club=club,
-                           memberships=memberships)
+                           memberships=memberships,
+                           is_leader=is_leader,
+                           is_co_leader=is_co_leader)
 
 
 # Club API routes
@@ -3601,6 +3661,604 @@ def remove_member(membership_id):
         app.logger.error(f'Error removing member: {str(e)}')
         return jsonify({'error': 'Failed to remove member'}), 500
 
+
+# Club Dashboard API Endpoints
+@app.route('/api/clubs/<int:club_id>/posts', methods=['GET', 'POST'])
+@login_required
+def club_posts(club_id):
+    """Get all posts for a club or create a new post."""
+    from models import ClubPost
+    
+    # Verify user is a member of the club
+    club = Club.query.get_or_404(club_id)
+    membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
+    if not membership and club.leader_id != current_user.id:
+        return jsonify({'error': 'You are not a member of this club'}), 403
+        
+    if request.method == 'GET':
+        posts = db.session.query(ClubPost, User).join(User, ClubPost.user_id == User.id) \
+                .filter(ClubPost.club_id == club_id) \
+                .order_by(ClubPost.created_at.desc()).all()
+                
+        result = []
+        for post, user in posts:
+            result.append({
+                'id': post.id,
+                'content': post.content,
+                'created_at': post.created_at.isoformat(),
+                'updated_at': post.updated_at.isoformat(),
+                'user': {
+                    'id': user.id,
+                    'username': user.username
+                }
+            })
+            
+        return jsonify({'posts': result})
+        
+    elif request.method == 'POST':
+        data = request.get_json()
+        content = data.get('content')
+        
+        if not content:
+            return jsonify({'error': 'Post content cannot be empty'}), 400
+            
+        post = ClubPost(
+            club_id=club_id,
+            user_id=current_user.id,
+            content=content
+        )
+        
+        db.session.add(post)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Post created successfully',
+            'post': {
+                'id': post.id,
+                'content': post.content,
+                'created_at': post.created_at.isoformat(),
+                'user': {
+                    'id': current_user.id,
+                    'username': current_user.username
+                }
+            }
+        })
+
+@app.route('/api/clubs/<int:club_id>/posts/<int:post_id>', methods=['PUT', 'DELETE'])
+@login_required
+def manage_club_post(club_id, post_id):
+    """Update or delete a club post."""
+    from models import ClubPost
+    
+    post = ClubPost.query.get_or_404(post_id)
+    
+    # Check if post belongs to the correct club
+    if post.club_id != club_id:
+        return jsonify({'error': 'Post not found in this club'}), 404
+        
+    # Check if user is authorized (post creator or club leader)
+    if post.user_id != current_user.id and post.club.leader_id != current_user.id:
+        membership = ClubMembership.query.filter_by(
+            user_id=current_user.id, 
+            club_id=club_id, 
+            role='co-leader'
+        ).first()
+        
+        if not membership:
+            return jsonify({'error': 'You are not authorized to manage this post'}), 403
+    
+    if request.method == 'PUT':
+        data = request.get_json()
+        content = data.get('content')
+        
+        if not content:
+            return jsonify({'error': 'Post content cannot be empty'}), 400
+            
+        post.content = content
+        post.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Post updated successfully',
+            'post': {
+                'id': post.id,
+                'content': post.content,
+                'updated_at': post.updated_at.isoformat()
+            }
+        })
+        
+    elif request.method == 'DELETE':
+        db.session.delete(post)
+        db.session.commit()
+        
+        return jsonify({'message': 'Post deleted successfully'})
+
+@app.route('/api/clubs/<int:club_id>/assignments', methods=['GET', 'POST'])
+@login_required
+def club_assignments(club_id):
+    """Get all assignments for a club or create a new assignment."""
+    from models import ClubAssignment
+    
+    # Verify user is a member of the club
+    club = Club.query.get_or_404(club_id)
+    membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
+    if not membership and club.leader_id != current_user.id:
+        return jsonify({'error': 'You are not a member of this club'}), 403
+        
+    if request.method == 'GET':
+        assignments = db.session.query(ClubAssignment, User) \
+            .join(User, ClubAssignment.created_by == User.id) \
+            .filter(ClubAssignment.club_id == club_id) \
+            .order_by(ClubAssignment.created_at.desc()).all()
+                
+        result = []
+        for assignment, user in assignments:
+            result.append({
+                'id': assignment.id,
+                'title': assignment.title,
+                'description': assignment.description,
+                'due_date': assignment.due_date.isoformat() if assignment.due_date else None,
+                'created_at': assignment.created_at.isoformat(),
+                'is_active': assignment.is_active,
+                'creator': {
+                    'id': user.id,
+                    'username': user.username
+                }
+            })
+            
+        return jsonify({'assignments': result})
+        
+    elif request.method == 'POST':
+        # Only leaders and co-leaders can create assignments
+        if club.leader_id != current_user.id:
+            membership = ClubMembership.query.filter_by(
+                user_id=current_user.id, 
+                club_id=club_id, 
+                role='co-leader'
+            ).first()
+            
+            if not membership:
+                return jsonify({'error': 'Only club leaders can create assignments'}), 403
+                
+        data = request.get_json()
+        title = data.get('title')
+        description = data.get('description')
+        due_date_str = data.get('due_date')
+        
+        if not title or not description:
+            return jsonify({'error': 'Title and description are required'}), 400
+            
+        due_date = None
+        if due_date_str:
+            try:
+                due_date = datetime.fromisoformat(due_date_str.replace('Z', '+00:00'))
+            except ValueError:
+                return jsonify({'error': 'Invalid due date format'}), 400
+                
+        assignment = ClubAssignment(
+            club_id=club_id,
+            title=title,
+            description=description,
+            due_date=due_date,
+            created_by=current_user.id
+        )
+        
+        db.session.add(assignment)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Assignment created successfully',
+            'assignment': {
+                'id': assignment.id,
+                'title': assignment.title,
+                'description': assignment.description,
+                'due_date': assignment.due_date.isoformat() if assignment.due_date else None,
+                'created_at': assignment.created_at.isoformat(),
+                'is_active': assignment.is_active
+            }
+        })
+
+@app.route('/api/clubs/<int:club_id>/assignments/<int:assignment_id>', methods=['PUT', 'DELETE'])
+@login_required
+def manage_club_assignment(club_id, assignment_id):
+    """Update or delete a club assignment."""
+    from models import ClubAssignment
+    
+    assignment = ClubAssignment.query.get_or_404(assignment_id)
+    
+    # Check if assignment belongs to the correct club
+    if assignment.club_id != club_id:
+        return jsonify({'error': 'Assignment not found in this club'}), 404
+        
+    # Check if user is authorized (creator or club leader/co-leader)
+    is_authorized = False
+    if assignment.created_by == current_user.id or assignment.club.leader_id == current_user.id:
+        is_authorized = True
+    else:
+        membership = ClubMembership.query.filter_by(
+            user_id=current_user.id, 
+            club_id=club_id, 
+            role='co-leader'
+        ).first()
+        
+        if membership:
+            is_authorized = True
+    
+    if not is_authorized:
+        return jsonify({'error': 'You are not authorized to manage this assignment'}), 403
+    
+    if request.method == 'PUT':
+        data = request.get_json()
+        
+        if 'title' in data:
+            assignment.title = data['title']
+        if 'description' in data:
+            assignment.description = data['description']
+        if 'due_date' in data and data['due_date']:
+            try:
+                assignment.due_date = datetime.fromisoformat(data['due_date'].replace('Z', '+00:00'))
+            except ValueError:
+                return jsonify({'error': 'Invalid due date format'}), 400
+        if 'is_active' in data:
+            assignment.is_active = data['is_active']
+            
+        assignment.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Assignment updated successfully',
+            'assignment': {
+                'id': assignment.id,
+                'title': assignment.title,
+                'description': assignment.description,
+                'due_date': assignment.due_date.isoformat() if assignment.due_date else None,
+                'updated_at': assignment.updated_at.isoformat(),
+                'is_active': assignment.is_active
+            }
+        })
+        
+    elif request.method == 'DELETE':
+        db.session.delete(assignment)
+        db.session.commit()
+        
+        return jsonify({'message': 'Assignment deleted successfully'})
+
+@app.route('/api/clubs/<int:club_id>/resources', methods=['GET', 'POST'])
+@login_required
+def club_resources(club_id):
+    """Get all resources for a club or create a new resource."""
+    from models import ClubResource
+    
+    # Verify user is a member of the club
+    club = Club.query.get_or_404(club_id)
+    membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
+    if not membership and club.leader_id != current_user.id:
+        return jsonify({'error': 'You are not a member of this club'}), 403
+        
+    if request.method == 'GET':
+        resources = db.session.query(ClubResource, User) \
+            .join(User, ClubResource.created_by == User.id) \
+            .filter(ClubResource.club_id == club_id) \
+            .order_by(ClubResource.created_at.desc()).all()
+                
+        result = []
+        for resource, user in resources:
+            result.append({
+                'id': resource.id,
+                'title': resource.title,
+                'url': resource.url,
+                'description': resource.description,
+                'icon': resource.icon,
+                'created_at': resource.created_at.isoformat(),
+                'creator': {
+                    'id': user.id,
+                    'username': user.username
+                }
+            })
+            
+        return jsonify({'resources': result})
+        
+    elif request.method == 'POST':
+        data = request.get_json()
+        title = data.get('title')
+        url = data.get('url')
+        description = data.get('description', '')
+        icon = data.get('icon', 'link')
+        
+        if not title or not url:
+            return jsonify({'error': 'Title and URL are required'}), 400
+            
+        resource = ClubResource(
+            club_id=club_id,
+            title=title,
+            url=url,
+            description=description,
+            icon=icon,
+            created_by=current_user.id
+        )
+        
+        db.session.add(resource)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Resource added successfully',
+            'resource': {
+                'id': resource.id,
+                'title': resource.title,
+                'url': resource.url,
+                'description': resource.description,
+                'icon': resource.icon,
+                'created_at': resource.created_at.isoformat()
+            }
+        })
+
+@app.route('/api/clubs/<int:club_id>/resources/<int:resource_id>', methods=['PUT', 'DELETE'])
+@login_required
+def manage_club_resource(club_id, resource_id):
+    """Update or delete a club resource."""
+    from models import ClubResource
+    
+    resource = ClubResource.query.get_or_404(resource_id)
+    
+    # Check if resource belongs to the correct club
+    if resource.club_id != club_id:
+        return jsonify({'error': 'Resource not found in this club'}), 404
+        
+    # Check if user is authorized (creator or club leader/co-leader)
+    is_authorized = False
+    if resource.created_by == current_user.id or resource.club.leader_id == current_user.id:
+        is_authorized = True
+    else:
+        membership = ClubMembership.query.filter_by(
+            user_id=current_user.id, 
+            club_id=club_id, 
+            role='co-leader'
+        ).first()
+        
+        if membership:
+            is_authorized = True
+    
+    if not is_authorized:
+        return jsonify({'error': 'You are not authorized to manage this resource'}), 403
+    
+    if request.method == 'PUT':
+        data = request.get_json()
+        
+        if 'title' in data:
+            resource.title = data['title']
+        if 'url' in data:
+            resource.url = data['url']
+        if 'description' in data:
+            resource.description = data['description']
+        if 'icon' in data:
+            resource.icon = data['icon']
+            
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Resource updated successfully',
+            'resource': {
+                'id': resource.id,
+                'title': resource.title,
+                'url': resource.url,
+                'description': resource.description,
+                'icon': resource.icon
+            }
+        })
+        
+    elif request.method == 'DELETE':
+        db.session.delete(resource)
+        db.session.commit()
+        
+        return jsonify({'message': 'Resource deleted successfully'})
+
+@app.route('/api/clubs/<int:club_id>/channels', methods=['GET', 'POST'])
+@login_required
+def club_chat_channels(club_id):
+    """Get all chat channels for a club or create a new channel."""
+    from models import ClubChatChannel
+    
+    # Verify user is a member of the club
+    club = Club.query.get_or_404(club_id)
+    membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
+    if not membership and club.leader_id != current_user.id:
+        return jsonify({'error': 'You are not a member of this club'}), 403
+        
+    if request.method == 'GET':
+        channels = ClubChatChannel.query.filter_by(club_id=club_id).all()
+                
+        result = []
+        for channel in channels:
+            result.append({
+                'id': channel.id,
+                'name': channel.name,
+                'description': channel.description,
+                'created_at': channel.created_at.isoformat()
+            })
+            
+        return jsonify({'channels': result})
+        
+    elif request.method == 'POST':
+        # Only leaders and co-leaders can create channels
+        if club.leader_id != current_user.id:
+            membership = ClubMembership.query.filter_by(
+                user_id=current_user.id, 
+                club_id=club_id, 
+                role='co-leader'
+            ).first()
+            
+            if not membership:
+                return jsonify({'error': 'Only club leaders can create channels'}), 403
+                
+        data = request.get_json()
+        name = data.get('name')
+        description = data.get('description', '')
+        
+        if not name:
+            return jsonify({'error': 'Channel name is required'}), 400
+            
+        # Check if channel with this name already exists
+        existing = ClubChatChannel.query.filter_by(club_id=club_id, name=name).first()
+        if existing:
+            return jsonify({'error': f'Channel "{name}" already exists'}), 400
+            
+        channel = ClubChatChannel(
+            club_id=club_id,
+            name=name,
+            description=description,
+            created_by=current_user.id
+        )
+        
+        db.session.add(channel)
+        db.session.commit()
+        
+        # Add a welcome message
+        from models import ClubChatMessage
+        welcome_message = ClubChatMessage(
+            channel_id=channel.id,
+            user_id=current_user.id,
+            content=f"Welcome to #{channel.name}! This channel was created by {current_user.username}."
+        )
+        db.session.add(welcome_message)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Channel created successfully',
+            'channel': {
+                'id': channel.id,
+                'name': channel.name,
+                'description': channel.description,
+                'created_at': channel.created_at.isoformat()
+            }
+        })
+
+@app.route('/api/clubs/<int:club_id>/channels/<int:channel_id>', methods=['PUT', 'DELETE'])
+@login_required
+def manage_club_channel(club_id, channel_id):
+    """Update or delete a club chat channel."""
+    from models import ClubChatChannel
+    
+    channel = ClubChatChannel.query.get_or_404(channel_id)
+    
+    # Check if channel belongs to the correct club
+    if channel.club_id != club_id:
+        return jsonify({'error': 'Channel not found in this club'}), 404
+        
+    # Check if user is authorized (club leader/co-leader)
+    is_authorized = False
+    if channel.club.leader_id == current_user.id:
+        is_authorized = True
+    else:
+        membership = ClubMembership.query.filter_by(
+            user_id=current_user.id, 
+            club_id=club_id, 
+            role='co-leader'
+        ).first()
+        
+        if membership:
+            is_authorized = True
+    
+    if not is_authorized:
+        return jsonify({'error': 'You are not authorized to manage this channel'}), 403
+    
+    if request.method == 'PUT':
+        data = request.get_json()
+        
+        if 'name' in data:
+            # Check if new name already exists
+            if data['name'] != channel.name:
+                existing = ClubChatChannel.query.filter_by(club_id=club_id, name=data['name']).first()
+                if existing:
+                    return jsonify({'error': f'Channel "{data["name"]}" already exists'}), 400
+            channel.name = data['name']
+            
+        if 'description' in data:
+            channel.description = data['description']
+            
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Channel updated successfully',
+            'channel': {
+                'id': channel.id,
+                'name': channel.name,
+                'description': channel.description
+            }
+        })
+        
+    elif request.method == 'DELETE':
+        # Delete all messages first
+        from models import ClubChatMessage
+        ClubChatMessage.query.filter_by(channel_id=channel.id).delete()
+        
+        # Then delete the channel
+        db.session.delete(channel)
+        db.session.commit()
+        
+        return jsonify({'message': 'Channel deleted successfully'})
+
+@app.route('/api/clubs/<int:club_id>/channels/<int:channel_id>/messages', methods=['GET', 'POST'])
+@login_required
+def channel_messages(club_id, channel_id):
+    """Get all messages for a channel or send a new message."""
+    from models import ClubChatChannel, ClubChatMessage
+    
+    # Verify channel exists and belongs to the specified club
+    channel = ClubChatChannel.query.filter_by(id=channel_id, club_id=club_id).first_or_404()
+    
+    # Verify user is a member of the club
+    membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
+    if not membership and channel.club.leader_id != current_user.id:
+        return jsonify({'error': 'You are not a member of this club'}), 403
+        
+    if request.method == 'GET':
+        messages = db.session.query(ClubChatMessage, User) \
+            .join(User, ClubChatMessage.user_id == User.id) \
+            .filter(ClubChatMessage.channel_id == channel_id) \
+            .order_by(ClubChatMessage.created_at).all()
+                
+        result = []
+        for message, user in messages:
+            result.append({
+                'id': message.id,
+                'content': message.content,
+                'created_at': message.created_at.isoformat(),
+                'user': {
+                    'id': user.id,
+                    'username': user.username
+                }
+            })
+            
+        return jsonify({'messages': result})
+        
+    elif request.method == 'POST':
+        data = request.get_json()
+        content = data.get('content')
+        
+        if not content:
+            return jsonify({'error': 'Message content cannot be empty'}), 400
+            
+        message = ClubChatMessage(
+            channel_id=channel_id,
+            user_id=current_user.id,
+            content=content
+        )
+        
+        db.session.add(message)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Message sent successfully',
+            'chat_message': {
+                'id': message.id,
+                'content': message.content,
+                'created_at': message.created_at.isoformat(),
+                'user': {
+                    'id': current_user.id,
+                    'username': current_user.username
+                }
+            }
+        })
 
 @app.route('/api/clubs/members/sites', methods=['GET'])
 @login_required

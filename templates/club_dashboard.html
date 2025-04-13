@@ -9,7 +9,7 @@
         {% if club %}
             <!-- Club Leader View -->
             <div class="club-tabs-container">
-                <div class="club-info-header">
+                <div class="club-info-header" data-club-id="{{ club.id }}">
                     <h2>{{ club.name }}</h2>
                     <div class="club-actions">
                         <button class="btn-primary edit-club-btn" onclick="openEditClubModal()">
@@ -2220,6 +2220,255 @@ function changeRole() {
     });
 }
 
+// Get club ID from the page
+function getClubId() {
+    // Try to get from the club-info-header data attribute
+    const clubInfoHeader = document.querySelector('.club-info-header');
+    if (clubInfoHeader && clubInfoHeader.dataset.clubId) {
+        return clubInfoHeader.dataset.clubId;
+    }
+    
+    // Fallback to URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const clubId = urlParams.get('club_id');
+    if (clubId) {
+        return clubId;
+    }
+    
+    // If all else fails, try to find it in the DOM
+    const clubIdElement = document.querySelector('[data-club-id]');
+    if (clubIdElement) {
+        return clubIdElement.dataset.clubId;
+    }
+    
+    return null;
+}
+
+// Fetch and display posts
+function loadPosts() {
+    const clubId = getClubId();
+    if (!clubId) {
+        console.error('Could not determine club ID');
+        return;
+    }
+    
+    const postsContainer = document.getElementById('posts-container');
+    postsContainer.innerHTML = `
+        <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Loading posts...</p>
+        </div>
+    `;
+    
+    fetch(`/api/clubs/${clubId}/posts`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showToast('error', data.error);
+                return;
+            }
+            
+            if (data.posts.length === 0) {
+                postsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-comment-slash"></i>
+                        <p>No posts yet. Be the first to post!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            postsContainer.innerHTML = '';
+            
+            data.posts.forEach(post => {
+                const postCard = document.createElement('div');
+                postCard.classList.add('post-card');
+                postCard.setAttribute('data-post-id', post.id);
+                
+                const postDate = new Date(post.created_at);
+                const formattedDate = postDate.toLocaleString();
+                
+                const isCurrentUser = post.user.id === parseInt(document.querySelector('body').dataset.userId);
+                
+                postCard.innerHTML = `
+                    <div class="post-header">
+                        <img src="/static/images/logo-rounded.png" alt="Profile" class="avatar">
+                        <div class="post-info">
+                            <h3>${post.user.username}</h3>
+                            <span class="post-date">${formattedDate}</span>
+                        </div>
+                        ${isCurrentUser ? `
+                        <div class="post-actions">
+                            <button class="btn-icon post-menu-btn" onclick="togglePostMenu(${post.id})">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <div class="post-menu" id="post-menu-${post.id}">
+                                <button onclick="editPost(${post.id})">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="delete-btn" onclick="deletePost(${post.id})">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="post-content">
+                        <p>${post.content}</p>
+                    </div>
+                    <div class="post-footer">
+                        <button class="post-action"><i class="far fa-heart"></i> Like</button>
+                        <button class="post-action"><i class="far fa-comment"></i> Comment</button>
+                    </div>
+                `;
+                
+                postsContainer.appendChild(postCard);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading posts:', error);
+            postsContainer.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>Failed to load posts. Please try again.</p>
+                </div>
+            `;
+        });
+}
+
+// Toggle post menu
+function togglePostMenu(postId) {
+    const menu = document.getElementById(`post-menu-${postId}`);
+    menu.classList.toggle('active');
+    
+    // Close other open menus
+    document.querySelectorAll('.post-menu.active').forEach(openMenu => {
+        if (openMenu.id !== `post-menu-${postId}`) {
+            openMenu.classList.remove('active');
+        }
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function closeMenuOutside(e) {
+        if (!e.target.closest('.post-menu') && !e.target.closest('.post-menu-btn')) {
+            menu.classList.remove('active');
+            document.removeEventListener('click', closeMenuOutside);
+        }
+    });
+}
+
+// Edit post
+function editPost(postId) {
+    const postCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+    const postContent = postCard.querySelector('.post-content p').textContent;
+    
+    // Create edit form
+    const contentArea = postCard.querySelector('.post-content');
+    const originalContent = contentArea.innerHTML;
+    
+    contentArea.innerHTML = `
+        <textarea class="edit-post-textarea" id="edit-post-${postId}">${postContent}</textarea>
+        <div class="edit-actions">
+            <button class="btn-secondary" onclick="cancelEditPost(${postId}, '${encodeURIComponent(originalContent)}')">
+                Cancel
+            </button>
+            <button class="btn-primary" onclick="saveEditPost(${postId})">
+                Save
+            </button>
+        </div>
+    `;
+    
+    // Focus the textarea
+    const textarea = document.getElementById(`edit-post-${postId}`);
+    textarea.focus();
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+}
+
+// Cancel post edit
+function cancelEditPost(postId, originalContent) {
+    const postCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+    const contentArea = postCard.querySelector('.post-content');
+    contentArea.innerHTML = decodeURIComponent(originalContent);
+}
+
+// Save post edit
+function saveEditPost(postId) {
+    const clubId = getClubId();
+    const textarea = document.getElementById(`edit-post-${postId}`);
+    const content = textarea.value.trim();
+    
+    if (!content) {
+        showToast('error', 'Post content cannot be empty');
+        return;
+    }
+    
+    fetch(`/api/clubs/${clubId}/posts/${postId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ content })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showToast('error', data.error);
+            return;
+        }
+        
+        const postCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+        const contentArea = postCard.querySelector('.post-content');
+        contentArea.innerHTML = `<p>${data.post.content}</p>`;
+        
+        showToast('success', 'Post updated successfully');
+    })
+    .catch(error => {
+        console.error('Error updating post:', error);
+        showToast('error', 'Failed to update post');
+    });
+}
+
+// Delete post
+function deletePost(postId) {
+    if (!confirm('Are you sure you want to delete this post?')) {
+        return;
+    }
+    
+    const clubId = getClubId();
+    
+    fetch(`/api/clubs/${clubId}/posts/${postId}`, {
+        method: 'DELETE'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showToast('error', data.error);
+            return;
+        }
+        
+        const postCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+        postCard.classList.add('fade-out');
+        
+        setTimeout(() => {
+            postCard.remove();
+            if (document.querySelectorAll('.post-card').length === 0) {
+                document.getElementById('posts-container').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-comment-slash"></i>
+                        <p>No posts yet. Be the first to post!</p>
+                    </div>
+                `;
+            }
+        }, 300);
+        
+        showToast('success', 'Post deleted successfully');
+    })
+    .catch(error => {
+        console.error('Error deleting post:', error);
+        showToast('error', 'Failed to delete post');
+    });
+}
+
 // Create a new post in the stream
 function createPost() {
     const content = document.getElementById('post-content').value.trim();
@@ -2229,77 +2478,504 @@ function createPost() {
         return;
     }
     
-    // This is a placeholder. We'll implement the actual functionality later.
-    const postsContainer = document.getElementById('posts-container');
-    const newPost = document.createElement('div');
-    newPost.classList.add('post-card');
-    newPost.innerHTML = `
-        <div class="post-header">
-            <img src="/static/images/logo-rounded.png" alt="Profile" class="avatar">
-            <div class="post-info">
-                <h3>You</h3>
-                <span class="post-date">Just now</span>
+    const clubId = getClubId();
+    
+    fetch(`/api/clubs/${clubId}/posts`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ content })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showToast('error', data.error);
+            return;
+        }
+        
+        // Clear any empty state
+        const postsContainer = document.getElementById('posts-container');
+        if (postsContainer.querySelector('.empty-state')) {
+            postsContainer.innerHTML = '';
+        }
+        
+        // Create new post element
+        const newPost = document.createElement('div');
+        newPost.classList.add('post-card');
+        newPost.setAttribute('data-post-id', data.post.id);
+        
+        const postDate = new Date(data.post.created_at);
+        const formattedDate = postDate.toLocaleString();
+        
+        newPost.innerHTML = `
+            <div class="post-header">
+                <img src="/static/images/logo-rounded.png" alt="Profile" class="avatar">
+                <div class="post-info">
+                    <h3>${data.post.user.username}</h3>
+                    <span class="post-date">${formattedDate}</span>
+                </div>
+                <div class="post-actions">
+                    <button class="btn-icon post-menu-btn" onclick="togglePostMenu(${data.post.id})">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div class="post-menu" id="post-menu-${data.post.id}">
+                        <button onclick="editPost(${data.post.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="delete-btn" onclick="deletePost(${data.post.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="post-actions">
-                <button class="btn-icon"><i class="fas fa-ellipsis-v"></i></button>
+            <div class="post-content">
+                <p>${data.post.content}</p>
             </div>
-        </div>
-        <div class="post-content">
-            <p>${content}</p>
-        </div>
-        <div class="post-footer">
-            <button class="post-action"><i class="far fa-heart"></i> Like</button>
-            <button class="post-action"><i class="far fa-comment"></i> Comment</button>
+            <div class="post-footer">
+                <button class="post-action"><i class="far fa-heart"></i> Like</button>
+                <button class="post-action"><i class="far fa-comment"></i> Comment</button>
+            </div>
+        `;
+        
+        // Add to top of posts container
+        postsContainer.insertBefore(newPost, postsContainer.firstChild);
+        
+        // Clear input
+        document.getElementById('post-content').value = '';
+        
+        // Show success message
+        showToast('success', 'Post created successfully');
+    })
+    .catch(error => {
+        console.error('Error creating post:', error);
+        showToast('error', 'Failed to create post');
+    });
+}
+
+// Load assignments
+function loadAssignments() {
+    const clubId = getClubId();
+    if (!clubId) {
+        console.error('Could not determine club ID');
+        return;
+    }
+    
+    const assignmentsContainer = document.getElementById('assignments-container');
+    assignmentsContainer.innerHTML = `
+        <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Loading assignments...</p>
         </div>
     `;
     
-    postsContainer.insertBefore(newPost, postsContainer.firstChild);
-    document.getElementById('post-content').value = '';
-    showToast('success', 'Post created successfully');
+    fetch(`/api/clubs/${clubId}/assignments`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showToast('error', data.error);
+                return;
+            }
+            
+            if (data.assignments.length === 0) {
+                assignmentsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-tasks"></i>
+                        <p>No assignments yet. Create one to get started.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            assignmentsContainer.innerHTML = '';
+            
+            data.assignments.forEach(assignment => {
+                const assignmentCard = document.createElement('div');
+                assignmentCard.classList.add('assignment-card');
+                assignmentCard.setAttribute('data-assignment-id', assignment.id);
+                
+                let dueDate = 'No due date';
+                if (assignment.due_date) {
+                    const date = new Date(assignment.due_date);
+                    dueDate = date.toLocaleDateString();
+                }
+                
+                assignmentCard.innerHTML = `
+                    <div class="assignment-status">
+                        <span class="status-badge ${assignment.is_active ? 'status-active' : 'status-inactive'}">
+                            ${assignment.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                    </div>
+                    <div class="assignment-body">
+                        <h3>${assignment.title}</h3>
+                        <p>${assignment.description}</p>
+                        <div class="assignment-meta">
+                            <span><i class="fas fa-calendar-alt"></i> Due: ${dueDate}</span>
+                            <span><i class="fas fa-user"></i> By: ${assignment.creator.username}</span>
+                        </div>
+                    </div>
+                    <div class="assignment-actions">
+                        <button class="btn-primary" onclick="viewAssignment(${assignment.id})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn-secondary" onclick="editAssignment(${assignment.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn-danger" onclick="deleteAssignment(${assignment.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                `;
+                
+                assignmentsContainer.appendChild(assignmentCard);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading assignments:', error);
+            assignmentsContainer.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>Failed to load assignments. Please try again.</p>
+                </div>
+            `;
+        });
 }
 
-// Create a new assignment
-function createAssignment() {
+// View assignment details
+function viewAssignment(assignmentId) {
+    const clubId = getClubId();
+    
+    fetch(`/api/clubs/${clubId}/assignments/${assignmentId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showToast('error', data.error);
+                return;
+            }
+            
+            // Create and show modal with assignment details
+            alert(`Assignment: ${data.assignment.title}\n\nDescription: ${data.assignment.description}\n\nDue Date: ${data.assignment.due_date || 'None'}`);
+        })
+        .catch(error => {
+            console.error('Error fetching assignment:', error);
+            showToast('error', 'Failed to load assignment details');
+        });
+}
+
+// Edit assignment
+function editAssignment(assignmentId) {
+    // Fetch assignment data and pre-fill edit form
+    const clubId = getClubId();
+    
+    fetch(`/api/clubs/${clubId}/assignments/${assignmentId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showToast('error', data.error);
+                return;
+            }
+            
+            const assignment = data.assignment;
+            
+            // Open modal and prefill data
+            document.getElementById('assignmentTitle').value = assignment.title;
+            document.getElementById('assignmentDescription').value = assignment.description;
+            if (assignment.due_date) {
+                document.getElementById('assignmentDueDate').value = assignment.due_date.split('T')[0];
+            }
+            
+            // Change the save button behavior
+            const saveBtn = document.querySelector('#createAssignmentModal .modal-actions .btn-primary');
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Update Assignment';
+            saveBtn.onclick = function() {
+                updateAssignment(assignmentId);
+            };
+            
+            openCreateAssignmentModal();
+        })
+        .catch(error => {
+            console.error('Error fetching assignment for edit:', error);
+            showToast('error', 'Failed to load assignment details');
+        });
+}
+
+// Update assignment
+function updateAssignment(assignmentId) {
+    const clubId = getClubId();
     const title = document.getElementById('assignmentTitle').value.trim();
     const description = document.getElementById('assignmentDescription').value.trim();
     const dueDate = document.getElementById('assignmentDueDate').value;
-    const allMembers = document.getElementById('assignAllMembers').checked;
     
     if (!title || !description) {
         showToast('error', 'Title and description are required');
         return;
     }
     
-    // Placeholder implementation
-    const assignmentsContainer = document.getElementById('assignments-container');
-    const newAssignment = document.createElement('div');
-    newAssignment.classList.add('assignment-card');
-    newAssignment.innerHTML = `
-        <div class="assignment-status">
-            <span class="status-badge status-active">Active</span>
-        </div>
-        <div class="assignment-body">
-            <h3>${title}</h3>
-            <p>${description}</p>
-            <div class="assignment-meta">
-                <span><i class="fas fa-calendar-alt"></i> Due: ${dueDate || 'No due date'}</span>
-                <span><i class="fas fa-users"></i> For: ${allMembers ? 'All members' : 'Selected members'}</span>
-            </div>
-        </div>
-        <div class="assignment-actions">
-            <button class="btn-primary"><i class="fas fa-eye"></i> View</button>
-            <button class="btn-secondary"><i class="fas fa-edit"></i> Edit</button>
-            <button class="btn-danger"><i class="fas fa-trash"></i> Delete</button>
+    const data = {
+        title,
+        description,
+        due_date: dueDate || null
+    };
+    
+    fetch(`/api/clubs/${clubId}/assignments/${assignmentId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showToast('error', data.error);
+            return;
+        }
+        
+        showToast('success', 'Assignment updated successfully');
+        closeCreateAssignmentModal();
+        
+        // Reset the save button
+        const saveBtn = document.querySelector('#createAssignmentModal .modal-actions .btn-primary');
+        saveBtn.innerHTML = '<i class="fas fa-plus"></i> Create Assignment';
+        saveBtn.onclick = createAssignment;
+        
+        // Reload assignments
+        loadAssignments();
+    })
+    .catch(error => {
+        console.error('Error updating assignment:', error);
+        showToast('error', 'Failed to update assignment');
+    });
+}
+
+// Delete assignment
+function deleteAssignment(assignmentId) {
+    if (!confirm('Are you sure you want to delete this assignment?')) {
+        return;
+    }
+    
+    const clubId = getClubId();
+    
+    fetch(`/api/clubs/${clubId}/assignments/${assignmentId}`, {
+        method: 'DELETE'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showToast('error', data.error);
+            return;
+        }
+        
+        const assignmentCard = document.querySelector(`.assignment-card[data-assignment-id="${assignmentId}"]`);
+        assignmentCard.classList.add('fade-out');
+        
+        setTimeout(() => {
+            assignmentCard.remove();
+            if (document.querySelectorAll('.assignment-card').length === 0) {
+                document.getElementById('assignments-container').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-tasks"></i>
+                        <p>No assignments yet. Create one to get started.</p>
+                    </div>
+                `;
+            }
+        }, 300);
+        
+        showToast('success', 'Assignment deleted successfully');
+    })
+    .catch(error => {
+        console.error('Error deleting assignment:', error);
+        showToast('error', 'Failed to delete assignment');
+    });
+}
+
+// Create a new assignment
+function createAssignment() {
+    const clubId = getClubId();
+    const title = document.getElementById('assignmentTitle').value.trim();
+    const description = document.getElementById('assignmentDescription').value.trim();
+    const dueDate = document.getElementById('assignmentDueDate').value;
+    
+    if (!title || !description) {
+        showToast('error', 'Title and description are required');
+        return;
+    }
+    
+    const data = {
+        title,
+        description,
+        due_date: dueDate || null
+    };
+    
+    fetch(`/api/clubs/${clubId}/assignments`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showToast('error', data.error);
+            return;
+        }
+        
+        showToast('success', 'Assignment created successfully');
+        closeCreateAssignmentModal();
+        
+        // Clear form
+        document.getElementById('createAssignmentForm').reset();
+        
+        // Reload assignments
+        loadAssignments();
+    })
+    .catch(error => {
+        console.error('Error creating assignment:', error);
+        showToast('error', 'Failed to create assignment');
+    });
+}
+
+// Load resources
+function loadResources() {
+    const clubId = getClubId();
+    if (!clubId) {
+        console.error('Could not determine club ID');
+        return;
+    }
+    
+    const resourcesContainer = document.getElementById('resources-container');
+    resourcesContainer.innerHTML = `
+        <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Loading resources...</p>
         </div>
     `;
     
-    assignmentsContainer.insertBefore(newAssignment, assignmentsContainer.firstChild);
-    closeCreateAssignmentModal();
-    showToast('success', 'Assignment created successfully');
+    fetch(`/api/clubs/${clubId}/resources`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showToast('error', data.error);
+                return;
+            }
+            
+            if (data.resources.length === 0) {
+                resourcesContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-link"></i>
+                        <p>No resources yet. Add some links to get started.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            resourcesContainer.innerHTML = '';
+            
+            data.resources.forEach(resource => {
+                const resourceCard = document.createElement('div');
+                resourceCard.classList.add('resource-card');
+                resourceCard.setAttribute('data-resource-id', resource.id);
+                
+                resourceCard.innerHTML = `
+                    <div class="resource-icon">
+                        <i class="fas fa-${resource.icon || 'link'}"></i>
+                    </div>
+                    <div class="resource-content">
+                        <h3>${resource.title}</h3>
+                        <p>${resource.description || 'No description provided'}</p>
+                    </div>
+                    <div class="resource-actions">
+                        <a href="${resource.url}" target="_blank" class="btn-primary btn-sm">
+                            <i class="fas fa-external-link-alt"></i> Visit
+                        </a>
+                        <button class="btn-icon" onclick="toggleResourceMenu(${resource.id})">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <div class="resource-menu" id="resource-menu-${resource.id}">
+                            <button onclick="editResource(${resource.id})">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="delete-btn" onclick="deleteResource(${resource.id})">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                resourcesContainer.appendChild(resourceCard);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading resources:', error);
+            resourcesContainer.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>Failed to load resources. Please try again.</p>
+                </div>
+            `;
+        });
 }
 
-// Add a new resource/link
-function addResource() {
+// Toggle resource menu
+function toggleResourceMenu(resourceId) {
+    const menu = document.getElementById(`resource-menu-${resourceId}`);
+    menu.classList.toggle('active');
+    
+    // Close other open menus
+    document.querySelectorAll('.resource-menu.active').forEach(openMenu => {
+        if (openMenu.id !== `resource-menu-${resourceId}`) {
+            openMenu.classList.remove('active');
+        }
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function closeMenuOutside(e) {
+        if (!e.target.closest('.resource-menu') && !e.target.closest('.resource-menu-btn')) {
+            menu.classList.remove('active');
+            document.removeEventListener('click', closeMenuOutside);
+        }
+    });
+}
+
+// Edit resource
+function editResource(resourceId) {
+    const clubId = getClubId();
+    
+    fetch(`/api/clubs/${clubId}/resources/${resourceId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showToast('error', data.error);
+                return;
+            }
+            
+            const resource = data.resource;
+            
+            // Open modal and prefill data
+            document.getElementById('resourceTitle').value = resource.title;
+            document.getElementById('resourceUrl').value = resource.url;
+            document.getElementById('resourceDescription').value = resource.description || '';
+            document.getElementById('resourceIcon').value = resource.icon || 'link';
+            
+            // Change the save button behavior
+            const saveBtn = document.querySelector('#addResourceModal .modal-actions .btn-primary');
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Update Resource';
+            saveBtn.onclick = function() {
+                updateResource(resourceId);
+            };
+            
+            openAddResourceModal();
+        })
+        .catch(error => {
+            console.error('Error fetching resource for edit:', error);
+            showToast('error', 'Failed to load resource details');
+        });
+}
+
+// Update resource
+function updateResource(resourceId) {
+    const clubId = getClubId();
     const title = document.getElementById('resourceTitle').value.trim();
     const url = document.getElementById('resourceUrl').value.trim();
     const description = document.getElementById('resourceDescription').value.trim();
@@ -2310,76 +2986,473 @@ function addResource() {
         return;
     }
     
-    // Placeholder implementation
-    const resourcesContainer = document.getElementById('resources-container');
-    const newResource = document.createElement('div');
-    newResource.classList.add('resource-card');
-    newResource.innerHTML = `
-        <div class="resource-icon">
-            <i class="fas fa-${icon}"></i>
-        </div>
-        <div class="resource-content">
-            <h3>${title}</h3>
-            <p>${description || 'No description provided'}</p>
-        </div>
-        <div class="resource-actions">
-            <a href="${url}" target="_blank" class="btn-primary btn-sm">Visit</a>
-            <button class="btn-icon"><i class="fas fa-ellipsis-v"></i></button>
+    const data = {
+        title,
+        url,
+        description,
+        icon
+    };
+    
+    fetch(`/api/clubs/${clubId}/resources/${resourceId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showToast('error', data.error);
+            return;
+        }
+        
+        showToast('success', 'Resource updated successfully');
+        closeAddResourceModal();
+        
+        // Reset the save button
+        const saveBtn = document.querySelector('#addResourceModal .modal-actions .btn-primary');
+        saveBtn.innerHTML = '<i class="fas fa-plus"></i> Add Resource';
+        saveBtn.onclick = addResource;
+        
+        // Reload resources
+        loadResources();
+    })
+    .catch(error => {
+        console.error('Error updating resource:', error);
+        showToast('error', 'Failed to update resource');
+    });
+}
+
+// Delete resource
+function deleteResource(resourceId) {
+    if (!confirm('Are you sure you want to delete this resource?')) {
+        return;
+    }
+    
+    const clubId = getClubId();
+    
+    fetch(`/api/clubs/${clubId}/resources/${resourceId}`, {
+        method: 'DELETE'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showToast('error', data.error);
+            return;
+        }
+        
+        const resourceCard = document.querySelector(`.resource-card[data-resource-id="${resourceId}"]`);
+        resourceCard.classList.add('fade-out');
+        
+        setTimeout(() => {
+            resourceCard.remove();
+            if (document.querySelectorAll('.resource-card').length === 0) {
+                document.getElementById('resources-container').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-link"></i>
+                        <p>No resources yet. Add some links to get started.</p>
+                    </div>
+                `;
+            }
+        }, 300);
+        
+        showToast('success', 'Resource deleted successfully');
+    })
+    .catch(error => {
+        console.error('Error deleting resource:', error);
+        showToast('error', 'Failed to delete resource');
+    });
+}
+
+// Add a new resource/link
+function addResource() {
+    const clubId = getClubId();
+    const title = document.getElementById('resourceTitle').value.trim();
+    const url = document.getElementById('resourceUrl').value.trim();
+    const description = document.getElementById('resourceDescription').value.trim();
+    const icon = document.getElementById('resourceIcon').value;
+    
+    if (!title || !url) {
+        showToast('error', 'Title and URL are required');
+        return;
+    }
+    
+    const data = {
+        title,
+        url,
+        description,
+        icon
+    };
+    
+    fetch(`/api/clubs/${clubId}/resources`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showToast('error', data.error);
+            return;
+        }
+        
+        showToast('success', 'Resource added successfully');
+        closeAddResourceModal();
+        
+        // Clear form
+        document.getElementById('addResourceForm').reset();
+        
+        // Reload resources
+        loadResources();
+    })
+    .catch(error => {
+        console.error('Error adding resource:', error);
+        showToast('error', 'Failed to add resource');
+    });
+}
+
+// Load chat channels
+function loadChatChannels() {
+    const clubId = getClubId();
+    if (!clubId) {
+        console.error('Could not determine club ID');
+        return;
+    }
+    
+    const channelsList = document.querySelector('.channels-list');
+    channelsList.innerHTML = `
+        <li><div class="loading-spinner-small"></div> Loading...</li>
+    `;
+    
+    fetch(`/api/clubs/${clubId}/channels`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showToast('error', data.error);
+                return;
+            }
+            
+            if (data.channels.length === 0) {
+                // Create a default general channel
+                createDefaultChannel();
+                return;
+            }
+            
+            channelsList.innerHTML = '';
+            
+            data.channels.forEach(channel => {
+                const channelItem = document.createElement('li');
+                channelItem.setAttribute('data-channel-id', channel.id);
+                channelItem.innerHTML = `<i class="fas fa-hashtag"></i> ${channel.name}`;
+                
+                // Make general channel active by default
+                if (channel.name === 'general') {
+                    channelItem.classList.add('active');
+                    loadChannelMessages(channel.id);
+                }
+                
+                channelItem.addEventListener('click', () => {
+                    document.querySelectorAll('.channels-list li').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    channelItem.classList.add('active');
+                    loadChannelMessages(channel.id);
+                    
+                    // Update chat header
+                    document.querySelector('.chat-header h3').innerHTML = `<i class="fas fa-hashtag"></i> ${channel.name}`;
+                });
+                
+                channelsList.appendChild(channelItem);
+            });
+            
+            // If no channel was set as active, select the first one
+            if (!document.querySelector('.channels-list li.active') && data.channels.length > 0) {
+                const firstChannel = document.querySelector('.channels-list li');
+                firstChannel.classList.add('active');
+                loadChannelMessages(firstChannel.dataset.channelId);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading channels:', error);
+            channelsList.innerHTML = `
+                <li class="error-item">
+                    <i class="fas fa-exclamation-circle"></i> Failed to load channels
+                </li>
+            `;
+        });
+}
+
+// Create default general channel if none exists
+function createDefaultChannel() {
+    const clubId = getClubId();
+    
+    fetch(`/api/clubs/${clubId}/channels`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            name: 'general',
+            description: 'General discussion channel'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showToast('error', data.error);
+            return;
+        }
+        
+        // Reload channels after creating default
+        loadChatChannels();
+    })
+    .catch(error => {
+        console.error('Error creating default channel:', error);
+        showToast('error', 'Failed to create default channel');
+    });
+}
+
+// Load messages for a channel
+function loadChannelMessages(channelId) {
+    const clubId = getClubId();
+    if (!clubId || !channelId) {
+        console.error('Missing club ID or channel ID');
+        return;
+    }
+    
+    const messagesContainer = document.getElementById('chat-messages-container');
+    messagesContainer.innerHTML = `
+        <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Loading messages...</p>
         </div>
     `;
     
-    resourcesContainer.insertBefore(newResource, resourcesContainer.firstChild);
-    closeAddResourceModal();
-    showToast('success', 'Resource added successfully');
+    // Store current channel ID in the chat input data attribute
+    document.getElementById('chat-message-input').dataset.channelId = channelId;
+    
+    fetch(`/api/clubs/${clubId}/channels/${channelId}/messages`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showToast('error', data.error);
+                return;
+            }
+            
+            if (data.messages.length === 0) {
+                messagesContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-comments"></i>
+                        <p>No messages yet. Start the conversation!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            messagesContainer.innerHTML = '';
+            
+            data.messages.forEach(message => {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('chat-message');
+                
+                const messageDate = new Date(message.created_at);
+                const formattedDate = messageDate.toLocaleString();
+                
+                messageElement.innerHTML = `
+                    <img src="/static/images/logo-rounded.png" alt="Profile" class="avatar">
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-sender">${message.user.username}</span>
+                            <span class="message-time">${formattedDate}</span>
+                        </div>
+                        <p>${message.content}</p>
+                    </div>
+                `;
+                
+                messagesContainer.appendChild(messageElement);
+            });
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        })
+        .catch(error => {
+            console.error('Error loading messages:', error);
+            messagesContainer.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>Failed to load messages. Please try again.</p>
+                </div>
+            `;
+        });
 }
 
 // Create a new chat channel
 function createChannel() {
-    const channelName = document.getElementById('channelName').value.trim();
+    const clubId = getClubId();
+    const channelName = document.getElementById('channelName').value.trim().toLowerCase();
+    const channelDescription = document.getElementById('channelDescription').value.trim();
     
     if (!channelName) {
         showToast('error', 'Channel name is required');
         return;
     }
     
-    // Placeholder implementation
-    const channelsList = document.querySelector('.channels-list');
-    const newChannel = document.createElement('li');
-    newChannel.innerHTML = `<i class="fas fa-hashtag"></i> ${channelName}`;
+    // Validate channel name (only lowercase letters, numbers, and hyphens)
+    if (!/^[a-z0-9\-]+$/.test(channelName)) {
+        showToast('error', 'Channel name can only contain lowercase letters, numbers, and hyphens');
+        return;
+    }
     
-    channelsList.appendChild(newChannel);
-    closeCreateChannelModal();
-    showToast('success', 'Channel created successfully');
+    fetch(`/api/clubs/${clubId}/channels`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            name: channelName,
+            description: channelDescription
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showToast('error', data.error);
+            return;
+        }
+        
+        showToast('success', 'Channel created successfully');
+        closeCreateChannelModal();
+        
+        // Clear form
+        document.getElementById('createChannelForm').reset();
+        
+        // Reload channels
+        loadChatChannels();
+    })
+    .catch(error => {
+        console.error('Error creating channel:', error);
+        showToast('error', 'Failed to create channel');
+    });
 }
 
 // Send a chat message
 function sendChatMessage() {
     const messageInput = document.getElementById('chat-message-input');
     const message = messageInput.value.trim();
+    const channelId = messageInput.dataset.channelId;
+    const clubId = getClubId();
     
     if (!message) {
         return;
     }
     
-    // Placeholder implementation
-    const messagesContainer = document.getElementById('chat-messages-container');
-    const newMessage = document.createElement('div');
-    newMessage.classList.add('chat-message');
-    newMessage.innerHTML = `
-        <img src="/static/images/logo-rounded.png" alt="Profile" class="avatar">
-        <div class="message-content">
-            <div class="message-header">
-                <span class="message-sender">You</span>
-                <span class="message-time">Just now</span>
-            </div>
-            <p>${message}</p>
-        </div>
-    `;
+    if (!channelId) {
+        showToast('error', 'No channel selected');
+        return;
+    }
     
-    messagesContainer.appendChild(newMessage);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    messageInput.value = '';
+    fetch(`/api/clubs/${clubId}/channels/${channelId}/messages`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ content: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showToast('error', data.error);
+            return;
+        }
+        
+        // Clear input
+        messageInput.value = '';
+        
+        // Add message to chat
+        const messagesContainer = document.getElementById('chat-messages-container');
+        
+        // Clear empty state if needed
+        if (messagesContainer.querySelector('.empty-state')) {
+            messagesContainer.innerHTML = '';
+        }
+        
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('chat-message');
+        
+        const messageDate = new Date(data.chat_message.created_at);
+        const formattedDate = messageDate.toLocaleString();
+        
+        messageElement.innerHTML = `
+            <img src="/static/images/logo-rounded.png" alt="Profile" class="avatar">
+            <div class="message-content">
+                <div class="message-header">
+                    <span class="message-sender">${data.chat_message.user.username}</span>
+                    <span class="message-time">${formattedDate}</span>
+                </div>
+                <p>${data.chat_message.content}</p>
+            </div>
+        `;
+        
+        messagesContainer.appendChild(messageElement);
+        
+        // Scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    })
+    .catch(error => {
+        console.error('Error sending message:', error);
+        showToast('error', 'Failed to send message');
+    });
 }
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Make sure the active tab is set
+    const activeTab = document.querySelector('.tab-btn.active');
+    if (activeTab) {
+        const tabName = activeTab.getAttribute('onclick').match(/openTab\('(.+?)'\)/)[1];
+        openTab(tabName);
+        
+        // Load data for active tab
+        if (tabName === 'stream') {
+            loadPosts();
+        } else if (tabName === 'assignments') {
+            loadAssignments();
+        } else if (tabName === 'resources') {
+            loadResources();
+        } else if (tabName === 'chat') {
+            loadChatChannels();
+        }
+    }
+    
+    // Add tab change handlers
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabName = this.getAttribute('onclick').match(/openTab\('(.+?)'\)/)[1];
+            
+            // Load data when switching to tab
+            if (tabName === 'stream') {
+                loadPosts();
+            } else if (tabName === 'assignments') {
+                loadAssignments();
+            } else if (tabName === 'resources') {
+                loadResources();
+            } else if (tabName === 'chat') {
+                loadChatChannels();
+            }
+        });
+    });
+    
+    // Make chat input send on Enter key
+    document.getElementById('chat-message-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendChatMessage();
+        }
+    });
+});
 
 // Display toast notifications
 function showToast(type, message) {
