@@ -4413,6 +4413,7 @@ def get_member_sites():
 
             # Additional debug logging - list all sites found
             for site in sites:
+                app.logger.info(f"Site found: {site.id} - {site.name} (Owner: {site.user_id})")
 
 @app.route('/api/clubs/<int:club_id>/assignments/<int:assignment_id>', methods=['GET'])
 @login_required
