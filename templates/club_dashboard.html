@@ -1858,6 +1858,7 @@
 }
 </style>
 
+<script src="{{ url_for('static', filename='js/event-helper.js') }}"></script>
 <script>
 // Tab functionality
 function openTab(tabName) {
@@ -3553,36 +3554,107 @@ function viewClub(clubId) {
     window.location.href = `/club-dashboard?club_id=${clubId}`;
 }
 
-// Initialize when document is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Make sure the active tab is set
-    const activeTab = document.querySelector('.tab-btn.active');
-    if (activeTab && activeTab.getAttribute('onclick')) {
-        const match = activeTab.getAttribute('onclick').match(/openTab\('(.+?)'\)/);
-        if (match && match[1]) {
-            openTab(match[1]);
-        }
-    }
+// Use a more reliable way to initialize the page
+function safeInitialize() {
+    console.log("Safe initialization started");
     
-    // Add null checks for document event listeners
-    const createChannelForm = document.getElementById('createChannelForm');
-    if (createChannelForm) {
-        createChannelForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            createChannel();
-        });
-    }
-    
-    const chatMessageInput = document.getElementById('chat-message-input');
-    if (chatMessageInput) {
-        chatMessageInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendChatMessage();
+    try {
+        // Make sure the active tab is set
+        const activeTab = document.querySelector('.tab-btn.active');
+        if (activeTab && activeTab.getAttribute('onclick')) {
+            const match = activeTab.getAttribute('onclick').match(/openTab\('(.+?)'\)/);
+            if (match && match[1]) {
+                openTab(match[1]);
             }
-        });
+        }
+        
+        // Load data for the active tab
+        const currentTabId = document.querySelector('.tab-pane.active')?.id;
+        if (currentTabId) {
+            if (currentTabId === 'stream') loadPosts();
+            else if (currentTabId === 'assignments') loadAssignments();
+            else if (currentTabId === 'resources') loadResources();
+            else if (currentTabId === 'chat') loadChatChannels();
+        }
+        
+        // Safely attach event listeners
+        attachEventListeners();
+    } catch (error) {
+        console.warn("Error during initialization:", error);
+    }
+}
+
+// Execute initialization when the document is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', safeInitialize);
+} else {
+    // Document already loaded, run immediately
+    safeInitialize();
+}
+
+// Add a backup initialization in case the DOM event fails
+window.addEventListener('load', function() {
+    if (!document.querySelector('.tab-pane.active')) {
+        console.log("Backup initialization triggered");
+        safeInitialize();
     }
 });
+
+// Move event listeners out of DOMContentLoaded to avoid errors
+function attachEventListeners() {
+    try {
+        // Form event listeners
+        const forms = {
+            'createChannelForm': createChannel,
+            'addResourceForm': addResource,
+            'createAssignmentForm': createAssignment
+        };
+        
+        Object.keys(forms).forEach(formId => {
+            const form = document.getElementById(formId);
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    forms[formId]();
+                });
+            }
+        });
+        
+        // Input event listeners
+        const chatInput = document.getElementById('chat-message-input');
+        if (chatInput) {
+            chatInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendChatMessage();
+                }
+            });
+        }
+    } catch (error) {
+        console.warn('Error attaching event listeners:', error);
+    }
+}
+
+// Call this function after DOM is loaded, but safely handle potential errors
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        // Wait a bit for all elements to be fully rendered
+        setTimeout(attachEventListeners, 100);
+        
+        // Handle tab initialization
+        const urlHash = window.location.hash;
+        if (urlHash) {
+            const match = urlHash.match(/#tab=([a-zA-Z]+)/);
+            if (match && match[1]) {
+                openTab(match[1]);
+            }
+        }
+    } catch (error) {
+        console.warn('Error in DOMContentLoaded initialization:', error);
+    }
+});
+
+function openDeleteClubModal() {
 
 function openDeleteClubModal() {
     if (confirm('Are you sure you want to delete this club? This action cannot be undone.')) {
