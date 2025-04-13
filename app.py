@@ -3770,48 +3770,6 @@ def club_posts(club_id):
 def manage_club_post(club_id, post_id):
     """Update or delete a club post."""
     from models import ClubPost
-
-@app.route('/api/clubs/<int:club_id>/posts/<int:post_id>/like', methods=['POST'])
-@login_required
-def toggle_post_like(club_id, post_id):
-    """Toggle like on a club post."""
-    from models import ClubPost, ClubPostLike
-    
-    post = ClubPost.query.get_or_404(post_id)
-    
-    # Check if post belongs to the correct club
-    if post.club_id != club_id:
-        return jsonify({'error': 'Post not found in this club'}), 404
-        
-    # Check if user is a club member
-    membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
-    if not membership and post.club.leader_id != current_user.id:
-        return jsonify({'error': 'You are not a member of this club'}), 403
-    
-    # Check if user already liked this post
-    existing_like = ClubPostLike.query.filter_by(post_id=post_id, user_id=current_user.id).first()
-    
-    if existing_like:
-        # Unlike
-        db.session.delete(existing_like)
-        liked = False
-    else:
-        # Like
-        new_like = ClubPostLike(post_id=post_id, user_id=current_user.id)
-        db.session.add(new_like)
-        liked = True
-    
-    # Update likes count
-    like_count = ClubPostLike.query.filter_by(post_id=post_id).count()
-    post.likes = like_count
-    
-    db.session.commit()
-    
-    return jsonify({
-        'message': 'Like toggled successfully',
-        'liked': liked,
-        'likes': like_count
-    })
     
     post = ClubPost.query.get_or_404(post_id)
     
@@ -3855,6 +3813,49 @@ def toggle_post_like(club_id, post_id):
         db.session.commit()
         
         return jsonify({'message': 'Post deleted successfully'})
+
+
+@app.route('/api/clubs/<int:club_id>/posts/<int:post_id>/like', methods=['POST'])
+@login_required
+def toggle_post_like(club_id, post_id):
+    """Toggle like on a club post."""
+    from models import ClubPost, ClubPostLike
+    
+    post = ClubPost.query.get_or_404(post_id)
+    
+    # Check if post belongs to the correct club
+    if post.club_id != club_id:
+        return jsonify({'error': 'Post not found in this club'}), 404
+        
+    # Check if user is a club member
+    membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
+    if not membership and post.club.leader_id != current_user.id:
+        return jsonify({'error': 'You are not a member of this club'}), 403
+    
+    # Check if user already liked this post
+    existing_like = ClubPostLike.query.filter_by(post_id=post_id, user_id=current_user.id).first()
+    
+    if existing_like:
+        # Unlike
+        db.session.delete(existing_like)
+        liked = False
+    else:
+        # Like
+        new_like = ClubPostLike(post_id=post_id, user_id=current_user.id)
+        db.session.add(new_like)
+        liked = True
+    
+    # Update likes count
+    like_count = ClubPostLike.query.filter_by(post_id=post_id).count()
+    post.likes = like_count
+    
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Like toggled successfully',
+        'liked': liked,
+        'likes': like_count
+    })
 
 @app.route('/api/clubs/<int:club_id>/assignments', methods=['GET', 'POST'])
 @login_required
