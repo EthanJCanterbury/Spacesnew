@@ -2330,6 +2330,11 @@ function loadPosts() {
 // Toggle post menu
 function togglePostMenu(postId) {
     const menu = document.getElementById(`post-menu-${postId}`);
+    if (!menu) {
+        console.error(`Menu element with ID post-menu-${postId} not found`);
+        return;
+    }
+    
     menu.classList.toggle('active');
 
     // Close other open menus
@@ -2346,6 +2351,9 @@ function togglePostMenu(postId) {
             document.removeEventListener('click', closeMenuOutside);
         }
     });
+    
+    // Prevent the click event from propagating
+    event.stopPropagation();
 }
 
 // Edit post
@@ -2524,7 +2532,9 @@ function createPost() {
                 <p>${data.post.content}</p>
             </div>
             <div class="post-footer">
-                <button class="post-action"><i class="far fa-heart"></i> Like</button>
+                <button class="post-action" onclick="toggleLike(${data.post.id})">
+                    <i class="far fa-heart"></i> <span id="like-count-${data.post.id}">0</span> Likes
+                </button>
                 <button class="post-action"><i class="far fa-comment"></i> Comment</button>
             </div>
         `;
@@ -2637,19 +2647,57 @@ function viewAssignment(assignmentId) {
     const clubId = getClubId();
 
     fetch(`/api/clubs/${clubId}/assignments/${assignmentId}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Server returned ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.error) {
                 showToast('error', data.error);
                 return;
             }
 
+            // Format due date for display
+            let formattedDueDate = 'None';
+            if (data.assignment.due_date) {
+                const dueDate = new Date(data.assignment.due_date);
+                formattedDueDate = dueDate.toLocaleDateString() + ' ' + dueDate.toLocaleTimeString();
+            }
+
             // Create and show modal with assignment details
-            alert(`Assignment: ${data.assignment.title}\n\nDescription: ${data.assignment.description}\n\nDue Date: ${data.assignment.due_date || 'None'}`);
+            const detailsHtml = `
+                <div class="assignment-details-modal">
+                    <h2>${data.assignment.title}</h2>
+                    <p class="details-meta">Due: ${formattedDueDate}</p>
+                    <div class="details-content">${data.assignment.description}</div>
+                </div>
+            `;
+
+            // Create modal to display details
+            const modalContainer = document.createElement('div');
+            modalContainer.className = 'modal';
+            modalContainer.style.display = 'flex';
+            modalContainer.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-tasks"></i> Assignment Details</h2>
+                        <button class="close-btn" onclick="this.parentElement.parentElement.parentElement.remove()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        ${detailsHtml}
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-secondary" onclick="this.parentElement.parentElement.parentElement.remove()">Close</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modalContainer);
         })
         .catch(error => {
             console.error('Error fetching assignment:', error);
-            showToast('error', 'Failed to load assignment details');
+            showToast('error', 'Failed to load assignment details: ' + error.message);
         });
 }
 
@@ -2659,7 +2707,12 @@ function editAssignment(assignmentId) {
     const clubId = getClubId();
 
     fetch(`/api/clubs/${clubId}/assignments/${assignmentId}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Server returned ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.error) {
                 showToast('error', data.error);
@@ -2686,7 +2739,7 @@ function editAssignment(assignmentId) {
         })
         .catch(error => {
             console.error('Error fetching assignment for edit:', error);
-            showToast('error', 'Failed to load assignment details');
+            showToast('error', 'Failed to load assignment details: ' + error.message);
         });
 }
 
@@ -2937,7 +2990,12 @@ function editResource(resourceId) {
     const clubId = getClubId();
 
     fetch(`/api/clubs/${clubId}/resources/${resourceId}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Server returned ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.error) {
                 showToast('error', data.error);
@@ -2963,7 +3021,7 @@ function editResource(resourceId) {
         })
         .catch(error => {
             console.error('Error fetching resource for edit:', error);
-            showToast('error', 'Failed to load resource details');
+            showToast('error', 'Failed to load resource details: ' + error.message);
         });
 }
 
