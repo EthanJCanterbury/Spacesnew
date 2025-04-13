@@ -71,10 +71,6 @@ def stop_hackatime_service():
 def support():
     return render_template('support.html')
 
-@app.route('/login')
-def login():
-    return render_template('login.html')
-
 if __name__ == '__main__':
     app.logger.info("Starting Hack Club Spaces application")
 
