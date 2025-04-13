@@ -245,9 +245,9 @@
                                             <i class="fas fa-{{ 'user-check' if user.is_suspended else 'user-lock' }}"></i>
                                             <span>{{ 'Unsuspend' if user.is_suspended else 'Suspend' }}</span>
                                         </button>
-                                        <button class="dropdown-item" onclick="toggleClubLeader({{ user.id }}, '{{ user.username }}', {{ 'true' if user.is_club_leader_role else 'false' }})">
+                                        <button class="dropdown-item" onclick="toggleClubLeader({{ user.id }}, '{{ user.username }}', {{ 'true' if Club.query.filter_by(leader_id=user.id).first() else 'false' }})">
                                             <i class="fas fa-user-tag"></i>
-                                            <span>{{ 'Remove Club Leader Role' if user.is_club_leader_role else 'Grant Club Leader Role' }}</span>
+                                            <span>{{ 'Remove Club Leader Role' if Club.query.filter_by(leader_id=user.id).first() else 'Grant Club Leader Role' }}</span>
                                         </button>
                                         <button onclick="deleteAllSites({{ user.id }}, '{{ user.username }}')" class="dropdown-item">
                                             <i class="fas fa-trash-alt"></i>
@@ -865,9 +865,9 @@ function filterUsers() {
                                     <i class="fas fa-${user.is_suspended ? 'user-check' : 'user-lock'}"></i>
                                     <span>${user.is_suspended ? 'Unsuspend' : 'Suspend'}</span>
                                 </button>
-                                <button onclick="toggleClubLeader(${user.id}, '${user.username}', ${user.is_club_leader_role})" class="dropdown-item">
+                                <button onclick="toggleClubLeader(${user.id}, '${user.username}', ${user.is_club_leader})" class="dropdown-item">
                                     <i class="fas fa-user-tag"></i>
-                                    <span>${user.is_club_leader_role ? 'Remove Club Leader Role' : 'Grant Club Leader Role'}</span>
+                                    <span>${user.is_club_leader ? 'Remove Club Leader Role' : 'Grant Club Leader Role'}</span>
                                 </button>
                                 <button onclick="deleteAllSites(${user.id}, '${user.username}')" class="dropdown-item">
                                     <i class="fas fa-trash-alt"></i>
@@ -2918,8 +2918,7 @@ tbody tr:hover {
 .date-picker {
     display: flex;
     align-items: center;
-    padding: 0.5rem 1rem;
-    background-color: transparent;
+    padding: 0.5rem 1rem;background-color: transparent;
     border-radius: 6px;
     cursor: pointer;
     margin-left: 10px;
