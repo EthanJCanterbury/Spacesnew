@@ -198,13 +198,13 @@ async function toggleClubLeader(userId, username, makeLeader) {
     if (!confirmation) return;
 
     try {
-        const response = await fetch(`/api/admin/users/${userId}/toggle_club_leader`, {
+        const response = await fetch(`/api/admin/users/${userId}/club-leader`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 // Add any necessary CSRF token headers if your app uses them
             },
-            body: JSON.stringify({ make_leader: makeLeader })
+            body: JSON.stringify({ is_club_leader: makeLeader })
         });
 
         const data = await response.json();
