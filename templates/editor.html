@@ -240,34 +240,39 @@
 
 <script>
 function showToast(type, message) {
-    const toastContainer = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
+    // Import the shared toast.js functionality
+    if (window.createToast) {
+        window.createToast(type, message);
+    } else {
+        const toastContainer = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
 
-    const icon = type === 'success' ? 'check-circle' : 
-                 type === 'error' ? 'exclamation-circle' :
-                 type === 'warning' ? 'exclamation-triangle' : 'info-circle';
+        const icon = type === 'success' ? 'check-circle' : 
+                     type === 'error' ? 'exclamation-circle' :
+                     type === 'warning' ? 'exclamation-triangle' : 'info-circle';
 
-    toast.innerHTML = `
-        <div class="toast-content">
-            <i class="fas fa-${icon}"></i>
-            <span>${message}</span>
-        </div>
-    `;
+        toast.innerHTML = `
+            <div class="toast-content">
+                <i class="fas fa-${icon}"></i>
+                <span>${message}</span>
+            </div>
+        `;
 
-    toastContainer.appendChild(toast);
+        toastContainer.appendChild(toast);
 
-    // Force reflow
-    toast.offsetHeight;
+        // Force reflow
+        toast.offsetHeight;
 
-    // Show the toast
-    toast.classList.add('show');
+        // Show the toast
+        toast.classList.add('show');
 
-    // Automatically remove after 3 seconds
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+        // Automatically remove after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
 }
 </script>
 
