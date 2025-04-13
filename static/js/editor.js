@@ -19,7 +19,7 @@ async function saveContent() {
         });
 
         if (!response.ok) throw new Error(`Failed to save ${currentFile}`);
-        showNotification(`Changes Saved!`, 'success');
+        showNotification(`Changes to ${currentFile} saved successfully!`, 'success');
 
         // Use delayed update to ensure server has time to process changes
         if (siteType === 'web') {

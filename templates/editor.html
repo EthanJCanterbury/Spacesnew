@@ -241,8 +241,8 @@
 <script>
 function showToast(type, message) {
     // Import the shared toast.js functionality
-    if (window.createToast) {
-        window.createToast(type, message);
+    if (window.showToast) {
+        window.showToast(type, message);
     } else {
         const toastContainer = document.getElementById('toast-container');
         const toast = document.createElement('div');
