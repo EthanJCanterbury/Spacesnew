@@ -7,7 +7,7 @@
 .support-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 4rem 2rem;
+    padding: 7rem 2rem 4rem;
 }
 
 .support-header {
@@ -56,10 +56,14 @@
     color: white;
     padding: 2rem;
     text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .card-icon i {
     font-size: 3rem;
+    filter: drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2));
 }
 
 .card-content {
