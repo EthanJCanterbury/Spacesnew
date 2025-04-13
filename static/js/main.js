@@ -125,11 +125,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!hamburger || !navLinks) return;
         
+        console.log("Hamburger menu setup initialized");
+        
         // Toggle menu when hamburger is clicked
         hamburger.addEventListener('click', function(e) {
+            e.preventDefault();
             e.stopPropagation();
             navLinks.classList.toggle('active');
             hamburger.classList.toggle('active');
+            console.log("Hamburger clicked, menu active:", navLinks.classList.contains('active'));
         });
         
         // Close menu when clicking outside

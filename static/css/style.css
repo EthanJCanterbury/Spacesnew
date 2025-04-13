@@ -466,7 +466,7 @@ body.editor-page {
     .hamburger {
         display: block;
     }
-    
+
     .nav-links {
         position: fixed;
         top: 0;
@@ -477,24 +477,30 @@ body.editor-page {
         flex-direction: column;
         padding: 80px 20px 30px;
         transition: all 0.3s ease;
-        z-index: 1000;
+        z-index: 1500;
         box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
         align-items: flex-start;
+        visibility: visible;
+        opacity: 1;
     }
-    
+
     .nav-links.active {
         right: 0;
+        visibility: visible;
+        opacity: 1;
+        display: flex;
+        pointer-events: auto;
     }
-    
+
     .nav-links a {
         margin: 10px 0;
         width: 100%;
     }
-    
+
     .desktop-auth {
         display: none;
     }
-    
+
     .mobile-auth {
         display: flex;
         flex-direction: column;
@@ -503,21 +509,21 @@ body.editor-page {
         border-top: 1px solid rgba(0, 0, 0, 0.1);
         padding-top: 20px;
     }
-    
+
     .mobile-auth a {
         margin: 5px 0;
         width: 100%;
     }
-    
+
     /* Hamburger animation for active state */
     .hamburger.active span:nth-child(1) {
         transform: rotate(45deg) translate(5px, 6px);
     }
-    
+
     .hamburger.active span:nth-child(2) {
         opacity: 0;
     }
-    
+
     .hamburger.active span:nth-child(3) {
         transform: rotate(-45deg) translate(5px, -6px);
     }
@@ -1072,8 +1078,7 @@ footer {
 }
 
 .alert.error {
-    background: rgba(236, 55, 80, 0.1);
-    color: var(--primary);
+    background: rgba(236, 55, 80, 0.1);color: var(--primary);
     border: 1px solid rgba(236, 55, 80, 0.2);
 }
 
@@ -2585,8 +2590,7 @@ footer {
     color: var(--text-primary);
 }
 
-.modal-actions {
-    display: flex;
+.modal-actions {    display: flex;
     justify-content: flex-end;
     gap: 1rem;
     margin-top: 1.5rem;
@@ -3412,6 +3416,7 @@ select:focus {
 
 /* Form group focus styles now use the standardized input focus styles */
 }
+
 .settings-container {
     max-width: 1200px;
     margin: 0 auto;
