@@ -111,7 +111,7 @@
                         </div>
                         <div class="post-footer">
                             <button class="post-action"><i class="far fa-heart"></i> Like</button>
-                            
+
                         </div>
                     </div>
                 </div>
@@ -320,7 +320,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2><i class="fas fa-users"></i> Create New Club</h2>
-            <button class="close-btn" onclick="closeCreateClubModal()">&times;</button>
+            <button class="close-btn" onclick="closeModal('createClubModal')">&times;</button>
         </div>
         <div class="modal-body">
             <form id="createClubForm">
@@ -340,7 +340,7 @@
             </form>
         </div>
         <div class="modal-actions">
-            <button class="btn-secondary" onclick="closeCreateClubModal()">Cancel</button>
+            <button class="btn-secondary" onclick="closeModal('createClubModal')">Cancel</button>
             <button class="btn-primary" onclick="createClub()">
                 <i class="fas fa-plus"></i> Create Club
             </button>
@@ -353,7 +353,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2><i class="fas fa-sign-in-alt"></i> Join a Club</h2>
-            <button class="close-btn" onclick="closeJoinClubModal()">&times;</button>
+            <button class="close-btn" onclick="closeModal('joinClubModal')">&times;</button>
         </div>
         <div class="modal-body">
             <div class="form-group">
@@ -366,7 +366,7 @@
             </div>
         </div>
         <div class="modal-actions">
-            <button class="btn-secondary" onclick="closeJoinClubModal()">Cancel</button>
+            <button class="btn-secondary" onclick="closeModal('joinClubModal')">Cancel</button>
             <button class="btn-primary" onclick="joinClub()">
                 <i class="fas fa-sign-in-alt"></i> Join Club
             </button>
@@ -379,7 +379,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2><i class="fas fa-edit"></i> Edit Club</h2>
-            <button class="close-btn" onclick="closeEditClubModal()">&times;</button>
+            <button class="close-btn" onclick="closeModal('editClubModal')">&times;</button>
         </div>
         <div class="modal-body">
             <form id="editClubForm">
@@ -398,7 +398,7 @@
             </form>
         </div>
         <div class="modal-actions">
-            <button class="btn-secondary" onclick="closeEditClubModal()">Cancel</button>
+            <button class="btn-secondary" onclick="closeModal('editClubModal')">Cancel</button>
             <button class="btn-primary" onclick="updateClub()">
                 <i class="fas fa-save"></i> Save Changes
             </button>
@@ -411,7 +411,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2><i class="fas fa-user-plus"></i> Add Member</h2>
-            <button class="close-btn" onclick="closeAddMemberModal()">&times;</button>
+            <button class="close-btn" onclick="closeModal('addMemberModal')">&times;</button>
         </div>
         <div class="modal-body">
             <div class="join-code-info">
@@ -435,7 +435,7 @@
             </div>
         </div>
         <div class="modal-actions">
-            <button class="btn-secondary" onclick="closeAddMemberModal()">Close</button>
+            <button class="btn-secondary" onclick="closeModal('addMemberModal')">Close</button>
         </div>
     </div>
 </div>
@@ -445,7 +445,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2><i class="fas fa-user-tag"></i> Change Member Role</h2>
-            <button class="close-btn" onclick="closeChangeRoleModal()">&times;</button>
+            <button class="close-btn" onclick="closeModal('changeRoleModal')">&times;</button>
         </div>
         <div class="modal-body">
             <p>Change role for <span id="roleUsername" class="highlighted-text"></span>:</p>
@@ -470,7 +470,7 @@
             </div>
         </div>
         <div class="modal-actions">
-            <button class="btn-secondary" onclick="closeChangeRoleModal()">Cancel</button>
+            <button class="btn-secondary" onclick="closeModal('changeRoleModal')">Cancel</button>
             <button class="btn-primary" onclick="changeRole()">
                 <i class="fas fa-save"></i> Save Changes
             </button>
@@ -483,7 +483,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2><i class="fas fa-tasks"></i> Create Assignment</h2>
-            <button class="close-btn" onclick="closeCreateAssignmentModal()">&times;</button>
+            <button class="close-btn" onclick="closeModal('createAssignmentModal')">&times;</button>
         </div>
         <div class="modal-body">
             <form id="createAssignmentForm">
@@ -510,7 +510,7 @@
             </form>
         </div>
         <div class="modal-actions">
-            <button class="btn-secondary" onclick="closeCreateAssignmentModal()">Cancel</button>
+            <button class="btn-secondary" onclick="closeModal('createAssignmentModal')">Cancel</button>
             <button class="btn-primary" onclick="createAssignment()">
                 <i class="fas fa-plus"></i> Create Assignment
             </button>
@@ -523,7 +523,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2><i class="fas fa-link"></i> Add Resource</h2>
-            <button class="close-btn" onclick="closeAddResourceModal()">&times;</button>
+            <button class="close-btn" onclick="closeModal('addResourceModal')">&times;</button>
         </div>
         <div class="modal-body">
             <form id="addResourceForm">
@@ -552,7 +552,7 @@
             </form>
         </div>
         <div class="modal-actions">
-            <button class="btn-secondary" onclick="closeAddResourceModal()">Cancel</button>
+            <button class="btn-secondary" onclick="closeModal('addResourceModal')">Cancel</button>
             <button class="btn-primary" onclick="addResource()">
                 <i class="fas fa-plus"></i> Add Resource
             </button>
@@ -565,7 +565,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2><i class="fas fa-hashtag"></i> Create Channel</h2>
-            <button class="close-btn" onclick="closeCreateChannelModal()">&times;</button>
+            <button class="close-btn" onclick="closeModal('createChannelModal')">&times;</button>
         </div>
         <div class="modal-body">
             <form id="createChannelForm">
@@ -580,7 +580,7 @@
             </form>
         </div>
         <div class="modal-actions">
-            <button class="btn-secondary" onclick="closeCreateChannelModal()">Cancel</button>
+            <button class="btn-secondary" onclick="closeModal('createChannelModal')">Cancel</button>
             <button class="btn-primary" onclick="createChannel()">
                 <i class="fas fa-plus"></i> Create Channel
             </button>
@@ -2311,7 +2311,7 @@ function loadPosts() {
                             <i class="${liked ? 'fas' : 'far'} fa-heart"></i> 
                             <span id="like-count-${post.id}">${likesCount}</span> Likes
                         </button>
-                        
+
                     </div>
                 `;
 
@@ -2537,7 +2537,7 @@ function createPost() {
                 <button class="post-action" onclick="toggleLike(${data.post.id})">
                     <i class="far fa-heart"></i> <span id="like-count-${data.post.id}">0</span> Likes
                 </button>
-                
+
             </div>
         `;
 
@@ -3462,7 +3462,7 @@ function sendChatMessage() {
 }
 
 // Initialize everything when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+function initializeDashboard() {
     // Make sure the active tab is set
     const activeTab = document.querySelector('.tab-btn.active');
     if (activeTab) {
@@ -3506,95 +3506,44 @@ document.addEventListener('DOMContentLoaded', function() {
             sendChatMessage();
         }
     });
+}
+
+// Use the DOMContentLoaded event with fallbacks and safety checks
+window.addEventListener('load', function() {
+    console.log("Window load event triggered");
+    // If the DOM ready event failed, try initializing again
+    if (!window._clubDashboardInitialized) {
+        console.log("Backup initialization triggered from window.load");
+        window._clubDashboardInitialized = true;
+        try {
+            initializeDashboard();
+        } catch (error) {
+            console.error("Error in backup initialization:", error);
+        }
+    }
 });
 
-// Display toast notifications
-function showToast(type, message) {
-    const toastContainer = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.classList.add('toast', `toast-${type}`);
-
-    let icon = '';
-    switch (type) {
-        case 'success':
-            icon = '<i class="fas fa-check-circle"></i>';
-            break;
-        case 'error':
-            icon = '<i class="fas fa-exclamation-circle"></i>';
-            break;
-        case 'warning':
-            icon = '<i class="fas fa-exclamation-triangle"></i>';
-            break;
-        case 'info':
-            icon = '<i class="fas fa-info-circle"></i>';
-            break;
-    }
-
-    toast.innerHTML = `
-        <div class="toast-content">
-            ${icon}
-            <span>${message}</span>
-        </div>
-        <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
-    `;
-
-    toastContainer.appendChild(toast);
-
-    // Auto-remove the toast after 5 seconds
-    setTimeout(() => {
-        toast.classList.add('toast-fade-out');
-        setTimeout(() => {
-            toast.remove();
-        }, 300);
-    }, 5000);
-}
-
-// View a specific club for members with multiple clubs
-function viewClub(clubId) {
-    window.location.href = `/club-dashboard?club_id=${clubId}`;
-}
-
-// Use a more reliable way to initialize the page
-function safeInitialize() {
-    console.log("Safe initialization started");
-    
+// Call this function after DOM is loaded, with proper error handling
+onDOMReady(function() {
     try {
-        // Make sure the active tab is set
-        whenElementExists('.tab-btn.active', function(activeTab) {
-            if (activeTab.getAttribute('onclick')) {
-                const match = activeTab.getAttribute('onclick').match(/openTab\('(.+?)'\)/);
-                if (match && match[1]) {
-                    openTab(match[1]);
-                }
-            }
-        });
-        
-        // Load data for the active tab
-        whenElementExists('.tab-pane.active', function(activePane) {
-            const currentTabId = activePane.id;
-            if (currentTabId === 'stream') loadPosts();
-            else if (currentTabId === 'assignments') loadAssignments();
-            else if (currentTabId === 'resources') loadResources();
-            else if (currentTabId === 'chat') loadChatChannels();
-        });
-        
-        // Safely attach event listeners
-        attachEventListenersSecurely();
-    } catch (error) {
-        console.warn("Error during initialization:", error);
-    }
-}
-
-// Use the onDOMReady helper for more reliable initialization
-onDOMReady(safeInitialize);
-
-// Add a backup initialization with window.onload
-window.addEventListener('load', function() {
-    // Check if initialization already happened
-    if (!window._clubDashboardInitialized) {
-        console.log("Backup initialization triggered");
         window._clubDashboardInitialized = true;
-        safeInitialize();
+        console.log("Club dashboard initialization started from onDOMReady");
+
+        // Handle tab initialization from URL
+        const urlHash = window.location.hash;
+        if (urlHash) {
+            const match = urlHash.match(/#tab=([a-zA-Z]+)/);
+            if (match && match[1]) {
+                openTab(match[1]);
+            }
+        }
+
+        // Add all event listeners using the secure method
+        attachEventListenersSecurely();
+
+        console.log("Club dashboard initialization completed");
+    } catch (error) {
+        console.warn('Error in club dashboard initialization:', error);
     }
 });
 
@@ -3607,27 +3556,6 @@ function attachEventListeners() {
     }
 }
 
-// Call this function after DOM is loaded, but safely handle potential errors
-// Use onDOMReady from event-helper.js for reliable DOM initialization
-onDOMReady(function() {
-    try {
-        console.log("Club dashboard initialization started");
-        
-        // Handle tab initialization
-        const urlHash = window.location.hash;
-        if (urlHash) {
-            const match = urlHash.match(/#tab=([a-zA-Z]+)/);
-            if (match && match[1]) {
-                openTab(match[1]);
-            }
-        }
-        
-        // Add event listeners safely
-        attachEventListenersSecurely();
-    } catch (error) {
-        console.warn('Error in club dashboard initialization:', error);
-    }
-});
 
 // Enhanced function to securely attach event listeners
 function attachEventListenersSecurely() {
@@ -3636,14 +3564,14 @@ function attachEventListenersSecurely() {
         e.preventDefault();
         createChannel();
     });
-    
+
     safeAddEventListener('#chat-message-input', 'keydown', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendChatMessage();
         }
     });
-    
+
     // Add other form listeners
     ['#addResourceForm', '#createAssignmentForm'].forEach(function(selector) {
         safeAddEventListener(selector, 'submit', function(e) {
@@ -3652,7 +3580,7 @@ function attachEventListenersSecurely() {
             if (selector === '#createAssignmentForm') createAssignment();
         });
     });
-    
+
     console.log("Event listeners attached securely");
 }
 
