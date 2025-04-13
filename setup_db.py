@@ -34,7 +34,7 @@ def setup_database():
                         site_id INTEGER NOT NULL REFERENCES site(id) ON DELETE CASCADE,
                         UNIQUE(site_id)
                     );
-                    
+
                     -- Create or replace the update trigger function
                     CREATE OR REPLACE FUNCTION update_updated_at_column()
                     RETURNS TRIGGER AS $$
@@ -43,10 +43,10 @@ def setup_database():
                         RETURN NEW;
                     END;
                     $$ language 'plpgsql';
-                    
+
                     -- Drop the trigger if it exists
                     DROP TRIGGER IF EXISTS update_github_repo_updated_at ON github_repo;
-                    
+
                     -- Create the trigger
                     CREATE TRIGGER update_github_repo_updated_at
                         BEFORE UPDATE ON github_repo
@@ -98,7 +98,7 @@ def setup_database():
                             WHEN duplicate_column THEN 
                                 NULL;
                         END;
-                        
+
                         BEGIN
                             ALTER TABLE site ADD COLUMN analytics_enabled BOOLEAN DEFAULT FALSE;
                         EXCEPTION
@@ -160,7 +160,7 @@ def setup_database():
         print("Creating database tables...")
         db.create_all()
         print("Database tables created successfully.")
-        
+
         # Create default chat channels for existing clubs if they don't have any
         clubs = Club.query.all()
         for club in clubs:
@@ -173,7 +173,7 @@ def setup_database():
                     {"name": "announcements", "description": "Important announcements"},
                     {"name": "help", "description": "Get help with your projects"}
                 ]
-                
+
                 for channel_data in default_channels:
                     channel = ClubChatChannel(
                         club_id=club.id,
@@ -182,19 +182,20 @@ def setup_database():
                         created_by=club.leader_id
                     )
                     db.session.add(channel)
-                    
-                    # Add welcome message to general channel
-                    if channel_data["name"] == "general":
-                        welcome_message = ClubChatMessage(
-                            channel_id=channel.id,
-                            user_id=club.leader_id,
-                            content=f"Welcome to the {club.name} chat!"
-                        )
-                        db.session.add(welcome_message)
-                
+
+                    db.session.commit()
+
+                    # Now add welcome message after the channel is committed
+                    welcome_message = ClubChatMessage(
+                        channel_id=channel.id,
+                        user_id=club.leader_id,
+                        content=f"Welcome to the {club.name} chat!"
+                    )
+                    db.session.add(welcome_message)
+
                 db.session.commit()
                 print(f"Created default channels for club: {club.name}")
-        
+
         print("Database setup complete.")
 
 if __name__ == "__main__":
