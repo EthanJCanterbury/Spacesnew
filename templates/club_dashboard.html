@@ -2242,12 +2242,7 @@ function loadPosts() {
     `;
 
     fetch(`/api/clubs/${clubId}/posts`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.error) {
                 showToast('error', data.error);
@@ -2274,28 +2269,9 @@ function loadPosts() {
                 const postDate = new Date(post.created_at);
                 const formattedDate = postDate.toLocaleString();
 
-                // Get the current user ID from session - reliable approach
-                // First try to get it from the body data attribute
-                let currentUserId = null;
-                
-                // Look for the current user ID in various places
-                const bodyData = document.querySelector('body').dataset;
-                if (bodyData && bodyData.userId) {
-                    currentUserId = parseInt(bodyData.userId);
-                } else {
-                    // Fallback: Check if there's a current-user-id element in the DOM
-                    const userIdElement = document.getElementById('current-user-id');
-                    if (userIdElement) {
-                        currentUserId = parseInt(userIdElement.value);
-                    } else {
-                        // Last resort: try to extract from the club container
-                        const clubInfo = document.querySelector('.club-info-header');
-                        if (clubInfo && clubInfo.dataset.userId) {
-                            currentUserId = parseInt(clubInfo.dataset.userId);
-                        }
-                    }
-                }
-                
+                // Get the current user ID from body data attribute or use alternative method
+                const userId = document.querySelector('body').dataset.userId;
+                const currentUserId = userId ? parseInt(userId) : null;
                 const isCurrentUser = post.user.id === currentUserId;
 
                 // Check if the current user has liked this post
@@ -2311,14 +2287,14 @@ function loadPosts() {
                         </div>
                         ${isCurrentUser ? `
                         <div class="post-actions">
-                            <button class="btn-icon post-menu-btn" onclick="event.stopPropagation(); togglePostMenu(${post.id})">
+                            <button class="btn-icon post-menu-btn" onclick="togglePostMenu(${post.id})">
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
                             <div class="post-menu" id="post-menu-${post.id}">
-                                <button onclick="event.stopPropagation(); editPost(${post.id})">
+                                <button onclick="editPost(${post.id})">
                                     <i class="fas fa-edit"></i> Edit
                                 </button>
-                                <button class="delete-btn" onclick="event.stopPropagation(); deletePost(${post.id})">
+                                <button class="delete-btn" onclick="deletePost(${post.id})">
                                     <i class="fas fa-trash"></i> Delete
                                 </button>
                             </div>
@@ -2339,15 +2315,6 @@ function loadPosts() {
 
                 postsContainer.appendChild(postCard);
             });
-            
-            // Add a hidden input with current user ID for reference
-            if (currentUserId && !document.getElementById('current-user-id')) {
-                const userIdInput = document.createElement('input');
-                userIdInput.type = 'hidden';
-                userIdInput.id = 'current-user-id';
-                userIdInput.value = currentUserId;
-                document.body.appendChild(userIdInput);
-            }
         })
         .catch(error => {
             console.error('Error loading posts:', error);
@@ -2363,12 +2330,6 @@ function loadPosts() {
 // Toggle post menu
 function togglePostMenu(postId) {
     const menu = document.getElementById(`post-menu-${postId}`);
-    if (!menu) {
-        console.error(`Menu element not found: post-menu-${postId}`);
-        return;
-    }
-    
-    // Toggle the active class
     menu.classList.toggle('active');
 
     // Close other open menus
@@ -2378,27 +2339,13 @@ function togglePostMenu(postId) {
         }
     });
 
-    // Remove any existing event listener to prevent duplicates
-    document.removeEventListener('click', window.currentMenuOutsideClickHandler);
-    
-    // Create a new handler that closes this specific menu
-    window.currentMenuOutsideClickHandler = function(e) {
+    // Close menu when clicking outside
+    document.addEventListener('click', function closeMenuOutside(e) {
         if (!e.target.closest('.post-menu') && !e.target.closest('.post-menu-btn')) {
-            const menuToClose = document.getElementById(`post-menu-${postId}`);
-            if (menuToClose) {
-                menuToClose.classList.remove('active');
-            }
-            document.removeEventListener('click', window.currentMenuOutsideClickHandler);
+            menu.classList.remove('active');
+            document.removeEventListener('click', closeMenuOutside);
         }
-    };
-    
-    // Add the event listener
-    if (menu.classList.contains('active')) {
-        // Small delay to prevent immediate closure
-        setTimeout(() => {
-            document.addEventListener('click', window.currentMenuOutsideClickHandler);
-        }, 10);
-    }
+    });
 }
 
 // Edit post
@@ -2690,48 +2637,15 @@ function viewAssignment(assignmentId) {
     const clubId = getClubId();
 
     fetch(`/api/clubs/${clubId}/assignments/${assignmentId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.error) {
                 showToast('error', data.error);
                 return;
             }
 
-            // Format due date if it exists
-            const dueDate = data.assignment.due_date ? new Date(data.assignment.due_date).toLocaleDateString() : 'None';
-            
-            // Create a modal to show assignment details instead of alert
-            const modalHtml = `
-                <div id="viewAssignmentModal" class="modal visible" style="display: flex;">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2><i class="fas fa-tasks"></i> ${data.assignment.title}</h2>
-                            <button class="close-btn" onclick="closeModal('viewAssignmentModal')">&times;</button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="assignment-details">
-                                <p><strong>Description:</strong></p>
-                                <p>${data.assignment.description}</p>
-                                <p><strong>Due Date:</strong> ${dueDate}</p>
-                                <p><strong>Status:</strong> ${data.assignment.is_active ? 'Active' : 'Inactive'}</p>
-                            </div>
-                        </div>
-                        <div class="modal-actions">
-                            <button class="btn-secondary" onclick="closeModal('viewAssignmentModal')">Close</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Add modal to body
-            const modalContainer = document.createElement('div');
-            modalContainer.innerHTML = modalHtml;
-            document.body.appendChild(modalContainer.firstChild);
+            // Create and show modal with assignment details
+            alert(`Assignment: ${data.assignment.title}\n\nDescription: ${data.assignment.description}\n\nDue Date: ${data.assignment.due_date || 'None'}`);
         })
         .catch(error => {
             console.error('Error fetching assignment:', error);
@@ -3023,12 +2937,7 @@ function editResource(resourceId) {
     const clubId = getClubId();
 
     fetch(`/api/clubs/${clubId}/resources/${resourceId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.error) {
                 showToast('error', data.error);
@@ -3043,15 +2952,11 @@ function editResource(resourceId) {
             document.getElementById('resourceDescription').value = resource.description || '';
             document.getElementById('resourceIcon').value = resource.icon || 'link';
 
-            // Store resource ID in the modal for reference
-            document.getElementById('addResourceModal').setAttribute('data-resource-id', resourceId);
-
             // Change the save button behavior
             const saveBtn = document.querySelector('#addResourceModal .modal-actions .btn-primary');
             saveBtn.innerHTML = '<i class="fas fa-save"></i> Update Resource';
             saveBtn.onclick = function() {
-                const storedResourceId = document.getElementById('addResourceModal').getAttribute('data-resource-id');
-                updateResource(storedResourceId);
+                updateResource(resourceId);
             };
 
             openAddResourceModal();
@@ -3596,32 +3501,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (activeTab) {
         const tabName = activeTab.getAttribute('onclick').match(/openTab\('(.+?)'\)/)[1];
         openTab(tabName);
-        
-        // Load data for the active tab
-        if (tabName === 'stream') {
-            loadPosts();
-        } else if (tabName === 'assignments') {
-            loadAssignments();
-        } else if (tabName === 'resources') {
-            loadResources();
-        } else if (tabName === 'chat') {
-            loadChatChannels();
-        }
     }
-    
-    // Add global click handler for the document to close all menus when clicking outside
-    document.addEventListener('click', function(e) {
-        // Skip if the click was on a menu button or menu itself
-        if (e.target.closest('.post-menu-btn') || e.target.closest('.post-menu') || 
-            e.target.closest('.resource-menu-btn') || e.target.closest('.resource-menu')) {
-            return;
-        }
-        
-        // Close all post and resource menus
-        document.querySelectorAll('.post-menu.active, .resource-menu.active').forEach(menu => {
-            menu.classList.remove('active');
-        });
-    });
 });
 
 function openDeleteClubModal() {
