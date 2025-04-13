@@ -530,3 +530,84 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/toolbar/prism-toolbar.min.js"></script>
 {% endblock %}
+
+
+        <section id="file-paths">
+            <h2>File Paths</h2>
+            <p class="lead">Understanding how to correctly link to files in your Spaces project is crucial for your website to work properly.</p>
+            
+            <div class="info-box" style="border-color: #ec3750;">
+                <div class="info-icon" style="color: #ec3750;">⚠️</div>
+                <div class="info-content">
+                    <h4>Important: Special File Path Format</h4>
+                    <p>In Hack Club Spaces, you <strong>cannot</strong> use relative paths like <code>styles.css</code> or absolute paths like <code>/styles.css</code> as you might in traditional web development.</p>
+                </div>
+            </div>
+            
+            <div class="practices-list">
+                <div class="practice-item">
+                    <h3>Correct File Path Format</h3>
+                    <p>When linking to your own files, you must use this special format:</p>
+                    <pre><code class="language-html">/s/[sitename]/[filename]</code></pre>
+                    <p>Where <code>[sitename]</code> is the name of your site and <code>[filename]</code> is the name of your file.</p>
+                </div>
+                
+                <div class="practice-item">
+                    <h3>Examples</h3>
+                    <div class="code-example">
+                        <h4>Linking a CSS file</h4>
+                        <pre><code class="language-html">&lt;!-- WRONG ❌ --&gt;
+&lt;link rel="stylesheet" href="styles.css"&gt;
+
+&lt;!-- WRONG ❌ --&gt;
+&lt;link rel="stylesheet" href="/styles.css"&gt;
+
+&lt;!-- CORRECT ✅ --&gt;
+&lt;link rel="stylesheet" href="/s/your-site-name/styles.css"&gt;</code></pre>
+                        
+                        <h4>Linking a JavaScript file</h4>
+                        <pre><code class="language-html">&lt;!-- WRONG ❌ --&gt;
+&lt;script src="script.js"&gt;&lt;/script&gt;
+
+&lt;!-- WRONG ❌ --&gt;
+&lt;script src="/script.js"&gt;&lt;/script&gt;
+
+&lt;!-- CORRECT ✅ --&gt;
+&lt;script src="/s/your-site-name/script.js"&gt;&lt;/script&gt;</code></pre>
+                        
+                        <h4>Referencing an image</h4>
+                        <pre><code class="language-html">&lt;!-- WRONG ❌ --&gt;
+&lt;img src="images/logo.png" alt="Logo"&gt;
+
+&lt;!-- CORRECT ✅ --&gt;
+&lt;img src="/s/your-site-name/images/logo.png" alt="Logo"&gt;</code></pre>
+                    </div>
+                </div>
+                
+                <div class="practice-item">
+                    <h3>CSS Background Images</h3>
+                    <p>The same rules apply when referencing images in your CSS:</p>
+                    <div class="code-example">
+                        <pre><code class="language-css">/* WRONG ❌ */
+background-image: url('images/background.jpg');
+
+/* WRONG ❌ */
+background-image: url('/images/background.jpg');
+
+/* CORRECT ✅ */
+background-image: url('/s/your-site-name/images/background.jpg');</code></pre>
+                    </div>
+                </div>
+                
+                <div class="tip-card">
+                    <h4>Why This Matters</h4>
+                    <p>Files in Hack Club Spaces are served through a special URL structure to ensure proper content delivery and site isolation. Using incorrect file paths is the #1 reason why images, styles, or scripts fail to load in your project.</p>
+                </div>
+                
+                <div class="practice-item">
+                    <h3>Finding Your Site Name</h3>
+                    <p>Your site name is the name you gave your project when you created it. You can see it in the URL of your deployed site, which will be:</p>
+                    <pre><code>https://your-site-name.hackclub.me</code></pre>
+                </div>
+            </div>
+        </section>
