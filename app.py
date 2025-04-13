@@ -3288,16 +3288,6 @@ def club_dashboard(club_id=None):
     """Club dashboard for club leaders to manage their clubs."""
     from models import Club, ClubMembership, ClubChatChannel
     
-    # First check if user has club leader role or is in a club
-    is_in_any_club = ClubMembership.query.filter_by(user_id=current_user.id).first() is not None
-    is_club_leader = Club.query.filter_by(leader_id=current_user.id).first() is not None
-    
-    # If user is not a club leader and not in any club, deny access
-    if not current_user.is_club_leader_role and not is_in_any_club and not is_club_leader:
-        app.logger.warning(f"User {current_user.id} ({current_user.username}) attempted to access club dashboard without permissions")
-        flash('You do not have access to the club dashboard.', 'error')
-        return redirect(url_for('welcome'))
-    
     # If no club ID is provided, try to find user's club
     if club_id is None:
         # Check if user is a club leader
@@ -3308,13 +3298,8 @@ def club_dashboard(club_id=None):
             club_memberships = ClubMembership.query.filter_by(user_id=current_user.id).all()
             
             if not club_memberships:
-                # User has club leader role but no club yet
-                if current_user.is_club_leader_role:
-                    return render_template('club_dashboard.html', club=None)
-                else:
-                    # User doesn't have any club associations
-                    flash('You do not have access to the club dashboard.', 'error')
-                    return redirect(url_for('welcome'))
+                # User doesn't have any club associations
+                return render_template('club_dashboard.html', club=None)
                 
             if len(club_memberships) == 1:
                 # If user is a member of only one club, show that club
