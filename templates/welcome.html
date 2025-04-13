@@ -762,31 +762,7 @@ async function createNewPython(e) {
     }
 }
 
-function showToast(type, message) {
-    const toastContainer = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-
-    const icon = type === 'success' ? 'check-circle' : 'exclamation-circle';
-
-    toast.innerHTML = `
-        <div class="toast-content">
-            <i class="fas fa-${icon}"></i>
-            <span>${message}</span>
-        </div>
-    `;
-
-    toastContainer.appendChild(toast);
-
-    toast.offsetHeight;
-
-    toast.classList.add('show');
-
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
+// Using the centralized toast function from toast.js
 
 async function leaveSharedSpace(collaborationId) {
     if (!confirm('Are you sure you want to leave this shared space?')) {

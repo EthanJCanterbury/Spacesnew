@@ -257,10 +257,13 @@ function showToast(type, message) {
 
     toastContainer.appendChild(toast);
 
+    // Force reflow
     toast.offsetHeight;
 
+    // Show the toast
     toast.classList.add('show');
 
+    // Automatically remove after 3 seconds
     setTimeout(() => {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 300);
