@@ -245,9 +245,9 @@
                                             <i class="fas fa-{{ 'user-check' if user.is_suspended else 'user-lock' }}"></i>
                                             <span>{{ 'Unsuspend' if user.is_suspended else 'Suspend' }}</span>
                                         </button>
-                                        <button class="dropdown-item" onclick="toggleClubLeader({{ user.id }}, '{{ user.username }}', {{ 'true' if Club.query.filter_by(leader_id=user.id).first() else 'false' }})">
+                                        <button class="dropdown-item" onclick="toggleClubLeader({{ user.id }}, '{{ user.username }}', {{ 'true' if user.is_club_leader_role else 'false' }})">
                                             <i class="fas fa-user-tag"></i>
-                                            <span>{{ 'Remove Club Leader' if Club.query.filter_by(leader_id=user.id).first() else 'Make Club Leader' }}</span>
+                                            <span>{{ 'Remove Club Leader Role' if user.is_club_leader_role else 'Grant Club Leader Role' }}</span>
                                         </button>
                                         <button onclick="deleteAllSites({{ user.id }}, '{{ user.username }}')" class="dropdown-item">
                                             <i class="fas fa-trash-alt"></i>
@@ -625,7 +625,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="club-members-container">
                     <h3><i class="fas fa-user-friends"></i> Club Members</h3>
                     <div class="table-container">
@@ -836,6 +836,7 @@ function filterUsers() {
                         ${user.id !== {{ current_user.id }} ? 
                         `<input type="checkbox" class="user-select" data-userid="${user.id}" data-username="${user.username}" onchange="updateBulkActions()">` : 
                         ''}
+                    ```
                     </td>
                     <td>${user.id}</td>
                     <td>${user.username}</td>
@@ -865,9 +866,9 @@ function filterUsers() {
                                     <i class="fas fa-${user.is_suspended ? 'user-check' : 'user-lock'}"></i>
                                     <span>${user.is_suspended ? 'Unsuspend' : 'Suspend'}</span>
                                 </button>
-                                <button onclick="toggleClubLeader(${user.id}, '${user.username}', ${!user.is_club_leader})" class="dropdown-item">
-                                    <i class="fas fa-${user.is_club_leader ? 'user-minus' : 'user-plus'}"></i>
-                                    <span>${user.is_club_leader ? 'Remove Club Leader' : 'Make Club Leader'}</span>
+                                <button onclick="toggleClubLeader(${user.id}, '${user.username}', ${user.is_club_leader_role})" class="dropdown-item">
+                                    <i class="fas fa-user-tag"></i>
+                                    <span>${user.is_club_leader_role ? 'Remove Club Leader Role' : 'Grant Club Leader Role'}</span>
                                 </button>
                                 <button onclick="deleteAllSites(${user.id}, '${user.username}')" class="dropdown-item">
                                     <i class="fas fa-trash-alt"></i>
@@ -1810,401 +1811,12 @@ function saveMaxSitesPerUser() {
 }
 
 function toggleClubLeader(userId, username, isClubLeader) {
-    // Toggle based on current status - if currently a leader, remove; if not a leader, make one
-    const makeLeader = !isClubLeader;
-    const confirmMsg = makeLeader 
-        ? `Make ${username} a club leader?` 
-        : `Remove ${username} from club leader status?`;
-
-    if (confirm(confirmMsg)) {
-        fetch('/api/admin/toggle_club_leader', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                user_id: userId,
-                make_leader: makeLeader
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showToast('success', data.message);
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
-            } else {
-                showToast('error', data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('error', 'Failed to update club leader status');
-        });
-    }
-}
-
-// Club management functions
-function filterClubs() {
-    const searchTerm = document.getElementById('clubSearch').value.trim();
-
-    if (searchTerm.length < 2) {
-        return; // Require at least 2 characters
-    }
-
-    // Show loading indicator
-    document.getElementById('clubTableBody').innerHTML = `
-        <tr>
-            <td colspan="7" class="text-center">
-                <div class="loading-spinner"></div>
-                <p>Searching clubs...</p>
-            </td>
-        </tr>
-    `;
-
-    // Make API call to search clubs
-    fetch(`/api/admin/search/clubs?term=${encodeURIComponent(searchTerm)}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                showToast('error', data.error);
-                return;
-            }
-
-            const clubTableBody = document.getElementById('clubTableBody');
-            clubTableBody.innerHTML = '';
-
-            if (data.clubs.length === 0) {
-                clubTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="text-center">
-                            <p>No clubs found matching "${searchTerm}"</p>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            data.clubs.forEach(club => {
-                const row = document.createElement('tr');
-
-                row.innerHTML = `
-                    <td>${club.id}</td>
-                    <td>${club.name}</td>
-                    <td>${club.leader_username}</td>
-                    <td>${club.member_count}</td>
-                    <td>${club.created_at}</td>
-                    <td>${club.join_code}</td>
-                    <td class="actions-cell">
-                        <div class="action-dropdown">
-                            <button class="action-dropdown-btn">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                            <div class="action-dropdown-content">
-                                <button onclick="viewClubDetails(${club.id})" class="dropdown-item">
-                                    <i class="fas fa-eye"></i>
-                                    <span>View Details</span>
-                                </button>
-                                <button onclick="resetJoinCode(${club.id})" class="dropdown-item">
-                                    <i class="fas fa-key"></i>
-                                    <span>Reset Join Code</span>
-                                </button>
-                                <button onclick="deleteClub(${club.id}, '${club.name}')" class="dropdown-item text-danger">
-                                    <i class="fas fa-trash-alt"></i>
-                                    <span>Delete Club</span>
-                                </button>
-                            </div>
-                        </div>
-                    </td>
-                `;
-
-                clubTableBody.appendChild(row);
-                row.classList.add('fade-in');
-                setTimeout(() => {
-                    row.classList.remove('fade-in');
-                }, 300);
-            });
-        })
-        .catch(error => {
-            console.error('Error searching clubs:', error);
-            showToast('error', 'Failed to search clubs');
-        });
-}
-
-function viewClubDetails(clubId) {
-    const modal = document.getElementById('clubDetailModal');
-    const clubDetailContent = document.getElementById('clubDetailContent');
-    const clubMembersTableBody = document.getElementById('clubMembersTableBody');
-
-    clubDetailContent.innerHTML = `
-        <div class="club-detail-loading">
-            <div class="loading-spinner"></div>
-            <p>Loading club details...</p>
-        </div>
-    `;
-
-    clubMembersTableBody.innerHTML = `
-        <tr>
-            <td colspan="6" class="text-center">
-                <div class="loading-spinner"></div>
-                <p>Loading members...</p>
-            </td>
-        </tr>
-    `;
-
-    modal.style.display = 'flex';
-
-    // Fetch club details
-    fetch(`/api/admin/clubs/${clubId}`)
-        .then(response => response.json())
-        .then(clubData => {
-            if (clubData.error) {
-                showToast('error', clubData.error);
-                return;
-            }
-
-            // Update club details section with club ID data attribute
-            clubDetailContent.innerHTML = `
-                <h3 data-club-id="${clubId}">${clubData.name}</h3>
-                <div class="club-meta">
-                    <p><i class="fas fa-user-tie"></i> Leader: ${clubData.leader_username}</p>
-                    <p><i class="fas fa-calendar-alt"></i> Created: ${clubData.created_at}</p>
-                    <p><i class="fas fa-map-marker-alt"></i> Location: ${clubData.location || 'Not specified'}</p>
-                    <p><i class="fas fa-key"></i> Join Code: ${clubData.join_code}</p>
-                </div>
-                <div class="club-description">
-                    <h4>Description</h4>
-                    <p>${clubData.description || 'No description provided.'}</p>
-                </div>
-            `;
-
-            // Update members table
-            if (clubData.members && clubData.members.length > 0) {
-                clubMembersTableBody.innerHTML = '';
-                
-                clubData.members.forEach(member => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${member.user_id}</td>
-                        <td>${member.username}</td>
-                        <td>${member.email}</td>
-                        <td>
-                            <span class="status-badge ${member.role === 'co-leader' ? 'club-leader' : 'active'}">
-                                ${member.role}
-                            </span>
-                        </td>
-                        <td>${member.joined_at}</td>
-                        <td class="actions-cell">
-                            <div class="action-dropdown">
-                                <button class="action-dropdown-btn">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
-                                <div class="action-dropdown-content">
-                                    <button onclick="viewUserDetails(${member.user_id})" class="dropdown-item">
-                                        <i class="fas fa-user"></i>
-                                        <span>View User</span>
-                                    </button>
-                                    <button onclick="changeClubMemberRole(${member.membership_id}, '${member.username}', '${member.role}')" class="dropdown-item">
-                                        <i class="fas fa-user-tag"></i>
-                                        <span>Change Role</span>
-                                    </button>
-                                    <button onclick="removeClubMember(${member.membership_id}, '${member.username}', ${clubId})" class="dropdown-item text-danger">
-                                        <i class="fas fa-user-minus"></i>
-                                        <span>Remove</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </td>
-                    `;
-                    clubMembersTableBody.appendChild(row);
-                });
-            } else {
-                clubMembersTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="text-center">
-                            <p>No members found for this club</p>
-                        </td>
-                    </tr>
-                `;
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching club details:', error);
-            clubDetailContent.innerHTML = `
-                <div class="error-message">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>Failed to load club details</p>
-                </div>
-            `;
-        });
-}
-
-function closeClubDetailModal() {
-    document.getElementById('clubDetailModal').style.display = 'none';
-}
-
-function resetJoinCode(clubId) {
-    if (!confirm('Are you sure you want to reset the join code for this club? The old code will no longer work.')) return;
-
-    fetch(`/api/admin/clubs/${clubId}/join-code`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            showToast('error', data.error);
-            return;
-        }
-        showToast('success', 'Join code reset successfully');
-        setTimeout(() => {
-            location.reload();
-        }, 1000);
-    })
-    .catch(error => {
-        console.error('Error resetting join code:', error);
-        showToast('error', 'Failed to reset join code');
-    });
-}
-
-function deleteClub(clubId, clubName) {
-    if (!confirm(`Are you sure you want to delete club "${clubName}"? This will remove all memberships.`)) return;
-
-    fetch(`/api/admin/clubs/${clubId}`, {
-        method: 'DELETE'
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            showToast('error', data.error);
-            return;
-        }
-        showToast('success', `Club "${clubName}" deleted successfully`);
-        setTimeout(() => {
-            location.reload();
-        }, 1000);
-    })
-    .catch(error => {
-        console.error('Error deleting club:', error);
-        showToast('error', 'Failed to delete club');
-    });
-}
-
-function changeClubMemberRole(membershipId, username, currentRole) {
-    const newRole = currentRole === 'member' ? 'co-leader' : 'member';
-    
-    if (!confirm(`Are you sure you want to change ${username}'s role from "${currentRole}" to "${newRole}"?`)) return;
-
-    fetch(`/api/admin/clubs/members/${membershipId}/role`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ role: newRole })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            showToast('error', data.error);
-            return;
-        }
-        showToast('success', `Changed ${username}'s role to ${newRole}`);
-        
-        // Refresh club details - get the club ID properly from the h3 element
-        const clubHeader = document.querySelector('#clubDetailContent h3');
-        if (clubHeader && clubHeader.dataset.clubId) {
-            viewClubDetails(clubHeader.dataset.clubId);
-        }
-    })
-    .catch(error => {
-        console.error('Error changing member role:', error);
-        showToast('error', 'Failed to change member role');
-    });
-}
-
-function removeClubMember(membershipId, username, clubId) {
-    if (!confirm(`Are you sure you want to remove ${username} from this club?`)) return;
-
-    fetch(`/api/admin/clubs/members/${membershipId}`, {
-        method: 'DELETE'
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.error) {
-            showToast('error', data.error);
-            return;
-        }
-        showToast('success', `Removed ${username} from the club`);
-        // Refresh club details
-        viewClubDetails(clubId);
-    })
-    .catch(error => {
-        console.error('Error removing club member:', error);
-        showToast('error', 'Failed to remove club member: ' + error.message);
-    });
-}
-
-async function saveUserChanges() {
-    const form = document.getElementById('editUserForm');
-    const userId = form.querySelector('#editUserId').value;
-    const username = form.querySelector('#editUsername').value;
-    const email = form.querySelector('#editEmail').value;
-    const password = form.querySelector('#resetPassword').value;
-
-    try {
-        const response = await fetch(`/api/admin/users/${userId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, email, password })
-        });
-
-        if (response.ok) {
-            showToast('success', 'User updated successfully!');
-            closeUserDetailModal();
-            location.reload();
-        } else {
-            const errorData = await response.json();
-            showToast('error', errorData.message || 'Failed to update user.');
-        }
-    } catch (error) {
-        showToast('error', 'An error occurred while saving changes.');
-    }
-}
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    const togglePasswordButtons = document.querySelectorAll('.toggle-password');
-    togglePasswordButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const passwordInput = this.previousElementSibling;
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                this.querySelector('i').classList.remove('fa-eye');
-                this.querySelector('i').classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                this.querySelector('i').classList.remove('fa-eye-slash');
-                this.querySelector('i').classList.add('fa-eye');
-            }
-        });
-    });
-});
-
-function toggleClubLeader(userId, username, isClubLeader) {
     if (!confirm(`Are you sure you want to ${isClubLeader ? 'make' : 'remove'} ${username} ${isClubLeader ? 'a Club Leader' : 'as Club Leader'}?`)) {
         return;
     }
-    
+
     showToast('info', `${isClubLeader ? 'Making' : 'Removing'} ${username} as club leader...`);
-    
+
     fetch(`/api/admin/users/${userId}/club-leader`, {
         method: 'POST',
         headers: {

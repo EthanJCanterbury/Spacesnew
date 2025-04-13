@@ -190,11 +190,13 @@ class User(UserMixin, db.Model):
     groq_api_key = db.Column(db.String(100), nullable=True)
     is_suspended = db.Column(db.Boolean, default=False)
     is_admin = db.Column(db.Boolean, default=False)
+    is_club_leader_role = db.Column(db.Boolean, default=False)
     
     @property
     def is_club_leader(self):
-        """Return True if the user is a club leader or co-leader."""
-        return Club.query.filter_by(leader_id=self.id).first() is not None or \
+        """Return True if the user has club leader role or is a club leader/co-leader."""
+        return self.is_club_leader_role or \
+               Club.query.filter_by(leader_id=self.id).first() is not None or \
                ClubMembership.query.filter_by(user_id=self.id, role='co-leader').first() is not None
 
     def set_password(self, password):
