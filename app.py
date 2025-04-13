@@ -3809,6 +3809,11 @@ def manage_club_post(club_id, post_id):
         })
         
     elif request.method == 'DELETE':
+        # First delete all likes associated with this post
+        from models import ClubPostLike
+        ClubPostLike.query.filter_by(post_id=post_id).delete()
+        
+        # Then delete the post itself
         db.session.delete(post)
         db.session.commit()
         
