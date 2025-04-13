@@ -290,10 +290,6 @@
         <div class="welcome-title">
             <h1>Welcome, {{ current_user.username }}! 👋</h1>
             <p class="subtitle">Lets make some cool stuff :D</p>
-            <p class="subtitle">Heads Up: This build a pre-beta and stuff WILL break!</p>
-            {% if not current_user.is_admin and not current_user.has_special_access %}
-            <!-- Special access form removed as it's no longer needed -->
-            {% endif %}
         </div>
         <div class="button-group">
             {% if sites|length < max_sites %}
