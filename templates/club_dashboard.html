@@ -3560,86 +3560,58 @@ function safeInitialize() {
     
     try {
         // Make sure the active tab is set
-        const activeTab = document.querySelector('.tab-btn.active');
-        if (activeTab && activeTab.getAttribute('onclick')) {
-            const match = activeTab.getAttribute('onclick').match(/openTab\('(.+?)'\)/);
-            if (match && match[1]) {
-                openTab(match[1]);
+        whenElementExists('.tab-btn.active', function(activeTab) {
+            if (activeTab.getAttribute('onclick')) {
+                const match = activeTab.getAttribute('onclick').match(/openTab\('(.+?)'\)/);
+                if (match && match[1]) {
+                    openTab(match[1]);
+                }
             }
-        }
+        });
         
         // Load data for the active tab
-        const currentTabId = document.querySelector('.tab-pane.active')?.id;
-        if (currentTabId) {
+        whenElementExists('.tab-pane.active', function(activePane) {
+            const currentTabId = activePane.id;
             if (currentTabId === 'stream') loadPosts();
             else if (currentTabId === 'assignments') loadAssignments();
             else if (currentTabId === 'resources') loadResources();
             else if (currentTabId === 'chat') loadChatChannels();
-        }
+        });
         
         // Safely attach event listeners
-        attachEventListeners();
+        attachEventListenersSecurely();
     } catch (error) {
         console.warn("Error during initialization:", error);
     }
 }
 
-// Execute initialization when the document is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', safeInitialize);
-} else {
-    // Document already loaded, run immediately
-    safeInitialize();
-}
+// Use the onDOMReady helper for more reliable initialization
+onDOMReady(safeInitialize);
 
-// Add a backup initialization in case the DOM event fails
+// Add a backup initialization with window.onload
 window.addEventListener('load', function() {
-    if (!document.querySelector('.tab-pane.active')) {
+    // Check if initialization already happened
+    if (!window._clubDashboardInitialized) {
         console.log("Backup initialization triggered");
+        window._clubDashboardInitialized = true;
         safeInitialize();
     }
 });
 
-// Move event listeners out of DOMContentLoaded to avoid errors
+// Kept for backward compatibility, now uses the secure method internally
 function attachEventListeners() {
     try {
-        // Form event listeners
-        const forms = {
-            'createChannelForm': createChannel,
-            'addResourceForm': addResource,
-            'createAssignmentForm': createAssignment
-        };
-        
-        Object.keys(forms).forEach(formId => {
-            const form = document.getElementById(formId);
-            if (form) {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    forms[formId]();
-                });
-            }
-        });
-        
-        // Input event listeners
-        const chatInput = document.getElementById('chat-message-input');
-        if (chatInput) {
-            chatInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendChatMessage();
-                }
-            });
-        }
+        attachEventListenersSecurely();
     } catch (error) {
         console.warn('Error attaching event listeners:', error);
     }
 }
 
 // Call this function after DOM is loaded, but safely handle potential errors
-document.addEventListener('DOMContentLoaded', function() {
+// Use onDOMReady from event-helper.js for reliable DOM initialization
+onDOMReady(function() {
     try {
-        // Wait a bit for all elements to be fully rendered
-        setTimeout(attachEventListeners, 100);
+        console.log("Club dashboard initialization started");
         
         // Handle tab initialization
         const urlHash = window.location.hash;
@@ -3649,10 +3621,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 openTab(match[1]);
             }
         }
+        
+        // Add event listeners safely
+        attachEventListenersSecurely();
     } catch (error) {
-        console.warn('Error in DOMContentLoaded initialization:', error);
+        console.warn('Error in club dashboard initialization:', error);
     }
 });
+
+// Enhanced function to securely attach event listeners
+function attachEventListenersSecurely() {
+    // Use safeAddEventListener from event-helper.js
+    safeAddEventListener('#createChannelForm', 'submit', function(e) {
+        e.preventDefault();
+        createChannel();
+    });
+    
+    safeAddEventListener('#chat-message-input', 'keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendChatMessage();
+        }
+    });
+    
+    // Add other form listeners
+    ['#addResourceForm', '#createAssignmentForm'].forEach(function(selector) {
+        safeAddEventListener(selector, 'submit', function(e) {
+            e.preventDefault();
+            if (selector === '#addResourceForm') addResource();
+            if (selector === '#createAssignmentForm') createAssignment();
+        });
+    });
+    
+    console.log("Event listeners attached securely");
+}
 
 function openDeleteClubModal() {
     if (confirm('Are you sure you want to delete this club? This action cannot be undone.')) {
