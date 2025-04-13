@@ -559,7 +559,7 @@ function saveContent(silent = false) {
             if (data.success) {
                 isDirty = false;
                 if (!silent) {
-                    showToast("Changes Saved!", "success");
+                    showToast("success", "Changes saved successfully!");
                 }
                 updatePreview();
             } else {
@@ -591,7 +591,7 @@ function saveContent(silent = false) {
             if (data.success) {
                 isDirty = false;
                 if (!silent) {
-                    showToast("Changes Saved!", "success");
+                    showToast("success", "Changes saved successfully!");
                 }
             } else {
                 showToast("Error saving content", "error");

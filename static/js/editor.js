@@ -53,7 +53,8 @@ function delayedUpdatePreview() {
 }
 
 function showNotification(message, type) {
-    showToast(type, message);
+    // Call the global showToast with correct parameter order
+    window.showToast(type, message);
 }
 
 // ... rest of the file (assumed to contain declarations for currentFile, editor, fileContents, siteType, showToast, and potentially the preview-frame element) ...
