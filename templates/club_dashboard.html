@@ -218,13 +218,6 @@
                             <i class="fas fa-plus"></i> New Channel
                         </button>
                     </div>
-                    <div class="chat-dms">
-                        <h3>Direct Messages</h3>
-                        <ul class="dm-list">
-                            <li><i class="fas fa-circle"></i> Member 1</li>
-                            <li><i class="fas fa-circle"></i> Member 2</li>
-                        </ul>
-                    </div>
                 </div>
                 
                 <div class="chat-main">
@@ -1276,8 +1269,7 @@
     overflow-y: auto;
 }
 
-.chat-channels h3,
-.chat-dms h3 {
+.chat-channels h3 {
     margin: 0 0 1rem;
     font-size: 1rem;
     font-weight: 600;
@@ -1286,15 +1278,13 @@
     letter-spacing: 0.05em;
 }
 
-.channels-list,
-.dm-list {
+.channels-list {
     list-style: none;
     padding: 0;
     margin: 0 0 1rem;
 }
 
-.channels-list li,
-.dm-list li {
+.channels-list li {
     padding: 0.5rem 0.75rem;
     border-radius: 6px;
     cursor: pointer;
@@ -1307,22 +1297,15 @@
     transition: all 0.2s ease;
 }
 
-.channels-list li:hover,
-.dm-list li:hover {
+.channels-list li:hover {
     background-color: rgba(0, 0, 0, 0.05);
     color: var(--text-primary);
 }
 
-.channels-list li.active,
-.dm-list li.active {
+.channels-list li.active {
     background-color: rgba(236, 55, 80, 0.1);
     color: var(--primary);
     font-weight: 500;
-}
-
-.dm-list li i {
-    font-size: 0.625rem;
-    color: #10b981;
 }
 
 .chat-main {
