@@ -117,6 +117,34 @@ document.addEventListener('DOMContentLoaded', function() {
             link.addEventListener('click', (e) => scrollToSection(e, 'features'));
         }
     });
+
+    // Hamburger menu toggle
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.getElementById('navLinks');
+
+    if (hamburger && navLinks) {
+        hamburger.addEventListener('click', function() {
+            navLinks.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!navLinks.contains(event.target) && !hamburger.contains(event.target) && navLinks.classList.contains('active')) {
+                navLinks.classList.remove('active');
+                hamburger.classList.remove('active');
+            }
+        });
+
+        // Close menu when clicking on a link
+        const navLinkElements = navLinks.querySelectorAll('a');
+        navLinkElements.forEach(link => {
+            link.addEventListener('click', function() {
+                navLinks.classList.remove('active');
+                hamburger.classList.remove('active');
+            });
+        });
+    }
 });
 
 // Improved animation observer with faster transition
@@ -201,7 +229,7 @@ async function toggleClubLeader(userId, username, isCurrentlyLeader) {
 
     try {
         showToast('info', `Processing request...`);
-        
+
         const response = await fetch(`/api/admin/users/${userId}/club-leader`, {
             method: 'POST',
             headers: {
@@ -214,7 +242,7 @@ async function toggleClubLeader(userId, username, isCurrentlyLeader) {
 
         if (response.ok) {
             showToast('success', data.message || `Successfully ${makeLeader ? 'made' : 'removed'} ${username} ${makeLeader ? 'a' : 'as a'} club leader.`);
-            
+
             // Force reload to update UI
             setTimeout(() => {
                 location.reload();

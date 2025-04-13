@@ -27,12 +27,28 @@
                 <img src="{{ url_for('static', filename='images/logo-rounded.png') }}" alt="Hack Club" style="height: 30px; margin-right: 8px; vertical-align: middle;">
                 <span style="vertical-align: middle;">Spaces</span>
             </a>
-            <div class="nav-links">
+            <div class="nav-links" id="navLinks">
                 <a href="/">Home</a>
                 <a href="#features">Features</a>
                 <a href="{{ url_for('documentation') }}">Documentation</a>
+                <!-- Auth links for mobile -->
+                <div class="mobile-auth">
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('welcome') }}" class="nav-button">Dashboard</a>
+                        {% if current_user.is_authenticated and current_user.is_club_leader %}
+                        <a href="{{ url_for('club_dashboard') }}" class="nav-button">Clubs</a>
+                        {% endif %}
+                        {% if current_user.is_authenticated and current_user.is_admin %}
+                        <a href="{{ url_for('admin_panel') }}" class="nav-button">Admin</a>
+                        {% endif %}
+                        <a href="{{ url_for('settings') }}" class="nav-button">Settings</a>
+                        <a href="{{ url_for('logout') }}" class="nav-button">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="nav-button">Login</a>
+                    {% endif %}
+                </div>
             </div>
-            <div class="nav-auth">
+            <div class="nav-auth desktop-auth">
                 {% if current_user.is_authenticated %}
                     <a href="{{ url_for('welcome') }}" class="nav-button">Dashboard</a>
                     {% if current_user.is_authenticated and current_user.is_club_leader %}
@@ -47,6 +63,11 @@
                     <a href="{{ url_for('login') }}" class="nav-button">Login</a>
                 {% endif %}
             </div>
+            <button class="hamburger" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
     </nav>
 
