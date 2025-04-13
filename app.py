@@ -3489,8 +3489,37 @@ def manage_current_club():
 
     elif request.method == 'DELETE':
         try:
+            # First delete all related ClubAssignment records
+            from models import ClubAssignment
+            ClubAssignment.query.filter_by(club_id=club.id).delete()
+            
+            # Delete all club memberships
             ClubMembership.query.filter_by(club_id=club.id).delete()
+            
+            # Delete club chat channels and messages
+            from models import ClubChatChannel, ClubChatMessage
+            
+            # Get all channel IDs for this club
+            channels = ClubChatChannel.query.filter_by(club_id=club.id).all()
+            for channel in channels:
+                # Delete messages in each channel
+                ClubChatMessage.query.filter_by(channel_id=channel.id).delete()
+            
+            # Delete all channels
+            ClubChatChannel.query.filter_by(club_id=club.id).delete()
+            
+            # Delete club resources
+            from models import ClubResource
+            ClubResource.query.filter_by(club_id=club.id).delete()
+            
+            # Delete club posts and likes
+            from models import ClubPost, ClubPostLike
+            posts = ClubPost.query.filter_by(club_id=club.id).all()
+            for post in posts:
+                ClubPostLike.query.filter_by(post_id=post.id).delete()
+            ClubPost.query.filter_by(club_id=club.id).delete()
 
+            # Finally delete the club itself
             db.session.delete(club)
             db.session.commit()
 
@@ -3506,7 +3535,7 @@ def manage_current_club():
         except Exception as e:
             db.session.rollback()
             app.logger.error(f'Error deleting club: {str(e)}')
-            return jsonify({'error': 'Failed to delete club'}), 500
+            return jsonify({'error': f'Failed to delete club: {str(e)}'}), 500
 
 
 @app.route('/api/clubs/join-code/generate', methods=['POST'])
