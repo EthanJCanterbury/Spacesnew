@@ -59,6 +59,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    margin: 0 auto;
+    border-radius: var(--card-radius) var(--card-radius) 0 0;
+    width: 100%;
 }
 
 .card-icon i {
