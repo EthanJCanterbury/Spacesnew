@@ -1,4 +1,3 @@
-
 /* VS Code-like styles for CodeMirror */
 .CodeMirror {
   height: 100%;
@@ -894,29 +893,39 @@ li.CodeMirror-hint-active {
 
 /* Toast notifications */
 #toast-container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: flex-end;
-  gap: 10px;
-  max-width: 320px;
-  pointer-events: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 10px;
+    max-width: 320px;
+    pointer-events: none;
 }
 
 .toast {
-  margin-top: 10px;
-  padding: 12px 16px;
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  width: 300px;
-  transform: translateX(120%);
-  transition: transform 0.3s ease;
-  color: white;
-  background-color: #333;
-  pointer-events: auto;
+    min-width: 320px;
+    max-width: 450px;
+    padding: 16px;
+    border-radius: 12px;
+    background-color: white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transform: translateX(120%);
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    overflow: hidden;
+    position: relative;
+    pointer-events: auto;
+}
+
+.toast::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
 }
 
 .toast.show {
@@ -926,29 +935,44 @@ li.CodeMirror-hint-active {
 .toast-content {
     display: flex;
     align-items: center;
-    gap: 10px;
-  color: black;
+    gap: 12px;
+    color: #000000;
 }
 
 .toast-content i {
-    font-size: 1.1rem;
-  color: black;
+    color: #000000;
 }
 
 .toast-success {
-    background-color: #48bb78;
+    background-color: #f0fdf4;
+}
+
+.toast-success::before {
+    background-color: #059669;
 }
 
 .toast-error {
-    background-color: #f56565;
+    background-color: #fef2f2;
+}
+
+.toast-error::before {
+    background-color: #dc2626;
 }
 
 .toast-info {
-    background-color: #4299e1;
+    background-color: #eff6ff;
+}
+
+.toast-info::before {
+    background-color: #3b82f6;
 }
 
 .toast-warning {
-    background-color: #ed8936;
+    background-color: #fffbeb;
+}
+
+.toast-warning::before {
+    background-color: #d97706;
 }
 
 .modal-content {
