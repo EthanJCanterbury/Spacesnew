@@ -245,8 +245,8 @@
                                             <i class="fas fa-{{ 'user-check' if user.is_suspended else 'user-lock' }}"></i>
                                             <span>{{ 'Unsuspend' if user.is_suspended else 'Suspend' }}</span>
                                         </button>
-                                        <button onclick="toggleClubLeader({{ user.id }}, '{{ user.username }}', {{ 'false' if user.is_club_leader else 'true' }})" class="dropdown-item">
-                                            <i class="fas fa-{{ 'user-minus' if user.is_club_leader else 'user-plus' }}"></i>
+                                        <button class="dropdown-item" onclick="toggleClubLeader({{ user.id }}, '{{ user.username }}', {{ 'true' if user.is_club_leader else 'false' }})">
+                                            <i class="fas fa-user-tag"></i>
                                             <span>{{ 'Remove Club Leader' if user.is_club_leader else 'Make Club Leader' }}</span>
                                         </button>
                                         <button onclick="deleteAllSites({{ user.id }}, '{{ user.username }}')" class="dropdown-item">
@@ -1046,7 +1046,9 @@ async function toggleSuspension(userId, username, suspend) {
     }
 }
 
-async function toggleClubLeader(userId, username, makeLeader) {
+async function toggleClubLeader(userId, username, isClubLeader) {
+    // Toggle based on current status - if currently a leader, remove; if not a leader, make one
+    const makeLeader = !isClubLeader;
     if (!confirm(`Are you sure you want to ${makeLeader ? 'make' : 'remove'} "${username}" ${makeLeader ? 'as a' : 'from being a'} club leader?`)) return;
 
     try {
@@ -1773,6 +1775,42 @@ function saveMaxSitesPerUser() {
     });
 }
 
+function toggleClubLeader(userId, username, isClubLeader) {
+    // Toggle based on current status - if currently a leader, remove; if not a leader, make one
+    const makeLeader = !isClubLeader;
+    const confirmMsg = makeLeader 
+        ? `Make ${username} a club leader?` 
+        : `Remove ${username} from club leader status?`;
+
+    if (confirm(confirmMsg)) {
+        fetch('/api/admin/toggle_club_leader', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                make_leader: makeLeader
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('success', data.message);
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showToast('error', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('error', 'Failed to update club leader status');
+        });
+    }
+}
+
 // Club management functions
 function filterClubs() {
     const searchTerm = document.getElementById('clubSearch').value.trim();
@@ -2078,54 +2116,6 @@ function removeClubMember(membershipId, username, clubId) {
         console.error('Error removing club member:', error);
         showToast('error', 'Failed to remove club member: ' + error.message);
     });
-}
-
-function showToast(type, message) {
-    // Clear any existing toast timeout
-    if (window.toastTimeout) {
-        clearTimeout(window.toastTimeout);
-    }
-    
-    let toastContainer = document.getElementById('toast-container');
-    
-    // Create toast container if it doesn't exist
-    if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.id = 'toast-container';
-        document.body.appendChild(toastContainer);
-    }
-    
-    // Remove any existing toasts
-    while (toastContainer.firstChild) {
-        toastContainer.removeChild(toastContainer.firstChild);
-    }
-    
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-
-    const icon = type === 'success' ? 'check-circle' : 
-                type === 'error' ? 'exclamation-circle' :
-                type === 'warning' ? 'exclamation-triangle' :
-                'info-circle';
-
-    toast.innerHTML = `
-        <div class="toast-content">
-            <i class="fas fa-${icon}"></i>
-            <span>${message}</span>
-        </div>
-    `;
-
-    toastContainer.appendChild(toast);
-    toast.offsetHeight;
-    toast.classList.add('show');
-
-    window.toastTimeout = setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => {
-            toast.remove();
-            window.toastTimeout = null;
-        }, 300);
-    }, 3000);
 }
 
 async function saveUserChanges() {

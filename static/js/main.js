@@ -44,7 +44,7 @@ async function createNewSite(event) {
     const siteName = document.getElementById('siteName').value;
 
     if (!siteName) {
-        alert('Please enter a site name');
+        showToast('warning', 'Please enter a site name');
         return;
     }
 
@@ -61,11 +61,11 @@ async function createNewSite(event) {
         if (response.ok) {
             window.location.href = `/edit/${data.site_id}`;
         } else {
-            alert(data.message || 'Failed to create website');
+            showToast('error', data.message || 'Failed to create website');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Failed to create website');
+        showToast('error', 'Failed to create website');
     }
 }
 
@@ -190,3 +190,40 @@ function showToast(type, message, duration = 4000) {
 
 // For backward compatibility with other toast systems
 window.showToast = showToast;
+
+// Function to toggle club leader status (Admin Panel)
+async function toggleClubLeader(userId, username, makeLeader) {
+    const action = makeLeader ? 'make' : 'remove';
+    const confirmation = confirm(`Are you sure you want to ${action} ${username} as a club leader?`);
+    if (!confirmation) return;
+
+    try {
+        const response = await fetch(`/api/admin/users/${userId}/toggle_club_leader`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add any necessary CSRF token headers if your app uses them
+            },
+            body: JSON.stringify({ make_leader: makeLeader })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showToast('success', data.message || `Successfully ${action}d ${username} as club leader.`);
+            // Update the UI (e.g., toggle a badge)
+            const badge = document.getElementById(`club-leader-badge-${userId}`);
+            if (badge) {
+                badge.style.display = makeLeader ? 'inline-block' : 'none';
+            }
+            // Optionally, update the button text/icon in the dropdown if needed
+            // This might require more complex DOM manipulation depending on how the dropdown is structured
+            location.reload(); // Simple way to update UI for now
+        } else {
+            showToast('error', data.message || `Failed to ${action} club leader status.`);
+        }
+    } catch (error) {
+        console.error('Error toggling club leader status:', error);
+        showToast('error', `An error occurred while trying to ${action} club leader status.`);
+    }
+}

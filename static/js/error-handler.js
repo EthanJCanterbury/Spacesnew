@@ -261,12 +261,14 @@ function reportError() {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(errorDetails)
-    }).then(() => {
-        alert('Error report sent successfully. Thank you for helping us improve!');
+    }).then(async response => {
+        const data = await response.json();
+        console.log('Report submission response:', data);
+        showToast('success', 'Error report sent successfully. Thank you for helping us improve!');
         closeErrorModal();
     }).catch(err => {
         console.error('Failed to send error report:', err);
-        alert('Failed to send error report. Please try again later.');
+        showToast('error', 'Failed to send error report. Please try again later.');
     });
 }
 
