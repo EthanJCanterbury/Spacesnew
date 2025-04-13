@@ -111,7 +111,7 @@
                         </div>
                         <div class="post-footer">
                             <button class="post-action"><i class="far fa-heart"></i> Like</button>
-
+                            
                         </div>
                     </div>
                 </div>
@@ -789,7 +789,8 @@
 }
 
 .club-empty-state p {
-    margin: 0 0 2rem;colorvar(--text-secondary);
+    margin: 0 0 2rem;
+    colorvar(--text-secondary);
     font-size: 1.25rem;
 }
 
@@ -2061,6 +2062,11 @@ function createClub() {
         description: document.getElementById('clubDescription').value.trim()
     };
 
+    if (!formData.name) {
+        showToast('error', 'Club name is required');
+        return;
+    }
+
     fetch('/api/clubs', {
         method: 'POST',
         headers: {
@@ -2091,6 +2097,11 @@ function createClub() {
 // Join club functionality
 function joinClub() {
     const joinCode = document.getElementById('joinCode').value.trim();
+
+    if (!joinCode) {
+        showToast('error', 'Join code is required');
+        return;
+    }
 
     fetch('/api/clubs/join', {
         method: 'POST',
@@ -2126,6 +2137,11 @@ function updateClub() {
         location: document.getElementById('editClubLocation').value.trim(),
         description: document.getElementById('editClubDescription').value.trim()
     };
+
+    if (!formData.name) {
+        showToast('error', 'Club name is required');
+        return;
+    }
 
     fetch('/api/clubs/current', {
         method: 'PUT',
@@ -2294,7 +2310,7 @@ function loadPosts() {
                             <i class="${liked ? 'fas' : 'far'} fa-heart"></i> 
                             <span id="like-count-${post.id}">${likesCount}</span> Likes
                         </button>
-
+                        
                     </div>
                 `;
 
@@ -2457,6 +2473,11 @@ function deletePost(postId) {
 function createPost() {
     const content = document.getElementById('post-content').value.trim();
 
+    if (!content) {
+        showToast('error', 'Post content cannot be empty');
+        return;
+    }
+
     const clubId = getClubId();
 
     fetch(`/api/clubs/${clubId}/posts`, {
@@ -2515,7 +2536,7 @@ function createPost() {
                 <button class="post-action" onclick="toggleLike(${data.post.id})">
                     <i class="far fa-heart"></i> <span id="like-count-${data.post.id}">0</span> Likes
                 </button>
-
+                
             </div>
         `;
 
@@ -2730,6 +2751,11 @@ function updateAssignment(assignmentId) {
     const description = document.getElementById('assignmentDescription').value.trim();
     const dueDate = document.getElementById('assignmentDueDate').value;
 
+    if (!title || !description) {
+        showToast('error', 'Title and description are required');
+        return;
+    }
+
     const data = {
         title,
         description,
@@ -2814,6 +2840,11 @@ function createAssignment() {
     const title = document.getElementById('assignmentTitle').value.trim();
     const description = document.getElementById('assignmentDescription').value.trim();
     const dueDate = document.getElementById('assignmentDueDate').value;
+
+    if (!title || !description) {
+        showToast('error', 'Title and description are required');
+        return;
+    }
 
     const data = {
         title,
@@ -3003,6 +3034,11 @@ function updateResource(resourceId) {
     const description = document.getElementById('resourceDescription').value.trim();
     const icon = document.getElementById('resourceIcon').value;
 
+    if (!title || !url) {
+        showToast('error', 'Title and URL are required');
+        return;
+    }
+
     const data = {
         title,
         url,
@@ -3089,6 +3125,11 @@ function addResource() {
     const url = document.getElementById('resourceUrl').value.trim();
     const description = document.getElementById('resourceDescription').value.trim();
     const icon = document.getElementById('resourceIcon').value;
+
+    if (!title || !url) {
+        showToast('error', 'Title and URL are required');
+        return;
+    }
 
     const data = {
         title,
@@ -3306,6 +3347,11 @@ function createChannel() {
     const clubId = getClubId();
     const channelName = document.getElementById('channelName').value.trim().toLowerCase();
     const channelDescription = document.getElementById('channelDescription').value.trim();
+
+    if (!channelName) {
+        showToast('error', 'Channel name is required');
+        return;
+    }
 
     // Validate channel name (only lowercase letters, numbers, and hyphens)
     if (!/^[a-z0-9\-]+$/.test(channelName)) {
@@ -3577,84 +3623,6 @@ function toggleLike(postId) {
     });
 }
 
-
-function showClubWarningModal() {
-        document.getElementById('confirmClubPermissions').checked = false;
-        document.getElementById('confirmJoinBtn').disabled = true;
-        const modal = document.getElementById('clubWarningModal');
-        modal.style.display = 'flex';
-        modal.style.opacity = '1';
-        modal.style.visibility = 'visible';
-        document.body.style.overflow = 'hidden'; // Prevent scrolling
-    }
-
-function confirmJoinClub() {
-        const joinCode = document.getElementById('joinClubCode').value.trim();
-        // Continue with join process without error checks
-    }
-
-function createClub() {
-        const formData = {
-            name: document.getElementById('clubName').value.trim(),
-            location: document.getElementById('clubLocation').value.trim(),
-            description: document.getElementById('clubDescription').value.trim()
-        };
-    }
-
-function joinClub() {
-        const joinCode = document.getElementById('joinCode').value.trim();
-    }
-
-function updateClub() {
-        const formData = {
-            name: document.getElementById('editClubName').value.trim(),
-            location: document.getElementById('editClubLocation').value.trim(),
-            description: document.getElementById('editClubDescription').value.trim()
-        };
-    }
-
-function createAssignment() {
-        const clubId = getClubId();
-        const title = document.getElementById('assignmentTitle').value.trim();
-        const description = document.getElementById('assignmentDescription').value.trim();
-        const dueDate = document.getElementById('assignmentDueDate').value;
-    }
-
-function addResource() {
-        const clubId = getClubId();
-        const title = document.getElementById('resourceTitle').value.trim();
-        const url = document.getElementById('resourceUrl').value.trim();
-        const description = document.getElementById('resourceDescription').value.trim();
-        const icon = document.getElementById('resourceIcon').value;
-    }
-
-function createChannel() {
-        const clubId = getClubId();
-        const channelName = document.getElementById('channelName').value.trim().toLowerCase();
-        const channelDescription = document.getElementById('channelDescription').value.trim();
-    }
-
-function updateAssignment(assignmentId) {
-        const clubId = getClubId();
-        const title = document.getElementById('assignmentTitle').value.trim();
-        const description = document.getElementById('assignmentDescription').value.trim();
-        const dueDate = document.getElementById('assignmentDueDate').value;
-    }
-
-function createPost() {
-        const content = document.getElementById('post-content').value.trim();
-    }
-
-function sendChatMessage() {
-        const messageInput = document.getElementById('chat-message-input');
-        const message = messageInput.value.trim();
-        const channelId = messageInput.dataset.channelId;
-        const clubId = getClubId();
-
-        if (!message) {
-            return;
-        }
-    }
 
 </script>
 <style>
