@@ -36,7 +36,7 @@ function updatePreview() {
     // Get the preview iframe
     const previewFrame = document.getElementById('preview');
     if (!previewFrame) return;
-    
+
     // Force reload by setting the same src again
     const currentSrc = previewFrame.src;
     if (currentSrc) {
@@ -52,4 +52,8 @@ function delayedUpdatePreview() {
     setTimeout(updatePreview, 500); // Adjust delay as needed
 }
 
-// ... rest of the file (assumed to contain declarations for currentFile, editor, fileContents, siteType, showNotification, and potentially the preview-frame element) ...
+function showNotification(message, type) {
+    showToast(type, message);
+}
+
+// ... rest of the file (assumed to contain declarations for currentFile, editor, fileContents, siteType, showToast, and potentially the preview-frame element) ...
