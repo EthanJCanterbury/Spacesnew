@@ -3563,6 +3563,25 @@ document.addEventListener('DOMContentLoaded', function() {
             openTab(match[1]);
         }
     }
+    
+    // Add null checks for document event listeners
+    const createChannelForm = document.getElementById('createChannelForm');
+    if (createChannelForm) {
+        createChannelForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            createChannel();
+        });
+    }
+    
+    const chatMessageInput = document.getElementById('chat-message-input');
+    if (chatMessageInput) {
+        chatMessageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        });
+    }
 });
 
 function openDeleteClubModal() {

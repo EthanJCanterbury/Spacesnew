@@ -3294,6 +3294,7 @@ def club_dashboard(club_id=None):
     
     # If user is not a club leader and not in any club, deny access
     if not current_user.is_club_leader_role and not is_in_any_club and not is_club_leader:
+        app.logger.warning(f"User {current_user.id} ({current_user.username}) attempted to access club dashboard without permissions")
         flash('You do not have access to the club dashboard.', 'error')
         return redirect(url_for('welcome'))
     
