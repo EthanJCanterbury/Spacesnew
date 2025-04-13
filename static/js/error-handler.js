@@ -1,35 +1,40 @@
-window.onerror = function(msg, url, lineNo, columnNo, error) {
-    handleError({
-        type: 'JavaScript Error',
-        message: msg,
-        file: url,
-        line: lineNo,
-        column: columnNo,
-        stack: error ? error.stack : null
+// Check if the current page is club_dashboard before attaching error handlers
+const isClubDashboard = window.location.pathname.includes('club-dashboard');
+
+// Skip error handling for club dashboard page
+if (!isClubDashboard) {
+    window.onerror = function(msg, url, lineNo, columnNo, error) {
+        handleError({
+            type: 'JavaScript Error',
+            message: msg,
+            file: url,
+            line: lineNo,
+            column: columnNo,
+            stack: error ? error.stack : null
+        });
+        return false;
+    };
+
+    window.addEventListener('error', function(event) {
+        console.error('Caught error:', event.error);
+        
+        event.preventDefault();
+        
+        if (typeof showToast === 'function') {
+            showToast('error', 'An error occurred: ' + (event.error?.message || 'Unknown error'));
+        }
+        
+        return true;
     });
-    return false;
-};
 
-window.addEventListener('error', function(event) {
-  console.error('Caught error:', event.error);
-  
-  event.preventDefault();
-  
-  if (typeof showToast === 'function') {
-    showToast('error', 'An error occurred: ' + (event.error?.message || 'Unknown error'));
-  }
-  
-  return true;
-});
-
-
-window.addEventListener('unhandledrejection', function(event) {
-    handleError({
-        type: 'Promise Error',
-        message: event.reason.message || 'Unhandled Promise Rejection',
-        stack: event.reason.stack
+    window.addEventListener('unhandledrejection', function(event) {
+        handleError({
+            type: 'Promise Error',
+            message: event.reason.message || 'Unhandled Promise Rejection',
+            stack: event.reason.stack
+        });
     });
-});
+}
 
 $(document).ajaxError(function(event, jqXHR, settings, error) {
     handleError({
@@ -291,59 +296,61 @@ function testError(type) {
             break;
     }
 }
-// Global error handler
-window.addEventListener('error', function(event) {
-    const errorInfo = {
-        type: event.error ? event.error.name : 'Error',
-        message: event.error ? event.error.message : event.message,
-        file: event.filename,
-        line: event.lineno,
-        column: event.colno,
-        stack: event.error ? event.error.stack : null
-    };
-    
-    console.error('Caught error:', errorInfo);
-    
-    // Send error to server
-    fetch('/api/log-error', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(errorInfo)
-    }).catch(err => {
-        console.error('Failed to log error:', err);
+// Global error handler - skip for club dashboard page
+if (!isClubDashboard) {
+    window.addEventListener('error', function(event) {
+        const errorInfo = {
+            type: event.error ? event.error.name : 'Error',
+            message: event.error ? event.error.message : event.message,
+            file: event.filename,
+            line: event.lineno,
+            column: event.colno,
+            stack: event.error ? event.error.stack : null
+        };
+        
+        console.error('Caught error:', errorInfo);
+        
+        // Send error to server
+        fetch('/api/log-error', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(errorInfo)
+        }).catch(err => {
+            console.error('Failed to log error:', err);
+        });
+        
+        // Show error toast
+        if (typeof showToast === 'function') {
+            showToast('error', `JavaScript error: ${errorInfo.message}`);
+        }
     });
-    
-    // Show error toast
-    if (typeof showToast === 'function') {
-        showToast('error', `JavaScript error: ${errorInfo.message}`);
-    }
-});
 
-// Promise rejection handler
-window.addEventListener('unhandledrejection', function(event) {
-    const errorInfo = {
-        type: 'Promise Rejection',
-        message: event.reason ? (event.reason.message || String(event.reason)) : 'Unknown rejection reason',
-        stack: event.reason && event.reason.stack ? event.reason.stack : null
-    };
-    
-    console.error('Unhandled promise rejection:', errorInfo);
-    
-    // Send error to server
-    fetch('/api/log-error', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(errorInfo)
-    }).catch(err => {
-        console.error('Failed to log error:', err);
+    // Promise rejection handler
+    window.addEventListener('unhandledrejection', function(event) {
+        const errorInfo = {
+            type: 'Promise Rejection',
+            message: event.reason ? (event.reason.message || String(event.reason)) : 'Unknown rejection reason',
+            stack: event.reason && event.reason.stack ? event.reason.stack : null
+        };
+        
+        console.error('Unhandled promise rejection:', errorInfo);
+        
+        // Send error to server
+        fetch('/api/log-error', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(errorInfo)
+        }).catch(err => {
+            console.error('Failed to log error:', err);
+        });
+        
+        // Show error toast
+        if (typeof showToast === 'function') {
+            showToast('error', `Promise error: ${errorInfo.message}`);
+        }
     });
-    
-    // Show error toast
-    if (typeof showToast === 'function') {
-        showToast('error', `Promise error: ${errorInfo.message}`);
-    }
-});
+}
