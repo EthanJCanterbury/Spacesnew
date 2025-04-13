@@ -25,37 +25,42 @@ def fix_club_tables():
             columns = get_table_columns('club_post')
             print(f"Current columns: {', '.join(columns)}")
             
-            # Handle column renames and additions
+            # Handle case where both author_id and user_id exist
+            if 'author_id' in columns and 'user_id' in columns:
+                db.session.execute(text("""
+                    DO $$ 
+                    BEGIN
+                        -- Copy data from author_id to user_id if user_id is NULL
+                        UPDATE club_post SET user_id = author_id WHERE user_id IS NULL;
+                        
+                        -- Drop the author_id column
+                        ALTER TABLE club_post DROP COLUMN author_id;
+                        RAISE NOTICE 'Copied data from author_id to user_id and dropped author_id';
+                    END $$;
+                """))
+            elif 'author_id' in columns and 'user_id' not in columns:
+                # Only rename if author_id exists and user_id does not
+                db.session.execute(text("""
+                    ALTER TABLE club_post RENAME COLUMN author_id TO user_id;
+                """))
+            elif 'user_id' not in columns:
+                # Add user_id if it doesn't exist
+                db.session.execute(text("""
+                    ALTER TABLE club_post ADD COLUMN user_id INTEGER REFERENCES "user"(id);
+                """))
+            
+            # Make sure there's no NOT NULL constraint
             db.session.execute(text("""
                 DO $$ 
                 BEGIN
-                    -- Handle author_id to user_id conversion if needed
-                    IF EXISTS (
-                        SELECT 1 FROM information_schema.columns 
-                        WHERE table_name = 'club_post' AND column_name = 'author_id'
-                    ) THEN
-                        ALTER TABLE club_post RENAME COLUMN author_id TO user_id;
-                        RAISE NOTICE 'Renamed author_id to user_id';
-                    END IF;
-                    
-                    -- Add user_id if it doesn't exist
-                    IF NOT EXISTS (
-                        SELECT 1 FROM information_schema.columns 
-                        WHERE table_name = 'club_post' AND column_name = 'user_id'
-                    ) THEN
-                        ALTER TABLE club_post ADD COLUMN user_id INTEGER REFERENCES "user"(id);
-                        RAISE NOTICE 'Added user_id column';
-                    END IF;
-                    
-                    -- Make sure there's no NOT NULL constraint if we just added it
                     BEGIN
                         ALTER TABLE club_post ALTER COLUMN user_id DROP NOT NULL;
-                        RAISE NOTICE 'Dropped NOT NULL constraint from user_id';
                     EXCEPTION WHEN OTHERS THEN
                         NULL;
                     END;
                 END $$;
             """))
+            
             db.session.commit()
             print("✅ Successfully fixed club_post table schema")
         except Exception as e:
@@ -68,36 +73,42 @@ def fix_club_tables():
             columns = get_table_columns('club_resource')
             print(f"Current columns: {', '.join(columns)}")
             
+            # Handle case where both creator_id and created_by exist
+            if 'creator_id' in columns and 'created_by' in columns:
+                db.session.execute(text("""
+                    DO $$ 
+                    BEGIN
+                        -- Copy data from creator_id to created_by if created_by is NULL
+                        UPDATE club_resource SET created_by = creator_id WHERE created_by IS NULL;
+                        
+                        -- Drop the creator_id column
+                        ALTER TABLE club_resource DROP COLUMN creator_id;
+                        RAISE NOTICE 'Copied data from creator_id to created_by and dropped creator_id';
+                    END $$;
+                """))
+            elif 'creator_id' in columns and 'created_by' not in columns:
+                # Only rename if creator_id exists and created_by does not
+                db.session.execute(text("""
+                    ALTER TABLE club_resource RENAME COLUMN creator_id TO created_by;
+                """))
+            elif 'created_by' not in columns:
+                # Add created_by if it doesn't exist
+                db.session.execute(text("""
+                    ALTER TABLE club_resource ADD COLUMN created_by INTEGER REFERENCES "user"(id);
+                """))
+            
+            # Make sure there's no NOT NULL constraint
             db.session.execute(text("""
                 DO $$ 
                 BEGIN
-                    -- Handle creator_id to created_by conversion if needed
-                    IF EXISTS (
-                        SELECT 1 FROM information_schema.columns 
-                        WHERE table_name = 'club_resource' AND column_name = 'creator_id'
-                    ) THEN
-                        ALTER TABLE club_resource RENAME COLUMN creator_id TO created_by;
-                        RAISE NOTICE 'Renamed creator_id to created_by';
-                    END IF;
-                    
-                    -- Add created_by if it doesn't exist
-                    IF NOT EXISTS (
-                        SELECT 1 FROM information_schema.columns 
-                        WHERE table_name = 'club_resource' AND column_name = 'created_by'
-                    ) THEN
-                        ALTER TABLE club_resource ADD COLUMN created_by INTEGER REFERENCES "user"(id);
-                        RAISE NOTICE 'Added created_by column';
-                    END IF;
-                    
-                    -- Make sure there's no NOT NULL constraint if we just added it
                     BEGIN
                         ALTER TABLE club_resource ALTER COLUMN created_by DROP NOT NULL;
-                        RAISE NOTICE 'Dropped NOT NULL constraint from created_by';
                     EXCEPTION WHEN OTHERS THEN
                         NULL;
                     END;
                 END $$;
             """))
+            
             db.session.commit()
             print("✅ Successfully fixed club_resource table schema")
         except Exception as e:
@@ -110,36 +121,48 @@ def fix_club_tables():
             columns = get_table_columns('club_assignment')
             print(f"Current columns: {', '.join(columns)}")
             
+            # Handle case where both creator_id and created_by exist
+            if 'creator_id' in columns and 'created_by' in columns:
+                db.session.execute(text("""
+                    DO $$ 
+                    BEGIN
+                        -- Copy data from creator_id to created_by if created_by is NULL
+                        UPDATE club_assignment SET created_by = creator_id WHERE created_by IS NULL;
+                        
+                        -- Drop the creator_id column
+                        ALTER TABLE club_assignment DROP COLUMN creator_id;
+                        RAISE NOTICE 'Copied data from creator_id to created_by and dropped creator_id';
+                    END $$;
+                """))
+            elif 'creator_id' in columns and 'created_by' not in columns:
+                # Only rename if creator_id exists and created_by does not
+                db.session.execute(text("""
+                    ALTER TABLE club_assignment RENAME COLUMN creator_id TO created_by;
+                """))
+            elif 'created_by' not in columns:
+                # Add created_by if it doesn't exist
+                db.session.execute(text("""
+                    ALTER TABLE club_assignment ADD COLUMN created_by INTEGER REFERENCES "user"(id);
+                """))
+            
+            # Add is_active column if it doesn't exist
+            if 'is_active' not in columns:
+                db.session.execute(text("""
+                    ALTER TABLE club_assignment ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+                """))
+            
+            # Make sure there's no NOT NULL constraint on created_by
             db.session.execute(text("""
                 DO $$ 
                 BEGIN
-                    -- Add is_active column if it doesn't exist
-                    IF NOT EXISTS (
-                        SELECT 1 FROM information_schema.columns 
-                        WHERE table_name = 'club_assignment' AND column_name = 'is_active'
-                    ) THEN
-                        ALTER TABLE club_assignment ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
-                        RAISE NOTICE 'Added is_active column';
-                    END IF;
-                    
-                    -- Add created_by if it doesn't exist
-                    IF NOT EXISTS (
-                        SELECT 1 FROM information_schema.columns 
-                        WHERE table_name = 'club_assignment' AND column_name = 'created_by'
-                    ) THEN
-                        ALTER TABLE club_assignment ADD COLUMN created_by INTEGER REFERENCES "user"(id);
-                        RAISE NOTICE 'Added created_by column';
-                    END IF;
-                    
-                    -- Make sure there's no NOT NULL constraint if we just added it
                     BEGIN
                         ALTER TABLE club_assignment ALTER COLUMN created_by DROP NOT NULL;
-                        RAISE NOTICE 'Dropped NOT NULL constraint from created_by';
                     EXCEPTION WHEN OTHERS THEN
                         NULL;
                     END;
                 END $$;
             """))
+            
             db.session.commit()
             print("✅ Successfully fixed club_assignment table schema")
         except Exception as e:
@@ -152,23 +175,20 @@ def fix_club_tables():
             columns = get_table_columns('club_chat_message')
             print(f"Current columns: {', '.join(columns)}")
             
-            db.session.execute(text("""
-                DO $$ 
-                BEGIN
-                    -- Make sure channel_id can be NULL to allow direct messages
-                    IF EXISTS (
-                        SELECT 1 FROM information_schema.columns 
-                        WHERE table_name = 'club_chat_message' AND column_name = 'channel_id'
-                    ) THEN
+            # Make sure channel_id can be NULL to allow direct messages
+            if 'channel_id' in columns:
+                db.session.execute(text("""
+                    DO $$ 
+                    BEGIN
                         BEGIN
                             ALTER TABLE club_chat_message ALTER COLUMN channel_id DROP NOT NULL;
                             RAISE NOTICE 'Dropped NOT NULL constraint from channel_id';
                         EXCEPTION WHEN OTHERS THEN
                             NULL;
                         END;
-                    END IF;
-                END $$;
-            """))
+                    END $$;
+                """))
+            
             db.session.commit()
             print("✅ Successfully fixed club_chat_message table schema")
         except Exception as e:
