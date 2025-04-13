@@ -836,7 +836,6 @@ function filterUsers() {
                         ${user.id !== {{ current_user.id }} ? 
                         `<input type="checkbox" class="user-select" data-userid="${user.id}" data-username="${user.username}" onchange="updateBulkActions()">` : 
                         ''}
-                    ```
                     </td>
                     <td>${user.id}</td>
                     <td>${user.username}</td>
