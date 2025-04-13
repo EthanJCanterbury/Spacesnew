@@ -42,12 +42,11 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    color: #000000;
+    color: #333333;
 }
 
 .toast-content i {
     font-size: 1.25rem;
-    color: #000000;
 }
 
 .toast-success {
@@ -58,12 +57,20 @@
     background-color: #059669;
 }
 
+.toast-success i {
+    color: #059669;
+}
+
 .toast-error {
     background-color: #fef2f2;
 }
 
 .toast-error::before {
     background-color: #dc2626;
+}
+
+.toast-error i {
+    color: #dc2626;
 }
 
 .toast-info {
@@ -74,12 +81,20 @@
     background-color: #3b82f6;
 }
 
+.toast-info i {
+    color: #3b82f6;
+}
+
 .toast-warning {
     background-color: #fffbeb;
 }
 
 .toast-warning::before {
     background-color: #d97706;
+}
+
+.toast-warning i {
+    color: #d97706;
 }
 
 @media (max-width: 768px) {
