@@ -4075,10 +4075,10 @@ def club_resources(club_id):
             }
         })
 
-@app.route('/api/clubs/<int:club_id>/resources/<int:resource_id>', methods=['GET', 'PUT', 'DELETE'])
+@app.route('/api/clubs/<int:club_id>/resources/<int:resource_id>', methods=['PUT', 'DELETE'])
 @login_required
 def manage_club_resource(club_id, resource_id):
-    """Get, update or delete a club resource."""
+    """Update or delete a club resource."""
     from models import ClubResource
     
     resource = ClubResource.query.get_or_404(resource_id)
@@ -4087,32 +4087,9 @@ def manage_club_resource(club_id, resource_id):
     if resource.club_id != club_id:
         return jsonify({'error': 'Resource not found in this club'}), 404
         
-    # Check if user is authorized
-    club = Club.query.get_or_404(club_id)
-    if club.leader_id != current_user.id:
-        membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
-        if not membership:
-            return jsonify({'error': 'You are not a member of this club'}), 403
-    
-    if request.method == 'GET':
-        return jsonify({
-            'resource': {
-                'id': resource.id,
-                'title': resource.title,
-                'url': resource.url,
-                'description': resource.description,
-                'icon': resource.icon,
-                'created_at': resource.created_at.isoformat(),
-                'creator': {
-                    'id': resource.creator.id,
-                    'username': resource.creator.username
-                }
-            }
-        })
-    
-    # For PUT and DELETE, check additional authorization
+    # Check if user is authorized (creator or club leader/co-leader)
     is_authorized = False
-    if resource.created_by == current_user.id or club.leader_id == current_user.id:
+    if resource.created_by == current_user.id or resource.club.leader_id == current_user.id:
         is_authorized = True
     else:
         membership = ClubMembership.query.filter_by(
@@ -4413,69 +4390,6 @@ def get_member_sites():
 
             # Additional debug logging - list all sites found
             for site in sites:
-                app.logger.info(f"Site found: {site.id} - {site.name} (Owner: {site.user_id})")
-                
-            # Format sites and return them
-            result = []
-            for site in sites:
-                user = User.query.get(site.user_id)
-                if user:
-                    site_data = {
-                        'id': site.id,
-                        'name': site.name,
-                        'type': site.site_type,
-                        'updated_at': site.updated_at.isoformat() if site.updated_at else None,
-                        'owner': {
-                            'id': user.id,
-                            'username': user.username
-                        }
-                    }
-                    result.append(site_data)
-            
-            return jsonify({'sites': result})
-            
-        except Exception as e:
-            app.logger.error(f'Error getting member sites: {str(e)}')
-            return jsonify({'error': f'Failed to get member sites: {str(e)}'}), 500
-
-@app.route('/api/clubs/<int:club_id>/assignments/<int:assignment_id>', methods=['GET'])
-@login_required
-def get_assignment_details(club_id, assignment_id):
-    """Get details of a specific assignment"""
-    try:
-        club = Club.query.get_or_404(club_id)
-        
-        # Check if user is member of this club
-        if club.leader_id != current_user.id:
-            membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
-            if not membership:
-                return jsonify({'error': 'You are not a member of this club'}), 403
-        
-        assignment = ClubAssignment.query.get_or_404(assignment_id)
-        
-        # Check if assignment belongs to the correct club
-        if assignment.club_id != club_id:
-            return jsonify({'error': 'Assignment not found in this club'}), 404
-            
-        return jsonify({
-            'assignment': {
-                'id': assignment.id,
-                'title': assignment.title,
-                'description': assignment.description,
-                'due_date': assignment.due_date.isoformat() if assignment.due_date else None,
-                'created_at': assignment.created_at.isoformat(),
-                'is_active': assignment.is_active,
-                'creator': {
-                    'id': assignment.creator.id,
-                    'username': assignment.creator.username
-                }
-            }
-        })
-    except Exception as e:
-        db.session.rollback()
-        app.logger.error(f'Error getting assignment details: {str(e)}')
-        return jsonify({'error': 'Failed to load assignment details'}), 500
-
                 app.logger.info(
                     f"Site found: {site.id} - {site.name} (Owner: {site.user_id})"
                 )
@@ -4555,186 +4469,3 @@ if __name__ == '__main__':
 
     app.logger.info("Server running on http://0.0.0.0:3000")
     app.run(host='0.0.0.0', port=3000, debug=True)
-
-
-@app.route('/api/clubs/<int:club_id>/assignments/<int:assignment_id>', methods=['GET'])
-@login_required
-def get_assignment_details(club_id, assignment_id):
-    """Get details of a specific assignment"""
-    try:
-        club = Club.query.get_or_404(club_id)
-        
-        # Check if user is member of this club
-        if club.leader_id != current_user.id:
-            membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
-            if not membership:
-                return jsonify({'error': 'You are not a member of this club'}), 403
-        
-        assignment = ClubAssignment.query.get_or_404(assignment_id)
-        
-        # Check if assignment belongs to the correct club
-        if assignment.club_id != club_id:
-            return jsonify({'error': 'Assignment not found in this club'}), 404
-            
-        return jsonify({
-            'assignment': {
-                'id': assignment.id,
-                'title': assignment.title,
-                'description': assignment.description,
-                'due_date': assignment.due_date.isoformat() if assignment.due_date else None,
-                'created_at': assignment.created_at.isoformat(),
-                'is_active': assignment.is_active,
-                'creator': {
-                    'id': assignment.creator.id,
-                    'username': assignment.creator.username
-                }
-            }
-        })
-    except Exception as e:
-        db.session.rollback()
-        app.logger.error(f'Error getting assignment details: {str(e)}')
-        return jsonify({'error': 'Failed to load assignment details'}), 500
-
-@app.route('/api/clubs/<int:club_id>/resources', methods=['GET', 'POST'])
-@login_required
-def club_resources(club_id):
-    """Get all resources for a club or create a new resource"""
-    from models import ClubResource
-    
-    # Verify user is a member of the club
-    club = Club.query.get_or_404(club_id)
-    membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
-    if not membership and club.leader_id != current_user.id:
-        return jsonify({'error': 'You are not a member of this club'}), 403
-        
-    if request.method == 'GET':
-        resources = db.session.query(ClubResource, User) \
-            .join(User, ClubResource.created_by == User.id) \
-            .filter(ClubResource.club_id == club_id) \
-            .order_by(ClubResource.created_at.desc()).all()
-                
-        result = []
-        for resource, user in resources:
-            result.append({
-                'id': resource.id,
-                'title': resource.title,
-                'url': resource.url,
-                'description': resource.description,
-                'icon': resource.icon,
-                'created_at': resource.created_at.isoformat(),
-                'creator': {
-                    'id': user.id,
-                    'username': user.username
-                }
-            })
-            
-        return jsonify({'resources': result})
-        
-    elif request.method == 'POST':
-        data = request.get_json()
-        title = data.get('title')
-        url = data.get('url')
-        description = data.get('description', '')
-        icon = data.get('icon', 'link')
-        
-        if not title or not url:
-            return jsonify({'error': 'Title and URL are required'}), 400
-            
-        resource = ClubResource(
-            club_id=club_id,
-            title=title,
-            url=url,
-            description=description,
-            icon=icon,
-            created_by=current_user.id
-        )
-        
-        db.session.add(resource)
-        db.session.commit()
-        
-        return jsonify({
-            'message': 'Resource created successfully',
-            'resource': {
-                'id': resource.id,
-                'title': resource.title,
-                'url': resource.url,
-                'description': resource.description,
-                'icon': resource.icon,
-                'created_at': resource.created_at.isoformat()
-            }
-        })
-
-@app.route('/api/clubs/<int:club_id>/resources/<int:resource_id>', methods=['GET', 'PUT', 'DELETE'])
-@login_required
-def manage_club_resource(club_id, resource_id):
-    """Get, update or delete a club resource"""
-    from models import ClubResource
-    
-    resource = ClubResource.query.get_or_404(resource_id)
-    
-    # Check if resource belongs to the correct club
-    if resource.club_id != club_id:
-        return jsonify({'error': 'Resource not found in this club'}), 404
-        
-    # Check if user is authorized
-    club = Club.query.get_or_404(club_id)
-    if club.leader_id != current_user.id:
-        membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
-        if not membership:
-            return jsonify({'error': 'You are not a member of this club'}), 403
-    
-    if request.method == 'GET':
-        return jsonify({
-            'resource': {
-                'id': resource.id,
-                'title': resource.title,
-                'url': resource.url,
-                'description': resource.description,
-                'icon': resource.icon,
-                'created_at': resource.created_at.isoformat(),
-                'creator': {
-                    'id': resource.creator.id,
-                    'username': resource.creator.username
-                }
-            }
-        })
-        
-    elif request.method == 'PUT':
-        # Only creator or leader can edit
-        if resource.created_by != current_user.id and club.leader_id != current_user.id:
-            return jsonify({'error': 'You are not authorized to edit this resource'}), 403
-            
-        data = request.get_json()
-        title = data.get('title')
-        url = data.get('url')
-        
-        if not title or not url:
-            return jsonify({'error': 'Title and URL are required'}), 400
-            
-        resource.title = title
-        resource.url = url
-        resource.description = data.get('description', '')
-        resource.icon = data.get('icon', 'link')
-        
-        db.session.commit()
-        
-        return jsonify({
-            'message': 'Resource updated successfully',
-            'resource': {
-                'id': resource.id,
-                'title': resource.title,
-                'url': resource.url,
-                'description': resource.description,
-                'icon': resource.icon
-            }
-        })
-        
-    elif request.method == 'DELETE':
-        # Only creator or leader can delete
-        if resource.created_by != current_user.id and club.leader_id != current_user.id:
-            return jsonify({'error': 'You are not authorized to delete this resource'}), 403
-            
-        db.session.delete(resource)
-        db.session.commit()
-        
-        return jsonify({'message': 'Resource deleted successfully'})
