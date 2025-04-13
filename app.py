@@ -4532,6 +4532,7 @@ if __name__ == '__main__':
     app.logger.info("Server running on http://0.0.0.0:3000")
     app.run(host='0.0.0.0', port=3000, debug=True)
 
+
 @app.route('/api/clubs/<int:club_id>/assignments/<int:assignment_id>', methods=['GET'])
 @login_required
 def get_assignment_details(club_id, assignment_id):
