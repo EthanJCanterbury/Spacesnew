@@ -227,29 +227,23 @@ def report_error():
 
 @app.before_request
 def log_request_info():
-    """Log detailed information about each incoming request."""
-    app.logger.info('Request: %s %s from %s', request.method, request.path,
-                    request.remote_addr)
-    if request.args:
-        app.logger.info('Request Args: %s', dict(request.args))
-    if request.form:
-        app.logger.info('Form Data: %s', dict(request.form))
-    if request.is_json and request.get_json(silent=True):
-        app.logger.info('JSON Data: %s', request.get_json(silent=True))
-    if request.headers:
-        headers = {
-            k: v
-            for k, v in request.headers.items()
-            if k.lower() not in ('cookie', 'authorization')
-        }
-        app.logger.info('Headers: %s', headers)
+    """Log minimal information about each incoming request."""
+    # Only log warnings and errors, not regular requests
+    if request.path.startswith('/static') or request.path.startswith('/favicon'):
+        return
+    
+    # Log only for specific error-prone endpoints or in debug mode
+    if app.debug or 'admin' in request.path or request.method != 'GET':
+        app.logger.debug('Request: %s %s', request.method, request.path)
 
 
 @app.after_request
 def log_response_info(response):
-    """Log information about the response."""
-    app.logger.info('Response: %s %s → %d', request.method, request.path,
-                    response.status_code)
+    """Log information about error responses only."""
+    # Only log non-successful responses
+    if response.status_code >= 400:
+        app.logger.warning('Response: %s %s → %d', request.method, request.path,
+                        response.status_code)
     return response
 
 

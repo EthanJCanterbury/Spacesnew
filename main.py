@@ -6,22 +6,22 @@ import signal
 import atexit
 from app import app, db
 
-# Configure logging
+# Configure logging - reduced verbosity
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,
     format='[%(asctime)s] [%(levelname)s] %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
 # Create console handler with a higher log level
 console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
+console_handler.setLevel(logging.WARNING)
 formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s')
 console_handler.setFormatter(formatter)
 
 # Add the handlers to the logger
 app.logger.addHandler(console_handler)
-app.logger.setLevel(logging.INFO)
+app.logger.setLevel(logging.WARNING)
 
 # Global variable to store the Hackatime service process
 hackatime_process = None

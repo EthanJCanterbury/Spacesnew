@@ -26,7 +26,7 @@ async function saveContent() {
             delayedUpdatePreview();
         }
     } catch (error) {
-        console.error(`Error saving ${currentFile}:`, error);
+        console.error(`Error saving ${currentFile}`);
         showNotification(`Error saving ${currentFile}`, 'error');
     }
 }
