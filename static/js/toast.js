@@ -1,3 +1,4 @@
+
 /**
  * Displays a toast notification
  * 
@@ -13,7 +14,7 @@ function showToast(type, message, duration = 3000) {
         toastContainer.id = 'toast-container';
         document.body.appendChild(toastContainer);
     }
-
+    
     // Create the toast
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
