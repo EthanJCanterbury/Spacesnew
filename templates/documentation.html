@@ -46,6 +46,7 @@
                     <h4>Guides</h4>
                     <ul>
                         <li><a href="#html-css">HTML & CSS Tips</a></li>
+                        <li><a href="#uploading-images">Uploading Images</a></li>
                         <li><a href="#best-practices">Best Practices</a></li>
                         <li><a href="#examples">Example Projects</a></li>
                     </ul>
@@ -367,6 +368,59 @@
                 </div>
                 <div class="feature-item">
                     <i class="fas fa-check-circle"></i>
+
+        <section id="uploading-images">
+            <h2>Uploading Images</h2>
+            <p class="lead">Learn how to add custom images to your Spaces projects using different methods.</p>
+            
+            <div class="practices-list">
+                <div class="practice-item">
+                    <h3>Method 1: Using Hack Club's #cdn Slack Channel</h3>
+                    <p>The easiest way to host images for your project is through the Hack Club Slack:</p>
+                    <ol style="padding-left: 20px; line-height: 1.6;">
+                        <li>Join the <a href="https://hackclub.com/slack" target="_blank">Hack Club Slack</a> if you haven't already</li>
+                        <li>Go to the <strong>#cdn</strong> channel</li>
+                        <li>Upload your image to the channel</li>
+                        <li>Right-click on the uploaded image and select "Copy Link"</li>
+                        <li>Paste the copied URL in your HTML code</li>
+                    </ol>
+                    <div class="code-example">
+                        <pre><code class="language-html">&lt;img src="https://cloud-example-url-from-slack.com/your-image.jpg" alt="My Custom Image"&gt;</code></pre>
+                    </div>
+                </div>
+                
+                <div class="practice-item">
+                    <h3>Method 2: Using Images from the Web</h3>
+                    <p>You can also use images from anywhere on the web:</p>
+                    <ol style="padding-left: 20px; line-height: 1.6;">
+                        <li>Find an image you want to use on any website</li>
+                        <li>Right-click on the image and select "Copy Image Address" or "Copy Image URL"</li>
+                        <li>Paste the URL in your HTML code</li>
+                    </ol>
+                    <div class="tip-card">
+                        <h4>Important Note</h4>
+                        <p>Make sure you have permission to use images from other websites. Using images without permission may violate copyright laws.</p>
+                    </div>
+                </div>
+                
+                <div class="practice-item">
+                    <h3>Using Images in HTML</h3>
+                    <div class="code-example">
+                        <h4>Basic Image Tag</h4>
+                        <pre><code class="language-html">&lt;img src="your-image-url-here.jpg" alt="Description of the image"&gt;</code></pre>
+                        
+                        <h4>Image with Styling</h4>
+                        <pre><code class="language-html">&lt;img 
+  src="your-image-url-here.jpg" 
+  alt="Description of the image"
+  class="responsive-image"
+  style="max-width: 100%; border-radius: 8px;"
+&gt;</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
                     <h3>Linting</h3>
                     <p>Enable code linting in the editor settings to identify potential errors and style issues as you type.</p>
                 </div>
