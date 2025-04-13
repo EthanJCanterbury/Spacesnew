@@ -3394,6 +3394,36 @@ def create_club():
                                     club_id=club.id,
                                     role='co-leader')
         db.session.add(membership)
+        
+        # Create default channels for the club
+        from models import ClubChatChannel, ClubChatMessage
+        default_channels = [
+            {'name': 'general', 'description': 'General discussion channel'},
+            {'name': 'announcements', 'description': 'Important club announcements'},
+            {'name': 'help', 'description': 'Ask for help with your projects'}
+        ]
+        
+        for channel_data in default_channels:
+            channel = ClubChatChannel(
+                club_id=club.id,
+                name=channel_data['name'],
+                description=channel_data['description'],
+                created_by=current_user.id
+            )
+            db.session.add(channel)
+        
+        db.session.commit()
+        
+        # Add welcome messages to the channels
+        channels = ClubChatChannel.query.filter_by(club_id=club.id).all()
+        for channel in channels:
+            welcome_message = ClubChatMessage(
+                channel_id=channel.id,
+                user_id=current_user.id,
+                content=f"Welcome to #{channel.name}! This channel was created automatically when the club was formed."
+            )
+            db.session.add(welcome_message)
+        
         db.session.commit()
 
         activity = UserActivity(
@@ -3682,11 +3712,22 @@ def club_posts(club_id):
                 
         result = []
         for post, user in posts:
+            # Get likes information
+            from models import ClubPostLike
+            post_likes = ClubPostLike.query.filter_by(post_id=post.id).all()
+            liked_by = [like.user_id for like in post_likes]
+            
+            # Check if current user liked this post
+            user_liked = current_user.id in liked_by
+            
             result.append({
                 'id': post.id,
                 'content': post.content,
                 'created_at': post.created_at.isoformat(),
                 'updated_at': post.updated_at.isoformat(),
+                'likes': post.likes or len(post_likes),  # Use stored count or calculate
+                'liked_by': liked_by,
+                'user_liked': user_liked,
                 'user': {
                     'id': user.id,
                     'username': user.username
@@ -3729,6 +3770,48 @@ def club_posts(club_id):
 def manage_club_post(club_id, post_id):
     """Update or delete a club post."""
     from models import ClubPost
+
+@app.route('/api/clubs/<int:club_id>/posts/<int:post_id>/like', methods=['POST'])
+@login_required
+def toggle_post_like(club_id, post_id):
+    """Toggle like on a club post."""
+    from models import ClubPost, ClubPostLike
+    
+    post = ClubPost.query.get_or_404(post_id)
+    
+    # Check if post belongs to the correct club
+    if post.club_id != club_id:
+        return jsonify({'error': 'Post not found in this club'}), 404
+        
+    # Check if user is a club member
+    membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
+    if not membership and post.club.leader_id != current_user.id:
+        return jsonify({'error': 'You are not a member of this club'}), 403
+    
+    # Check if user already liked this post
+    existing_like = ClubPostLike.query.filter_by(post_id=post_id, user_id=current_user.id).first()
+    
+    if existing_like:
+        # Unlike
+        db.session.delete(existing_like)
+        liked = False
+    else:
+        # Like
+        new_like = ClubPostLike(post_id=post_id, user_id=current_user.id)
+        db.session.add(new_like)
+        liked = True
+    
+    # Update likes count
+    like_count = ClubPostLike.query.filter_by(post_id=post_id).count()
+    post.likes = like_count
+    
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Like toggled successfully',
+        'liked': liked,
+        'likes': like_count
+    })
     
     post = ClubPost.query.get_or_404(post_id)
     

@@ -78,12 +78,29 @@ class ClubPost(db.Model):
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    likes = db.Column(db.Integer, default=0)
     
     club = db.relationship('Club', backref=db.backref('posts', lazy=True, order_by='desc(ClubPost.created_at)'))
     user = db.relationship('User', backref=db.backref('club_posts', lazy=True))
     
     def __repr__(self):
         return f'<ClubPost {self.id} by {self.user.username} in {self.club.name}>'
+
+class ClubPostLike(db.Model):
+    __tablename__ = 'club_post_like'
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey('club_post.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    post = db.relationship('ClubPost', backref=db.backref('post_likes', lazy=True))
+    user = db.relationship('User', backref=db.backref('club_post_likes', lazy=True))
+    
+    # Make post_id and user_id combination unique
+    __table_args__ = (db.UniqueConstraint('post_id', 'user_id', name='unique_post_like'),)
+    
+    def __repr__(self):
+        return f'<ClubPostLike post_id={self.post_id} by user_id={self.user_id}>'
 
 
 class ClubAssignment(db.Model):
