@@ -232,6 +232,11 @@ class User(UserMixin, db.Model):
     is_suspended = db.Column(db.Boolean, default=False)
     is_admin = db.Column(db.Boolean, default=False)
     is_club_leader_role = db.Column(db.Boolean, default=False)
+    social_links = db.Column(db.JSON, nullable=True)
+    bio = db.Column(db.Text, nullable=True)
+    avatar = db.Column(db.String(500), nullable=True)
+    profile_banner = db.Column(db.String(500), nullable=True)
+    is_profile_public = db.Column(db.Boolean, default=False)
     
     @property
     def is_club_leader(self):
