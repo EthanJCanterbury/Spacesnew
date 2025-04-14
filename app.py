@@ -1210,25 +1210,123 @@ def delete_site(site_id):
 def documentation():
     return render_template('documentation.html')
 
+@app.route('/api/admin/gallery/feature/<int:entry_id>', methods=['POST'])
+@login_required
+def toggle_gallery_feature(entry_id):
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+        
+    try:
+        from models import GalleryEntry
+        entry = GalleryEntry.query.get_or_404(entry_id)
+        
+        # Toggle featured status
+        entry.is_featured = not entry.is_featured
+        db.session.commit()
+        
+        activity = UserActivity(
+            activity_type="admin_action",
+            message=f'Admin {{username}} {"featured" if entry.is_featured else "unfeatured"} gallery entry "{entry.title}"',
+            username=current_user.username,
+            user_id=current_user.id
+        )
+        db.session.add(activity)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True, 
+            'is_featured': entry.is_featured
+        })
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error toggling gallery feature: {str(e)}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/gallery/entry/<int:entry_id>/remove', methods=['POST'])
+@login_required
+def remove_gallery_entry(entry_id):
+    try:
+        from models import GalleryEntry
+        entry = GalleryEntry.query.get_or_404(entry_id)
+        
+        # Verify permission (owner or admin)
+        if entry.user_id != current_user.id and not current_user.is_admin:
+            flash('You do not have permission to remove this entry', 'error')
+            return redirect(url_for('gallery'))
+        
+        title = entry.title
+        db.session.delete(entry)
+        
+        activity = UserActivity(
+            activity_type="gallery_removal",
+            message=f'User {{username}} removed "{title}" from the gallery',
+            username=current_user.username,
+            user_id=current_user.id
+        )
+        db.session.add(activity)
+        db.session.commit()
+        
+        flash('Entry successfully removed from the gallery', 'success')
+        return redirect(url_for('gallery'))
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error removing gallery entry: {str(e)}')
+        flash('An error occurred while removing the entry', 'error')
+        return redirect(url_for('gallery'))
+
 
 @app.route('/gallery')
-def gallery():
+@app.route('/gallery/tag/<tag>')
+def gallery(tag=None):
     from models import GalleryEntry, Site, User
-    entries = db.session.query(GalleryEntry, Site, User)\
+    
+    # Get featured entries
+    featured_query = db.session.query(GalleryEntry, Site, User)\
         .join(Site, GalleryEntry.site_id == Site.id)\
         .join(User, GalleryEntry.user_id == User.id)\
-        .filter(GalleryEntry.is_featured == True)\
-        .order_by(GalleryEntry.added_at.desc())\
-        .all()
+        .filter(GalleryEntry.is_featured == True)
     
-    recent_entries = db.session.query(GalleryEntry, Site, User)\
+    # Apply tag filter to featured entries if tag is provided
+    if tag:
+        featured_query = featured_query.filter(GalleryEntry.tags.like(f'%{tag}%'))
+    
+    featured_entries = featured_query.order_by(GalleryEntry.added_at.desc()).all()
+    
+    # Get all entries
+    entries_query = db.session.query(GalleryEntry, Site, User)\
         .join(Site, GalleryEntry.site_id == Site.id)\
-        .join(User, GalleryEntry.user_id == User.id)\
-        .order_by(GalleryEntry.added_at.desc())\
-        .limit(20)\
-        .all()
+        .join(User, GalleryEntry.user_id == User.id)
     
-    return render_template('gallery.html', featured_entries=entries, recent_entries=recent_entries)
+    # Apply tag filter to all entries if tag is provided
+    if tag:
+        entries_query = entries_query.filter(GalleryEntry.tags.like(f'%{tag}%'))
+    
+    entries = entries_query.order_by(GalleryEntry.added_at.desc()).all()
+    
+    # Get all unique tags for the filter dropdown
+    all_tags_query = db.session.query(GalleryEntry.tags).filter(GalleryEntry.tags != None, GalleryEntry.tags != '')
+    all_tags_raw = all_tags_query.all()
+    
+    # Process tags into a unique list
+    all_tags = set()
+    for tags_str in all_tags_raw:
+        if tags_str[0]:
+            tags_list = [t.strip() for t in tags_str[0].split(',')]
+            all_tags.update(tag for tag in tags_list if tag)
+    
+    all_tags = sorted(list(all_tags))
+    
+    return render_template(
+        'gallery.html', 
+        featured_entries=featured_entries, 
+        entries=entries,
+        all_tags=all_tags,
+        current_tag=tag
+    )
+
+@app.route('/gallery/tag/<tag>')
+def gallery_filter_by_tag(tag):
+    return gallery(tag)
 
 
 @app.route('/gallery/submit', methods=['GET', 'POST'])
@@ -1249,23 +1347,60 @@ def gallery_submit():
             flash('Invalid site selected', 'error')
             return redirect(url_for('gallery_submit'))
         
+        # Check if site is already in gallery
         from models import GalleryEntry
-        entry = GalleryEntry(
-            site_id=site_id,
-            user_id=current_user.id,
-            title=title,
-            description=description,
-            tags=tags
-        )
+        existing_entry = GalleryEntry.query.filter_by(site_id=site_id).first()
+        if existing_entry:
+            flash('This site is already in the gallery', 'error')
+            return redirect(url_for('gallery_submit'))
         
-        db.session.add(entry)
-        db.session.commit()
-        
-        flash('Your site has been submitted to the gallery!', 'success')
-        return redirect(url_for('gallery'))
+        try:
+            # Create new gallery entry
+            entry = GalleryEntry(
+                site_id=site_id,
+                user_id=current_user.id,
+                title=title,
+                description=description,
+                tags=tags
+            )
+            
+            db.session.add(entry)
+            db.session.commit()
+            
+            # Record activity
+            activity = UserActivity(
+                activity_type="gallery_submission",
+                message=f'User {{username}} submitted "{title}" to the gallery',
+                username=current_user.username,
+                user_id=current_user.id,
+                site_id=site.id
+            )
+            db.session.add(activity)
+            db.session.commit()
+            
+            flash('Your site has been successfully submitted to the gallery!', 'success')
+            return redirect(url_for('gallery'))
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f'Error submitting to gallery: {str(e)}')
+            flash('An error occurred while submitting to gallery', 'error')
+            return redirect(url_for('gallery_submit'))
     
-    # GET request
-    sites = Site.query.filter_by(user_id=current_user.id).all()
+    # GET request - only show sites that aren't already in the gallery
+    from models import GalleryEntry
+    
+    # Get all user's sites
+    all_sites = Site.query.filter_by(user_id=current_user.id).all()
+    
+    # Get sites already in gallery
+    gallery_site_ids = db.session.query(GalleryEntry.site_id).filter(
+        GalleryEntry.user_id == current_user.id
+    ).all()
+    gallery_site_ids = [id[0] for id in gallery_site_ids]
+    
+    # Filter sites not in gallery
+    sites = [site for site in all_sites if site.id not in gallery_site_ids]
+    
     return render_template('gallery_submit.html', sites=sites)
 
 
