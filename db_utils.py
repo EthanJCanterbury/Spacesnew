@@ -20,3 +20,32 @@ def get_user_sites(user_id):
         print(f"Error getting user sites: {str(e)}")
         reset_db_session()
         return []
+
+def repair_gallery_entries():
+    """Repair gallery entries with missing category information"""
+    try:
+        from app import db
+        from models import GalleryEntry
+        
+        # Add the category column if missing
+        db.session.execute(db.text("""
+            DO $$
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = 'gallery_entry' AND column_name = 'category'
+                ) THEN
+                    ALTER TABLE gallery_entry ADD COLUMN category VARCHAR(50);
+                END IF;
+            END
+            $$;
+        """))
+        
+        # Set default category for entries with NULL category
+        db.session.execute(db.text("UPDATE gallery_entry SET category = 'other' WHERE category IS NULL"))
+        db.session.commit()
+        return True
+    except Exception as e:
+        print(f"Error repairing gallery entries: {str(e)}")
+        reset_db_session()
+        return False

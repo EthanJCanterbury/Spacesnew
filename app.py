@@ -4827,16 +4827,52 @@ def gallery():
     db.session.rollback()
     
     try:
-        entries = GalleryEntry.query.order_by(GalleryEntry.created_at.desc()).paginate(
-            page=page, per_page=per_page, error_out=False)
+        # First try to repair the gallery entries if needed
+        from db_utils import repair_gallery_entries
+        repair_result = repair_gallery_entries()
         
-        # Get current user's sites if logged in for the add entry form
-        user_sites = []
-        if current_user.is_authenticated:
-            user_sites = Site.query.filter_by(user_id=current_user.id).all()
-        
-        return render_template('gallery.html', entries=entries.items, pagination=entries, user_sites=user_sites)
-        
+        if repair_result:
+            entries = GalleryEntry.query.order_by(GalleryEntry.created_at.desc()).paginate(
+                page=page, per_page=per_page, error_out=False)
+            
+            # Get current user's sites if logged in for the add entry form
+            user_sites = []
+            if current_user.is_authenticated:
+                user_sites = Site.query.filter_by(user_id=current_user.id).all()
+            
+            return render_template('gallery.html', entries=entries.items, pagination=entries, user_sites=user_sites)
+        else:
+            # If repair failed, get entries directly with a simple query to avoid category column
+            entries_query = db.session.execute(db.text(
+                "SELECT id, title, description, site_id, user_id, screenshot_url, featured, created_at, likes FROM gallery_entry ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
+            ), {"limit": per_page, "offset": (page-1)*per_page})
+            
+            entries = []
+            for row in entries_query:
+                # Create entry objects manually
+                entry = GalleryEntry(
+                    id=row[0], 
+                    title=row[1], 
+                    description=row[2], 
+                    site_id=row[3], 
+                    user_id=row[4], 
+                    screenshot_url=row[5], 
+                    featured=row[6],
+                    created_at=row[7],
+                    likes=row[8]
+                )
+                # Set site and user relationships manually to avoid additional queries
+                entry.site = Site.query.get(row[3])
+                entry.user = User.query.get(row[4])
+                entries.append(entry)
+                
+            # Get current user's sites if logged in for the add entry form
+            user_sites = []
+            if current_user.is_authenticated:
+                user_sites = Site.query.filter_by(user_id=current_user.id).all()
+            
+            return render_template('gallery.html', entries=entries, pagination=None, user_sites=user_sites)
+            
     except Exception as e:
         db.session.rollback()  # Ensure transaction is rolled back on error
         app.logger.error(f"Gallery error: {str(e)}")
@@ -4849,6 +4885,10 @@ def gallery():
 def create_gallery_entry():
     """Create a new gallery entry."""
     try:
+        # Ensure the gallery table has the category column
+        from db_utils import repair_gallery_entries
+        repair_gallery_entries()
+        
         data = request.get_json()
         
         # Validate required fields
@@ -4880,6 +4920,29 @@ def create_gallery_entry():
     
     except Exception as e:
         db.session.rollback()
+        app.logger.error(f"Error creating gallery entry: {str(e)}")
+        
+        # Try fallback method if the error is related to the category column
+        if "column gallery_entry.category does not exist" in str(e):
+            try:
+                # Insert without category using raw SQL
+                db.session.execute(db.text("""
+                    INSERT INTO gallery_entry 
+                    (title, description, site_id, user_id, screenshot_url, created_at, updated_at)
+                    VALUES (:title, :description, :site_id, :user_id, :screenshot_url, NOW(), NOW())
+                """), {
+                    "title": data.get('title'),
+                    "description": data.get('description'),
+                    "site_id": data.get('site_id'),
+                    "user_id": current_user.id,
+                    "screenshot_url": data.get('screenshot_url')
+                })
+                db.session.commit()
+                return jsonify({'success': True, 'message': 'Gallery entry created successfully'})
+            except Exception as inner_e:
+                db.session.rollback()
+                app.logger.error(f"Fallback error creating gallery entry: {str(inner_e)}")
+                
         return jsonify({'success': False, 'message': f'Error creating gallery entry: {str(e)}'}), 500
 
 

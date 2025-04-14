@@ -1,45 +1,32 @@
-
 import os
-from db_command import run_db_command
+from app import app, db
+from models import GalleryEntry
 
 def fix_gallery_table():
-    """Fix the gallery_entry table by adding missing columns."""
+    """Add the missing category column to the gallery_entry table."""
     print("Fixing gallery table...")
-    
-    sql_command = """
-    DO $$
-    BEGIN
-        -- Add created_at column if it doesn't exist
-        IF NOT EXISTS (
-            SELECT 1 
-            FROM information_schema.columns 
-            WHERE table_name='gallery_entry' AND column_name='created_at'
-        ) THEN
-            ALTER TABLE gallery_entry ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
-        END IF;
-        
-        -- Add updated_at column if it doesn't exist
-        IF NOT EXISTS (
-            SELECT 1 
-            FROM information_schema.columns 
-            WHERE table_name='gallery_entry' AND column_name='updated_at'
-        ) THEN
-            ALTER TABLE gallery_entry ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
-        END IF;
-        
-        -- Remove category column if it exists
-        IF EXISTS (
-            SELECT 1 
-            FROM information_schema.columns 
-            WHERE table_name='gallery_entry' AND column_name='category'
-        ) THEN
-            ALTER TABLE gallery_entry DROP COLUMN category;
-        END IF;
-    END $$;
-    """
-    
-    run_db_command(sql_command)
-    print("Gallery table fixed successfully.")
+
+    try:
+        with app.app_context():
+            # Execute SQL to add the missing column if it doesn't exist
+            db.session.execute(db.text("""
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns 
+                        WHERE table_name = 'gallery_entry' AND column_name = 'category'
+                    ) THEN
+                        ALTER TABLE gallery_entry ADD COLUMN category VARCHAR(50);
+                    END IF;
+                END
+                $$;
+            """))
+            db.session.commit()
+            print("Gallery table fixed successfully.")
+            return True
+    except Exception as e:
+        print(f"Error fixing gallery table: {str(e)}")
+        return False
 
 if __name__ == "__main__":
     fix_gallery_table()
