@@ -563,13 +563,13 @@
     color: white;
     border: none;
     border-radius: 12px;
-    padding: 14px 24px;
+    padding: 12px 24px;
     font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    white-space: nowrap;
     transition: all 0.3s ease;
     box-shadow: 0 8px 20px rgba(236, 55, 80, 0.25);
     text-decoration: none;
@@ -579,14 +579,12 @@
 .btn-submit-empty:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 25px rgba(236, 55, 80, 0.35);
+    background: linear-gradient(to right, var(--primary-dark), var(--secondary));
 }
 
 .btn-submit-empty i {
     font-size: 1.2rem;
     margin-right: 8px;
-    vertical-align: middle;
-    position: relative;
-    top: -1px;
 }
 
 .btn-primary {
