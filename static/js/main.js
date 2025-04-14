@@ -1,4 +1,3 @@
-
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         const href = this.getAttribute('href');
@@ -122,41 +121,51 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Hamburger menu toggle
-    const setupHamburgerMenu = function() {
+    // Hamburger menu toggle - improved with direct event binding
+    function setupHamburgerMenu() {
         const hamburger = document.querySelector('.hamburger');
         const navLinks = document.getElementById('navLinks');
-
+        
         if (!hamburger || !navLinks) return;
-
-        hamburger.addEventListener('click', function() {
+        
+        console.log("Hamburger menu setup initialized");
+        
+        // Toggle menu when hamburger is clicked
+        hamburger.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             navLinks.classList.toggle('active');
             hamburger.classList.toggle('active');
+            console.log("Hamburger clicked, menu active:", navLinks.classList.contains('active'));
         });
-
+        
         // Close menu when clicking outside
         document.addEventListener('click', function(event) {
-            if (navLinks.classList.contains('active') && 
-                !navLinks.contains(event.target) && 
-                !hamburger.contains(event.target)) {
+            if (!navLinks.contains(event.target) && !hamburger.contains(event.target) && navLinks.classList.contains('active')) {
                 navLinks.classList.remove('active');
                 hamburger.classList.remove('active');
             }
         });
-    };
-
-    setupHamburgerMenu();
-
-    // Initialize tabs on welcome page if present
-    if (document.getElementById('mySpacesTab')) {
-        const storedTab = localStorage.getItem('activeSpacesTab');
-        if (storedTab) {
-            switchTab(storedTab);
-        }
+        
+        // Close menu when clicking on a link
+        const navLinkElements = navLinks.querySelectorAll('a');
+        navLinkElements.forEach(link => {
+            link.addEventListener('click', function() {
+                navLinks.classList.remove('active');
+                hamburger.classList.remove('active');
+            });
+        });
     }
+    
+    // Call the setup function
+    setupHamburgerMenu();
 });
 
-// Animation observer
+// Improved animation observer with faster transition
+const observerOptions = {
+    threshold: 0.1
+};
+
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -164,7 +173,7 @@ const observer = new IntersectionObserver((entries) => {
             entry.target.style.transform = 'translateY(0)';
         }
     });
-}, { threshold: 0.1 });
+}, observerOptions);
 
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.feature-card').forEach(card => {
@@ -223,23 +232,6 @@ function showToast(type, message, duration = 4000) {
 
 // For backward compatibility with other toast systems
 window.showToast = showToast;
-
-// Function to switch tabs in welcome page
-function switchTab(tabName) {
-    if (!document.getElementById(tabName + 'Tab')) return;
-    
-    document.querySelectorAll('.tab-btn').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-    });
-
-    document.getElementById(tabName + 'Tab').classList.add('active');
-    document.getElementById(tabName + 'Content').classList.add('active');
-
-    localStorage.setItem('activeSpacesTab', tabName);
-}
 
 // Function to toggle club leader status (Admin Panel)
 async function toggleClubLeader(userId, username, isCurrentlyLeader) {
