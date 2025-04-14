@@ -125,20 +125,17 @@ document.addEventListener('DOMContentLoaded', function() {
     function setupHamburgerMenu() {
         const hamburger = document.querySelector('.hamburger');
         const navLinks = document.getElementById('navLinks');
-        
+
         if (!hamburger || !navLinks) return;
-        
-        console.log("Hamburger menu setup initialized");
-        
+
         // Toggle menu when hamburger is clicked
         hamburger.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             navLinks.classList.toggle('active');
             hamburger.classList.toggle('active');
-            console.log("Hamburger clicked, menu active:", navLinks.classList.contains('active'));
         });
-        
+
         // Close menu when clicking outside
         document.addEventListener('click', function(event) {
             if (!navLinks.contains(event.target) && !hamburger.contains(event.target) && navLinks.classList.contains('active')) {
@@ -146,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 hamburger.classList.remove('active');
             }
         });
-        
+
         // Close menu when clicking on a link
         const navLinkElements = navLinks.querySelectorAll('a');
         navLinkElements.forEach(link => {
@@ -156,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
+
     // Call the setup function
     setupHamburgerMenu();
 });
