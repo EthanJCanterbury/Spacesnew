@@ -1236,7 +1236,15 @@ def gallery():
         .order_by(GalleryEntry.submission_date.desc())\
         .all()
     
-    return render_template('gallery.html', entries=entries, featured_entries=featured_entries)
+    # Set total_pages to 1 since we're not doing pagination yet
+    total_pages = 1
+    current_page = 1
+    
+    return render_template('gallery.html', 
+                          entries=entries, 
+                          featured_entries=featured_entries,
+                          total_pages=total_pages,
+                          current_page=current_page)
 
 
 @app.route('/api/gallery/submit', methods=['POST'])
