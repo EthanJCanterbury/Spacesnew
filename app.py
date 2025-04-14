@@ -756,13 +756,14 @@ def run_python(site_id):
             safe_builtins = {}
             for name in dir(builtins):
                 if name not in [
-                        'eval', 'exec', 'compile', '__import__', 'open',
+                        'eval', 'exec', 'compile', 'open',
                         'input', 'memoryview', 'globals', 'locals'
                 ]:
                     safe_builtins[name] = getattr(builtins, name)
 
             restricted_globals = {'__builtins__': safe_builtins}
 
+            # Import allowed modules before executing user code
             for module_name in allowed:
                 try:
                     module = __import__(module_name)
