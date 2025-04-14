@@ -164,6 +164,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    align-self: center;
 }
 
 .profile-avatar {
@@ -190,6 +191,9 @@
 
 .profile-info {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .username-container {
@@ -214,6 +218,10 @@
     font-size: 0.8rem;
     font-weight: 600;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.role-badge i {
+    margin-right: 6px;
 }
 
 .admin-badge {
