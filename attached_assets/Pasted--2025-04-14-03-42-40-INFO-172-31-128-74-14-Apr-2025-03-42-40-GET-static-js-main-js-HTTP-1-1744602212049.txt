@@ -1,0 +1,18 @@
+[2025-04-14 03:42:40] [INFO] 172.31.128.74 - - [14/Apr/2025 03:42:40] "GET /static/js/main.js HTTP/1.1" 304 -
+[2025-04-14 03:43:04,243] [ERROR] Unhandled Exception: {'error_type': 'NameError', 'error_message': "name 'GalleryEntry' is not defined", 'error_details': None, 'file_name': None, 'line_number': None, 'code_snippet': None, 'traceback': '  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request\n    rv = self.dispatch_request()\n         ^^^^^^^^^^^^^^^^^^^^^^^\n  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/home/runner/workspace/app.py", line 4826, in gallery\n    entries = GalleryEntry.query.order_by(GalleryEntry.created_at.desc()).paginate(\n              ^^^^^^^^^^^^\n', 'suggestions': []}
+[2025-04-14 03:43:04] [ERROR] Unhandled Exception: {'error_type': 'NameError', 'error_message': "name 'GalleryEntry' is not defined", 'error_details': None, 'file_name': None, 'line_number': None, 'code_snippet': None, 'traceback': '  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request\n    rv = self.dispatch_request()\n         ^^^^^^^^^^^^^^^^^^^^^^^\n  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask/app.py", line 852, in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/home/runner/workspace/app.py", line 4826, in gallery\n    entries = GalleryEntry.query.order_by(GalleryEntry.created_at.desc()).paginate(\n              ^^^^^^^^^^^^\n', 'suggestions': []}
+[2025-04-14 03:43:04,394] [WARNING] Response: GET /gallery → 500
+[2025-04-14 03:43:04] [WARNING] Response: GET /gallery → 500
+[2025-04-14 03:43:04] [INFO] 172.31.128.74 - - [14/Apr/2025 03:43:04] "GET /gallery HTTP/1.1" 500 -
+[2025-04-14 03:43:04] [INFO] 172.31.128.74 - - [14/Apr/2025 03:43:04] "GET /static/css/unified.css HTTP/1.1" 304 -
+[2025-04-14 03:43:04] [INFO] 172.31.128.74 - - [14/Apr/2025 03:43:04] "GET /static/css/style.css HTTP/1.1" 304 -
+[2025-04-14 03:43:05] [INFO] 172.31.128.74 - - [14/Apr/2025 03:43:05] "GET /static/css/modals.css HTTP/1.1" 304 -
+[2025-04-14 03:43:05] [INFO] 172.31.128.74 - - [14/Apr/2025 03:43:05] "GET /static/css/github-repo-details.css HTTP/1.1" 304 -
+[2025-04-14 03:43:05] [INFO] 172.31.128.74 - - [14/Apr/2025 03:43:05] "GET /static/js/error-handler.js HTTP/1.1" 304 -
+[2025-04-14 03:43:05] [INFO] 172.31.128.74 - - [14/Apr/2025 03:43:05] "GET /static/css/toast.css HTTP/1.1" 304 -
+[2025-04-14 03:43:05] [INFO] 172.31.128.74 - - [14/Apr/2025 03:43:05] "GET /static/images/logo-rounded.png HTTP/1.1" 304 -
+[2025-04-14 03:43:05] [INFO] 172.31.128.74 - - [14/Apr/2025 03:43:05] "GET /static/js/toast.js HTTP/1.1" 304 -
+[2025-04-14 03:43:05] [INFO] 172.31.128.74 - - [14/Apr/2025 03:43:05] "GET /static/js/main.js HTTP/1.1" 304 -
+[2025-04-14 03:43:05] [INFO] 172.31.128.74 - - [14/Apr/2025 03:43:05] "GET /static/js/changelog.js HTTP/1.1" 304 -
+[2025-04-14 03:43:05] [INFO] 172.31.128.74 - - [14/Apr/2025 03:43:05] "GET /api/changelog HTTP/1.1" 200 -
+[2025-04-14 03:43:05] [INFO] 172.31.128.74 - - [14/Apr/2025 03:43:05] "GET /static/images/favicon.ico HTTP/1.1" 304 -
