@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block title %}Spaces Gallery{% endblock %}
@@ -229,7 +228,6 @@
         background-color: #d62a43;
     }
 
-    /* Gallery Modal */
     .gallery-modal {
         position: fixed;
         top: 0;
@@ -350,19 +348,6 @@
         margin-bottom: 2rem;
     }
 
-    @media (max-width: 768px) {
-        .gallery-grid {
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        }
-    }
-
-    @media (max-width: 480px) {
-        .gallery-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    /* Additional features */
     .gallery-pagination {
         display: flex;
         justify-content: center;
@@ -412,6 +397,18 @@
     .page-nav.disabled {
         opacity: 0.5;
         cursor: not-allowed;
+    }
+
+    @media (max-width: 768px) {
+        .gallery-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        }
+    }
+
+    @media (max-width: 480px) {
+        .gallery-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 {% endblock %}
@@ -599,11 +596,11 @@
         filterButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const filter = this.getAttribute('data-filter');
-                
+
                 // Update active button
                 filterButtons.forEach(btn => btn.classList.remove('active'));
                 this.classList.add('active');
-                
+
                 // Filter cards
                 galleryCards.forEach(card => {
                     if (filter === 'all') {
@@ -659,14 +656,14 @@
         if (galleryEntryForm) {
             galleryEntryForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                
+
                 const formData = new FormData(this);
                 const jsonData = {};
-                
+
                 for (const [key, value] of formData.entries()) {
                     jsonData[key] = value;
                 }
-                
+
                 fetch('/api/gallery/entries', {
                     method: 'POST',
                     headers: {
@@ -692,11 +689,11 @@
 
         // Like functionality
         const likeButtons = document.querySelectorAll('.like-btn');
-        
+
         likeButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const entryId = this.getAttribute('data-id');
-                
+
                 fetch(`/api/gallery/entries/${entryId}/like`, {
                     method: 'POST',
                     headers: {
@@ -709,7 +706,7 @@
                         // Update like count
                         const countSpan = this.querySelector('span');
                         countSpan.textContent = data.likes;
-                        
+
                         // Toggle heart icon
                         const icon = this.querySelector('i');
                         if (data.liked) {
