@@ -187,7 +187,7 @@
             <i class="fas fa-paint-brush"></i>
             <h2>The Gallery is Empty!</h2>
             <p>Be the first to submit your awesome project to the gallery.</p>
-            <a href="{{ url_for('gallery_submit') }}" class="btn-primary" style="margin-top: 1rem;">
+            <a href="{{ url_for('gallery_submit') }}" class="btn-submit-empty">
                 <i class="fas fa-plus"></i> Submit Your Site
             </a>
         </div>
@@ -556,6 +556,33 @@
     color: var(--text-muted);
     max-width: 500px;
     margin: 0 auto 2rem;
+}
+
+.btn-submit-empty {
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(236, 55, 80, 0.25);
+    text-decoration: none;
+    margin-top: 1.5rem;
+}
+
+.btn-submit-empty:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(236, 55, 80, 0.35);
+}
+
+.btn-submit-empty i {
+    font-size: 1.2rem;
 }
 
 .btn-primary {
