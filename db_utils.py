@@ -31,6 +31,28 @@ def repair_gallery_entries():
         db.session.execute(db.text("""
             DO $$
             BEGIN
+
+def ensure_gallery_likes_table():
+    """Ensure the gallery_entry_like table exists"""
+    try:
+        from app import db
+        
+        # Create the gallery_entry_like table if it doesn't exist
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS gallery_entry_like (
+                id SERIAL PRIMARY KEY,
+                entry_id INTEGER NOT NULL REFERENCES gallery_entry(id) ON DELETE CASCADE,
+                user_id INTEGER NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+                created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+                UNIQUE(entry_id, user_id)
+            )
+        """))
+        db.session.commit()
+        return True
+    except Exception as e:
+        print(f"Error ensuring gallery likes table: {str(e)}")
+        return False
+
                 IF NOT EXISTS (
                     SELECT 1 FROM information_schema.columns 
                     WHERE table_name = 'gallery_entry' AND column_name = 'category'

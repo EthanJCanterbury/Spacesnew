@@ -2077,6 +2077,65 @@ def admin_reset_join_code(club_id):
 
         return jsonify({
             'message': 'Join code reset successfully',
+
+@app.route('/api/gallery/entries/<int:entry_id>', methods=['DELETE'])
+@login_required
+def delete_gallery_entry(entry_id):
+    """Delete a gallery entry."""
+    try:
+        entry = GalleryEntry.query.get_or_404(entry_id)
+        
+        # Check if user is authorized to delete this entry
+        if entry.user_id != current_user.id and not current_user.is_admin:
+            return jsonify({'success': False, 'message': 'You are not authorized to delete this entry'}), 403
+        
+        db.session.delete(entry)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Gallery entry deleted successfully'})
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error deleting gallery entry: {str(e)}')
+        return jsonify({'success': False, 'message': f'Error deleting gallery entry: {str(e)}'}), 500
+
+@app.route('/api/gallery/entries/search', methods=['GET'])
+def search_gallery_entries():
+    """Search for gallery entries."""
+    try:
+        query = request.args.get('q', '')
+        if not query:
+            return jsonify({'success': False, 'message': 'Search query required'}), 400
+        
+        # Search in title, description, and user's username
+        entries = db.session.query(GalleryEntry).join(User, GalleryEntry.user_id == User.id).filter(
+            db.or_(
+                GalleryEntry.title.ilike(f'%{query}%'),
+                GalleryEntry.description.ilike(f'%{query}%'),
+                User.username.ilike(f'%{query}%'),
+                GalleryEntry.category.ilike(f'%{query}%') if hasattr(GalleryEntry, 'category') else False
+            )
+        ).all()
+        
+        results = []
+        for entry in entries:
+            results.append({
+                'id': entry.id,
+                'title': entry.title,
+                'description': entry.description,
+                'category': entry.category if hasattr(entry, 'category') else None,
+                'user': {
+                    'id': entry.user.id,
+                    'username': entry.user.username
+                }
+            })
+        
+        return jsonify({'success': True, 'entries': results})
+        
+    except Exception as e:
+        app.logger.error(f'Error searching gallery entries: {str(e)}')
+        return jsonify({'success': False, 'message': f'Error searching gallery entries: {str(e)}'}), 500
+
             'join_code': club.join_code
         })
 
@@ -4822,6 +4881,7 @@ def gallery():
     """Display the gallery of user-created websites."""
     page = request.args.get('page', 1, type=int)
     per_page = 12  # Number of entries per page
+    search_query = request.args.get('q', '')
     
     # Reset any potentially failed transactions
     db.session.rollback()
@@ -4831,21 +4891,71 @@ def gallery():
         from db_utils import repair_gallery_entries
         repair_result = repair_gallery_entries()
         
+        # Get the list of liked entries for the current user
+        liked_entries = []
+        if current_user.is_authenticated:
+            # Create GalleryEntryLike table if it doesn't exist
+            db.session.execute(db.text("""
+                CREATE TABLE IF NOT EXISTS gallery_entry_like (
+                    id SERIAL PRIMARY KEY,
+                    entry_id INTEGER NOT NULL REFERENCES gallery_entry(id) ON DELETE CASCADE,
+                    user_id INTEGER NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+                    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+                    UNIQUE(entry_id, user_id)
+                )
+            """))
+            db.session.commit()
+            
+            # Get IDs of entries liked by current user
+            likes_query = db.session.execute(db.text(
+                "SELECT entry_id FROM gallery_entry_like WHERE user_id = :user_id"
+            ), {"user_id": current_user.id})
+            
+            liked_entries = [row[0] for row in likes_query]
+        
         if repair_result:
-            entries = GalleryEntry.query.order_by(GalleryEntry.created_at.desc()).paginate(
-                page=page, per_page=per_page, error_out=False)
+            query = GalleryEntry.query.order_by(GalleryEntry.created_at.desc())
+            
+            # Apply search filter if provided
+            if search_query:
+                query = query.join(User, GalleryEntry.user_id == User.id).filter(
+                    db.or_(
+                        GalleryEntry.title.ilike(f'%{search_query}%'),
+                        GalleryEntry.description.ilike(f'%{search_query}%'),
+                        User.username.ilike(f'%{search_query}%'),
+                        GalleryEntry.category.ilike(f'%{search_query}%')
+                    )
+                )
+            
+            entries = query.paginate(page=page, per_page=per_page, error_out=False)
             
             # Get current user's sites if logged in for the add entry form
             user_sites = []
             if current_user.is_authenticated:
                 user_sites = Site.query.filter_by(user_id=current_user.id).all()
             
-            return render_template('gallery.html', entries=entries.items, pagination=entries, user_sites=user_sites)
+            return render_template('gallery.html', 
+                entries=entries.items, 
+                pagination=entries, 
+                user_sites=user_sites,
+                liked_entries=liked_entries,
+                search_query=search_query
+            )
         else:
             # If repair failed, get entries directly with a simple query to avoid category column
-            entries_query = db.session.execute(db.text(
-                "SELECT id, title, description, site_id, user_id, screenshot_url, featured, created_at, likes FROM gallery_entry ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
-            ), {"limit": per_page, "offset": (page-1)*per_page})
+            query_params = {"limit": per_page, "offset": (page-1)*per_page}
+            
+            # Modify the query to include search if provided
+            base_query = "SELECT id, title, description, site_id, user_id, screenshot_url, featured, created_at, likes FROM gallery_entry"
+            
+            if search_query:
+                base_query += " JOIN \"user\" ON gallery_entry.user_id = \"user\".id"
+                base_query += " WHERE title ILIKE :search OR description ILIKE :search OR \"user\".username ILIKE :search"
+                query_params["search"] = f"%{search_query}%"
+            
+            base_query += " ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
+            
+            entries_query = db.session.execute(db.text(base_query), query_params)
             
             entries = []
             for row in entries_query:
@@ -4871,13 +4981,19 @@ def gallery():
             if current_user.is_authenticated:
                 user_sites = Site.query.filter_by(user_id=current_user.id).all()
             
-            return render_template('gallery.html', entries=entries, pagination=None, user_sites=user_sites)
+            return render_template('gallery.html', 
+                entries=entries, 
+                pagination=None, 
+                user_sites=user_sites,
+                liked_entries=liked_entries,
+                search_query=search_query
+            )
             
     except Exception as e:
         db.session.rollback()  # Ensure transaction is rolled back on error
         app.logger.error(f"Gallery error: {str(e)}")
         # Return empty list for entries as fallback
-        return render_template('gallery.html', entries=[], pagination=None, user_sites=[])
+        return render_template('gallery.html', entries=[], pagination=None, user_sites=[], liked_entries=[])
 
 
 @app.route('/api/gallery/entries', methods=['POST'])
@@ -4953,32 +5069,51 @@ def like_gallery_entry(entry_id):
     try:
         entry = GalleryEntry.query.get_or_404(entry_id)
         
-        # Simple implementation - just increment/decrement likes
-        # In a production app, you'd track which users liked which entries
+        # Prevent liking your own entry
         if entry.user_id == current_user.id:
-            # Can't like your own entry
             return jsonify({'success': False, 'message': 'You cannot like your own entry'}), 400
         
-        # Toggle like (simplified implementation)
-        # In a real app, you'd use a separate table to track likes per user
-        if 'liked_entries' not in session:
-            session['liked_entries'] = []
-            
-        if entry_id in session['liked_entries']:
-            # Unlike
-            entry.likes = max(0, entry.likes - 1)
-            session['liked_entries'].remove(entry_id)
+        # Create the gallery_entry_like table if it doesn't exist
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS gallery_entry_like (
+                id SERIAL PRIMARY KEY,
+                entry_id INTEGER NOT NULL REFERENCES gallery_entry(id) ON DELETE CASCADE,
+                user_id INTEGER NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+                created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
+                UNIQUE(entry_id, user_id)
+            )
+        """))
+        db.session.commit()
+        
+        # Check if the user already liked this entry
+        like_exists = db.session.execute(db.text(
+            "SELECT id FROM gallery_entry_like WHERE entry_id = :entry_id AND user_id = :user_id"
+        ), {"entry_id": entry_id, "user_id": current_user.id}).fetchone()
+        
+        if like_exists:
+            # Unlike - remove the like record
+            db.session.execute(db.text(
+                "DELETE FROM gallery_entry_like WHERE entry_id = :entry_id AND user_id = :user_id"
+            ), {"entry_id": entry_id, "user_id": current_user.id})
             liked = False
         else:
-            # Like
-            entry.likes = entry.likes + 1
-            session['liked_entries'].append(entry_id)
+            # Like - insert a new like record
+            db.session.execute(db.text(
+                "INSERT INTO gallery_entry_like (entry_id, user_id) VALUES (:entry_id, :user_id)"
+            ), {"entry_id": entry_id, "user_id": current_user.id})
             liked = True
             
+        # Update the likes count in the gallery_entry table
+        like_count = db.session.execute(db.text(
+            "SELECT COUNT(*) FROM gallery_entry_like WHERE entry_id = :entry_id"
+        ), {"entry_id": entry_id}).fetchone()[0]
+        
+        entry.likes = like_count
         db.session.commit()
         
         return jsonify({'success': True, 'likes': entry.likes, 'liked': liked})
         
     except Exception as e:
         db.session.rollback()
+        app.logger.error(f'Error liking gallery entry: {str(e)}')
         return jsonify({'success': False, 'message': f'Error liking gallery entry: {str(e)}'}), 500

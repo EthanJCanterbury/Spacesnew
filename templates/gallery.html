@@ -29,6 +29,39 @@
         margin: 0 auto;
     }
 
+    .search-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        width: 100%;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 50px 0 0 50px;
+        font-size: 1rem;
+        outline: none;
+    }
+    
+    .search-btn {
+        background-color: #eb3750;
+        color: white;
+        border: none;
+        border-radius: 0 50px 50px 0;
+        padding: 0 1.2rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    
+    .search-btn:hover {
+        background-color: #d62a43;
+    }
+
     .gallery-filters {
         display: flex;
         justify-content: center;
@@ -406,6 +439,10 @@
         }
     }
 
+    .search-hidden {
+        display: none !important;
+    }
+    
     @media (max-width: 480px) {
         .gallery-grid {
             grid-template-columns: 1fr;
@@ -430,6 +467,13 @@
         <i class="fas fa-sign-in-alt"></i> Login to Add Your Space
     </a>
     {% endif %}
+
+    <div class="search-container">
+        <input type="text" id="gallerySearch" class="search-input" placeholder="Search gallery...">
+        <button id="searchButton" class="search-btn">
+            <i class="fas fa-search"></i>
+        </button>
+    </div>
 
     <div class="gallery-filters">
         <button class="filter-btn active" data-filter="all">All</button>
@@ -473,9 +517,14 @@
                         </div>
                         <div class="entry-actions">
                             <button class="action-btn like-btn" data-id="{{ entry.id }}">
-                                <i class="far fa-heart"></i>
+                                <i class="{% if current_user.is_authenticated and entry.id in liked_entries %}fas{% else %}far{% endif %} fa-heart"></i>
                                 <span>{{ entry.likes or 0 }}</span>
                             </button>
+                            {% if current_user.is_authenticated and (current_user.id == entry.user_id or current_user.is_admin) %}
+                            <button class="action-btn delete-btn" data-id="{{ entry.id }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            {% endif %}
                         </div>
                     </div>
                     <a href="/s/{{ entry.site.slug }}" target="_blank" class="entry-visit">
@@ -587,9 +636,50 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Search functionality
+        const searchInput = document.getElementById('gallerySearch');
+        const searchButton = document.getElementById('searchButton');
+        const galleryCards = document.querySelectorAll('.gallery-card');
+        
+        function performSearch() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            galleryCards.forEach(card => {
+                const title = card.querySelector('.entry-title').textContent.toLowerCase();
+                const description = card.querySelector('.entry-description').textContent.toLowerCase();
+                const author = card.querySelector('.entry-author span').textContent.toLowerCase();
+                const category = card.getAttribute('data-category').toLowerCase();
+                
+                if (searchTerm === '' || 
+                    title.includes(searchTerm) || 
+                    description.includes(searchTerm) || 
+                    author.includes(searchTerm) || 
+                    category.includes(searchTerm)) {
+                    card.classList.remove('search-hidden');
+                } else {
+                    card.classList.add('search-hidden');
+                }
+            });
+            
+            // Reset filter buttons
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+        }
+        
+        if (searchButton) {
+            searchButton.addEventListener('click', performSearch);
+        }
+        
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+        }
+        
         // Filter functionality
         const filterButtons = document.querySelectorAll('.filter-btn');
-        const galleryCards = document.querySelectorAll('.gallery-card');
 
         filterButtons.forEach(button => {
             button.addEventListener('click', function() {
@@ -598,9 +688,17 @@
                 // Update active button
                 filterButtons.forEach(btn => btn.classList.remove('active'));
                 this.classList.add('active');
+                
+                // Clear search
+                if (searchInput) {
+                    searchInput.value = '';
+                }
 
                 // Filter cards
                 galleryCards.forEach(card => {
+                    // Remove search-based hiding
+                    card.classList.remove('search-hidden');
+                    
                     if (filter === 'all') {
                         card.style.display = 'block';
                     } else if (filter === 'featured' && card.querySelector('.featured-badge')) {
@@ -713,6 +811,58 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
+                });
+            });
+        });
+        
+        // Delete functionality
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                if (!confirm('Are you sure you want to delete this gallery entry? This action cannot be undone.')) {
+                    return;
+                }
+                
+                const entryId = this.getAttribute('data-id');
+                
+                fetch(`/api/gallery/entries/${entryId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove the card from the view
+                        const card = this.closest('.gallery-card');
+                        card.style.opacity = '0';
+                        setTimeout(() => {
+                            card.remove();
+                            
+                            // Show empty gallery message if no more entries
+                            if (document.querySelectorAll('.gallery-card').length === 0) {
+                                const emptyGallery = document.createElement('div');
+                                emptyGallery.className = 'empty-gallery';
+                                emptyGallery.style.gridColumn = '1/-1';
+                                emptyGallery.innerHTML = `
+                                    <div class="empty-icon">
+                                        <i class="fas fa-rocket"></i>
+                                    </div>
+                                    <h2 class="empty-title">No Spaces in the Gallery Yet</h2>
+                                    <p class="empty-text">Be the first to add your amazing creation!</p>
+                                `;
+                                document.querySelector('.gallery-grid').appendChild(emptyGallery);
+                            }
+                        }, 300);
+                    } else {
+                        alert(data.message || 'Failed to delete entry');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the entry');
                 });
             });
         });
