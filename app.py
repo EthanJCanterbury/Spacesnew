@@ -4823,20 +4823,25 @@ def gallery():
     page = request.args.get('page', 1, type=int)
     per_page = 12  # Number of entries per page
     
+    # Reset any potentially failed transactions
+    db.session.rollback()
+    
     try:
         entries = GalleryEntry.query.order_by(GalleryEntry.created_at.desc()).paginate(
             page=page, per_page=per_page, error_out=False)
+        
+        # Get current user's sites if logged in for the add entry form
+        user_sites = []
+        if current_user.is_authenticated:
+            user_sites = Site.query.filter_by(user_id=current_user.id).all()
+        
+        return render_template('gallery.html', entries=entries.items, pagination=entries, user_sites=user_sites)
+        
     except Exception as e:
-        # Fallback if created_at column doesn't exist
-        entries = GalleryEntry.query.paginate(
-            page=page, per_page=per_page, error_out=False)
-    
-    # Get current user's sites if logged in for the add entry form
-    user_sites = []
-    if current_user.is_authenticated:
-        user_sites = Site.query.filter_by(user_id=current_user.id).all()
-    
-    return render_template('gallery.html', entries=entries.items, pagination=entries, user_sites=user_sites)
+        db.session.rollback()  # Ensure transaction is rolled back on error
+        app.logger.error(f"Gallery error: {str(e)}")
+        # Return empty list for entries as fallback
+        return render_template('gallery.html', entries=[], pagination=None, user_sites=[])
 
 
 @app.route('/api/gallery/entries', methods=['POST'])

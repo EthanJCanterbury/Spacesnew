@@ -474,7 +474,7 @@
                         <div class="entry-actions">
                             <button class="action-btn like-btn" data-id="{{ entry.id }}">
                                 <i class="far fa-heart"></i>
-                                <span>{{ entry.likes }}</span>
+                                <span>{{ entry.likes or 0 }}</span>
                             </button>
                         </div>
                     </div>
