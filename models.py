@@ -204,6 +204,7 @@ class GalleryEntry(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     screenshot_url = db.Column(db.String(500), nullable=True)
     featured = db.Column(db.Boolean, default=False)
+    category = db.Column(db.String(50), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     likes = db.Column(db.Integer, default=0)
