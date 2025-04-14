@@ -553,9 +553,15 @@
                 <label for="entrySite" class="form-label">Select a Space</label>
                 <select id="entrySite" name="site_id" class="form-select" required>
                     <option value="">Choose a space...</option>
-                    {% for site in user_sites %}
-                    <option value="{{ site.id }}">{{ site.name }}</option>
-                    {% endfor %}
+                    {% if user_sites %}
+                        {% for site in user_sites %}
+                        <option value="{{ site.id }}">{{ site.name }}</option>
+                        {% endfor %}
+                    {% else %}
+                        {% for site in current_user.sites %}
+                        <option value="{{ site.id }}">{{ site.name }}</option>
+                        {% endfor %}
+                    {% endif %}
                 </select>
             </div>
             <div class="form-group">
