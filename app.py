@@ -1216,6 +1216,72 @@ def apps():
     return render_template('apps.html')
 
 
+@app.route('/gallery')
+def gallery():
+    from models import GalleryEntry
+    
+    # Get approved gallery entries, most recent first
+    entries = db.session.query(GalleryEntry, Site, User)\
+        .join(Site, GalleryEntry.site_id == Site.id)\
+        .join(User, GalleryEntry.user_id == User.id)\
+        .filter(GalleryEntry.approval_status == 'approved')\
+        .order_by(GalleryEntry.submission_date.desc())\
+        .all()
+    
+    # Get featured entries
+    featured_entries = db.session.query(GalleryEntry, Site, User)\
+        .join(Site, GalleryEntry.site_id == Site.id)\
+        .join(User, GalleryEntry.user_id == User.id)\
+        .filter(GalleryEntry.featured == True)\
+        .order_by(GalleryEntry.submission_date.desc())\
+        .all()
+    
+    return render_template('gallery.html', entries=entries, featured_entries=featured_entries)
+
+
+@app.route('/api/gallery/submit', methods=['POST'])
+@login_required
+def submit_to_gallery():
+    try:
+        data = request.get_json()
+        site_id = data.get('site_id')
+        title = data.get('title')
+        description = data.get('description', '')
+        tags = data.get('tags', '')
+        
+        if not site_id or not title:
+            return jsonify({'error': 'Site ID and title are required'}), 400
+            
+        # Check if site exists and belongs to user
+        site = Site.query.get_or_404(site_id)
+        if site.user_id != current_user.id:
+            return jsonify({'error': 'You can only submit your own sites'}), 403
+            
+        # Check if already submitted
+        existing = GalleryEntry.query.filter_by(site_id=site_id).first()
+        if existing:
+            return jsonify({'error': 'This site has already been submitted to the gallery'}), 400
+            
+        # Create new gallery entry
+        entry = GalleryEntry(
+            site_id=site_id,
+            user_id=current_user.id,
+            title=title,
+            description=description,
+            tags=tags,
+            approval_status='pending'
+        )
+        
+        db.session.add(entry)
+        db.session.commit()
+        
+        return jsonify({'message': 'Site submitted to gallery successfully', 'entry_id': entry.id})
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error submitting to gallery: {str(e)}')
+        return jsonify({'error': f'Failed to submit to gallery: {str(e)}'}), 500
+
+
 @app.route('/api/changelog')
 def get_changelog():
     try:
@@ -2163,6 +2229,99 @@ def admin_remove_club_member(membership_id):
         db.session.rollback()
         app.logger.error(f'Error removing club member: {str(e)}')
         return jsonify({'error': 'Failed to remove club member'}), 500
+
+
+@app.route('/api/admin/gallery/entries', methods=['GET'])
+@login_required
+@admin_required
+def admin_gallery_entries():
+    """Get gallery entries for admin panel, including pending submissions."""
+    try:
+        entries = db.session.query(GalleryEntry, Site, User)\
+            .join(Site, GalleryEntry.site_id == Site.id)\
+            .join(User, GalleryEntry.user_id == User.id)\
+            .order_by(GalleryEntry.submission_date.desc())\
+            .all()
+            
+        result = []
+        for entry, site, user in entries:
+            result.append({
+                'id': entry.id,
+                'title': entry.title,
+                'description': entry.description,
+                'tags': entry.tags,
+                'featured': entry.featured,
+                'submission_date': entry.submission_date.isoformat(),
+                'approval_status': entry.approval_status,
+                'site': {
+                    'id': site.id,
+                    'name': site.name,
+                    'slug': site.slug
+                },
+                'user': {
+                    'id': user.id,
+                    'username': user.username
+                }
+            })
+            
+        return jsonify({'entries': result})
+    except Exception as e:
+        app.logger.error(f'Error getting gallery entries: {str(e)}')
+        return jsonify({'error': f'Failed to get gallery entries: {str(e)}'}), 500
+
+
+@app.route('/api/admin/gallery/entries/<int:entry_id>/approve', methods=['POST'])
+@login_required
+@admin_required
+def approve_gallery_entry(entry_id):
+    """Approve a gallery submission."""
+    try:
+        entry = GalleryEntry.query.get_or_404(entry_id)
+        entry.approval_status = 'approved'
+        db.session.commit()
+        
+        return jsonify({'message': 'Gallery entry approved'})
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error approving gallery entry: {str(e)}')
+        return jsonify({'error': f'Failed to approve entry: {str(e)}'}), 500
+
+
+@app.route('/api/admin/gallery/entries/<int:entry_id>/reject', methods=['POST'])
+@login_required
+@admin_required
+def reject_gallery_entry(entry_id):
+    """Reject a gallery submission."""
+    try:
+        entry = GalleryEntry.query.get_or_404(entry_id)
+        entry.approval_status = 'rejected'
+        db.session.commit()
+        
+        return jsonify({'message': 'Gallery entry rejected'})
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error rejecting gallery entry: {str(e)}')
+        return jsonify({'error': f'Failed to reject entry: {str(e)}'}), 500
+
+
+@app.route('/api/admin/gallery/entries/<int:entry_id>/feature', methods=['POST'])
+@login_required
+@admin_required
+def toggle_feature_entry(entry_id):
+    """Toggle featured status of a gallery entry."""
+    try:
+        entry = GalleryEntry.query.get_or_404(entry_id)
+        entry.featured = not entry.featured
+        db.session.commit()
+        
+        return jsonify({
+            'message': f'Gallery entry {"featured" if entry.featured else "unfeatured"}',
+            'featured': entry.featured
+        })
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error toggling featured status: {str(e)}')
+        return jsonify({'error': f'Failed to update featured status: {str(e)}'}), 500
 
 
 @app.route('/api/admin/stats/counts')
