@@ -1,6 +1,7 @@
 
 from app import db
 from models import User, Site
+from sqlalchemy import text
 
 def reset_db_session():
     """Reset the database session to recover from transaction errors"""
@@ -38,7 +39,7 @@ def ensure_gallery_likes_table():
         from app import db
         
         # Create the gallery_entry_like table if it doesn't exist
-        db.session.execute(db.text("""
+        db.session.execute(text("""
             CREATE TABLE IF NOT EXISTS gallery_entry_like (
                 id SERIAL PRIMARY KEY,
                 entry_id INTEGER NOT NULL REFERENCES gallery_entry(id) ON DELETE CASCADE,
