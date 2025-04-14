@@ -4439,6 +4439,213 @@ def channel_messages(club_id, channel_id):
             }
         })
 
+@app.route('/api/clubs/<int:club_id>/meetings', methods=['GET', 'POST'])
+@login_required
+def club_meetings(club_id):
+    """Get all meetings for a club or create a new meeting."""
+    from models import ClubMeeting
+    
+    # Verify user is a member of the club
+    club = Club.query.get_or_404(club_id)
+    membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
+    if not membership and club.leader_id != current_user.id:
+        return jsonify({'error': 'You are not a member of this club'}), 403
+        
+    if request.method == 'GET':
+        meetings = db.session.query(ClubMeeting, User) \
+            .join(User, ClubMeeting.created_by == User.id) \
+            .filter(ClubMeeting.club_id == club_id) \
+            .order_by(ClubMeeting.meeting_date, ClubMeeting.start_time).all()
+                
+        result = []
+        for meeting, user in meetings:
+            result.append({
+                'id': meeting.id,
+                'title': meeting.title,
+                'description': meeting.description,
+                'meeting_date': meeting.meeting_date.isoformat(),
+                'start_time': meeting.start_time.strftime('%H:%M'),
+                'end_time': meeting.end_time.strftime('%H:%M') if meeting.end_time else None,
+                'location': meeting.location,
+                'meeting_link': meeting.meeting_link,
+                'created_at': meeting.created_at.isoformat(),
+                'creator': {
+                    'id': user.id,
+                    'username': user.username
+                }
+            })
+            
+        return jsonify({'meetings': result})
+        
+    elif request.method == 'POST':
+        # Only leaders and co-leaders can create meetings
+        if club.leader_id != current_user.id:
+            membership = ClubMembership.query.filter_by(
+                user_id=current_user.id, 
+                club_id=club_id, 
+                role='co-leader'
+            ).first()
+            
+            if not membership:
+                return jsonify({'error': 'Only club leaders can create meetings'}), 403
+                
+        data = request.get_json()
+        title = data.get('title')
+        description = data.get('description', '')
+        meeting_date_str = data.get('meeting_date')
+        start_time_str = data.get('start_time')
+        end_time_str = data.get('end_time')
+        location = data.get('location', '')
+        meeting_link = data.get('meeting_link', '')
+        
+        if not title or not meeting_date_str or not start_time_str:
+            return jsonify({'error': 'Title, date and start time are required'}), 400
+            
+        try:
+            meeting_date = datetime.strptime(meeting_date_str, '%Y-%m-%d').date()
+            start_time = datetime.strptime(start_time_str, '%H:%M').time()
+            end_time = datetime.strptime(end_time_str, '%H:%M').time() if end_time_str else None
+        except ValueError:
+            return jsonify({'error': 'Invalid date or time format'}), 400
+                
+        meeting = ClubMeeting(
+            club_id=club_id,
+            title=title,
+            description=description,
+            meeting_date=meeting_date,
+            start_time=start_time,
+            end_time=end_time,
+            location=location,
+            meeting_link=meeting_link,
+            created_by=current_user.id
+        )
+        
+        db.session.add(meeting)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Meeting created successfully',
+            'meeting': {
+                'id': meeting.id,
+                'title': meeting.title,
+                'description': meeting.description,
+                'meeting_date': meeting.meeting_date.isoformat(),
+                'start_time': meeting.start_time.strftime('%H:%M'),
+                'end_time': meeting.end_time.strftime('%H:%M') if meeting.end_time else None,
+                'location': meeting.location,
+                'meeting_link': meeting.meeting_link,
+                'created_at': meeting.created_at.isoformat()
+            }
+        })
+
+@app.route('/api/clubs/<int:club_id>/meetings/<int:meeting_id>', methods=['GET', 'PUT', 'DELETE'])
+@login_required
+def manage_club_meeting(club_id, meeting_id):
+    """Get, update, or delete a club meeting."""
+    from models import ClubMeeting
+    
+    meeting = ClubMeeting.query.get_or_404(meeting_id)
+    
+    # Check if meeting belongs to the correct club
+    if meeting.club_id != club_id:
+        return jsonify({'error': 'Meeting not found in this club'}), 404
+        
+    # Check if user is a member of the club
+    membership = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club_id).first()
+    if not membership and meeting.club.leader_id != current_user.id:
+        return jsonify({'error': 'You are not a member of this club'}), 403
+    
+    if request.method == 'GET':
+        # Get user info for creator
+        creator = User.query.get(meeting.created_by)
+        
+        return jsonify({
+            'meeting': {
+                'id': meeting.id,
+                'title': meeting.title,
+                'description': meeting.description,
+                'meeting_date': meeting.meeting_date.isoformat(),
+                'start_time': meeting.start_time.strftime('%H:%M'),
+                'end_time': meeting.end_time.strftime('%H:%M') if meeting.end_time else None,
+                'location': meeting.location,
+                'meeting_link': meeting.meeting_link,
+                'created_at': meeting.created_at.isoformat(),
+                'updated_at': meeting.updated_at.isoformat(),
+                'creator': {
+                    'id': creator.id,
+                    'username': creator.username
+                }
+            }
+        })
+    
+    # For PUT and DELETE methods, check for additional authorization
+    is_authorized = False
+    if meeting.created_by == current_user.id or meeting.club.leader_id == current_user.id:
+        is_authorized = True
+    else:
+        co_leader_membership = ClubMembership.query.filter_by(
+            user_id=current_user.id, 
+            club_id=club_id, 
+            role='co-leader'
+        ).first()
+        
+        if co_leader_membership:
+            is_authorized = True
+    
+    if not is_authorized:
+        return jsonify({'error': 'You are not authorized to manage this meeting'}), 403
+    
+    if request.method == 'PUT':
+        data = request.get_json()
+        
+        if 'title' in data:
+            meeting.title = data['title']
+        if 'description' in data:
+            meeting.description = data['description']
+        if 'meeting_date' in data:
+            try:
+                meeting.meeting_date = datetime.strptime(data['meeting_date'], '%Y-%m-%d').date()
+            except ValueError:
+                return jsonify({'error': 'Invalid date format'}), 400
+        if 'start_time' in data:
+            try:
+                meeting.start_time = datetime.strptime(data['start_time'], '%H:%M').time()
+            except ValueError:
+                return jsonify({'error': 'Invalid time format'}), 400
+        if 'end_time' in data:
+            try:
+                meeting.end_time = datetime.strptime(data['end_time'], '%H:%M').time() if data['end_time'] else None
+            except ValueError:
+                return jsonify({'error': 'Invalid time format'}), 400
+        if 'location' in data:
+            meeting.location = data['location']
+        if 'meeting_link' in data:
+            meeting.meeting_link = data['meeting_link']
+            
+        meeting.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Meeting updated successfully',
+            'meeting': {
+                'id': meeting.id,
+                'title': meeting.title,
+                'description': meeting.description,
+                'meeting_date': meeting.meeting_date.isoformat(),
+                'start_time': meeting.start_time.strftime('%H:%M'),
+                'end_time': meeting.end_time.strftime('%H:%M') if meeting.end_time else None,
+                'location': meeting.location,
+                'meeting_link': meeting.meeting_link,
+                'updated_at': meeting.updated_at.isoformat()
+            }
+        })
+        
+    elif request.method == 'DELETE':
+        db.session.delete(meeting)
+        db.session.commit()
+        
+        return jsonify({'message': 'Meeting deleted successfully'})
+
 @app.route('/api/clubs/members/sites', methods=['GET'])
 @login_required
 def get_member_sites():

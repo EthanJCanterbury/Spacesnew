@@ -171,6 +171,28 @@ class ClubChatMessage(db.Model):
     
     def __repr__(self):
         return f'<ClubChatMessage by {self.user.username} in {self.channel.name}>'
+        
+        
+class ClubMeeting(db.Model):
+    __tablename__ = 'club_meeting'
+    id = db.Column(db.Integer, primary_key=True)
+    club_id = db.Column(db.Integer, db.ForeignKey('club.id', ondelete='CASCADE'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    meeting_date = db.Column(db.Date, nullable=False)
+    start_time = db.Column(db.Time, nullable=False)
+    end_time = db.Column(db.Time, nullable=True)
+    location = db.Column(db.String(200), nullable=True)
+    meeting_link = db.Column(db.String(500), nullable=True)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    club = db.relationship('Club', backref=db.backref('meetings', lazy=True, cascade='all, delete-orphan'))
+    creator = db.relationship('User', backref=db.backref('created_meetings', lazy=True))
+    
+    def __repr__(self):
+        return f'<ClubMeeting {self.title} on {self.meeting_date}>'
 
 
 class User(UserMixin, db.Model):
