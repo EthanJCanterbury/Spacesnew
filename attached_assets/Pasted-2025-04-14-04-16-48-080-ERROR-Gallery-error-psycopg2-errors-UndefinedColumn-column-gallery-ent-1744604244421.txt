@@ -1,0 +1,34 @@
+2025-04-14 04:16:48,080] [ERROR] Gallery error: (psycopg2.errors.UndefinedColumn) column gallery_entry.category does not exist
+LINE 1: ...gallery_entry.featured AS gallery_entry_featured, gallery_en...
+                                                             ^
+
+[SQL: SELECT gallery_entry.id AS gallery_entry_id, gallery_entry.title AS gallery_entry_title, gallery_entry.description AS gallery_entry_description, gallery_entry.site_id AS gallery_entry_site_id, gallery_entry.user_id AS gallery_entry_user_id, gallery_entry.screenshot_url AS gallery_entry_screenshot_url, gallery_entry.featured AS gallery_entry_featured, gallery_entry.category AS gallery_entry_category, gallery_entry.created_at AS gallery_entry_created_at, gallery_entry.updated_at AS gallery_entry_updated_at, gallery_entry.likes AS gallery_entry_likes 
+FROM gallery_entry ORDER BY gallery_entry.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s]
+[parameters: {'param_1': 12, 'param_2': 0}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+[2025-04-14 04:16:48] [ERROR] Gallery error: (psycopg2.errors.UndefinedColumn) column gallery_entry.category does not exist
+LINE 1: ...gallery_entry.featured AS gallery_entry_featured, gallery_en...
+                                                             ^
+
+[SQL: SELECT gallery_entry.id AS gallery_entry_id, gallery_entry.title AS gallery_entry_title, gallery_entry.description AS gallery_entry_description, gallery_entry.site_id AS gallery_entry_site_id, gallery_entry.user_id AS gallery_entry_user_id, gallery_entry.screenshot_url AS gallery_entry_screenshot_url, gallery_entry.featured AS gallery_entry_featured, gallery_entry.category AS gallery_entry_category, gallery_entry.created_at AS gallery_entry_created_at, gallery_entry.updated_at AS gallery_entry_updated_at, gallery_entry.likes AS gallery_entry_likes 
+FROM gallery_entry ORDER BY gallery_entry.created_at DESC 
+ LIMIT %(param_1)s OFFSET %(param_2)s]
+[parameters: {'param_1': 12, 'param_2': 0}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+[2025-04-14 04:16:48] [INFO] 172.31.128.74 - - [14/Apr/2025 04:16:48] "GET /gallery HTTP/1.1" 200 -
+[2025-04-14 04:16:48] [INFO] 172.31.128.74 - - [14/Apr/2025 04:16:48] "GET /static/images/logo-rounded.png HTTP/1.1" 304 -
+[2025-04-14 04:16:48] [INFO] 172.31.128.74 - - [14/Apr/2025 04:16:48] "GET /static/css/style.css HTTP/1.1" 304 -
+[2025-04-14 04:16:48] [INFO] 172.31.128.74 - - [14/Apr/2025 04:16:48] "GET /static/js/main.js HTTP/1.1" 304 -
+[2025-04-14 04:16:49] [INFO] 172.31.128.74 - - [14/Apr/2025 04:16:49] "GET /static/js/toast.js HTTP/1.1" 304 -
+[2025-04-14 04:16:49] [INFO] 172.31.128.74 - - [14/Apr/2025 04:16:49] "GET /static/js/changelog.js HTTP/1.1" 304 -
+[2025-04-14 04:16:49] [INFO] 172.31.128.74 - - [14/Apr/2025 04:16:49] "GET /api/changelog HTTP/1.1" 200 -
+[2025-04-14 04:16:49] [INFO] 172.31.128.74 - - [14/Apr/2025 04:16:49] "GET /static/images/favicon.ico HTTP/1.1" 304 -
+[2025-04-14 04:16:52] [INFO] 172.31.128.74 - - [14/Apr/2025 04:16:52] "GET / HTTP/1.1" 200 -
+[2025-04-14 04:16:52] [INFO] 172.31.128.74 - - [14/Apr/2025 04:16:52] "GET /static/css/style.css HTTP/1.1" 304 -
+[2025-04-14 04:16:52] [INFO] 172.31.128.74 - - [14/Apr/2025 04:16:52] "GET /static/images/flag-orpheus-left.svg HTTP/1.1" 304 -
+[2025-04-14 04:16:52] [INFO] 172.31.128.74 - - [14/Apr/2025 04:16:52] "GET /static/images/logo-rounded.png HTTP/1.1" 304 -
+[2025-04-14 04:16:52] [INFO] 172.31.128.74 - - [14/Apr/2025 04:16:52] "GET /static/js/main.js HTTP/1.1" 304 -
+[2025-04-14 04:16:57,727] [WARNING] Response: POST /api/gallery/entries → 500
+[2025-04-14 04:16:57] [WARNING] Response: POST /api/gallery/entries → 500
+[2025-04-14 04:16:57] [INFO] 172.31.128.74 - - [14/Apr/2025 04:16:57] "POST /api/gallery/entries HTTP/1.1" 500 -
