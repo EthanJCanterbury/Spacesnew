@@ -193,6 +193,25 @@ class ClubMeeting(db.Model):
     
     def __repr__(self):
         return f'<ClubMeeting {self.title} on {self.meeting_date}>'
+        
+        
+class GalleryEntry(db.Model):
+    __tablename__ = 'gallery_entry'
+    id = db.Column(db.Integer, primary_key=True)
+    site_id = db.Column(db.Integer, db.ForeignKey('site.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    thumbnail_url = db.Column(db.String(500), nullable=True)
+    tags = db.Column(db.String(200), nullable=True)
+    added_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_featured = db.Column(db.Boolean, default=False)
+    
+    site = db.relationship('Site', backref=db.backref('gallery_entries', lazy=True, cascade='all, delete-orphan'))
+    user = db.relationship('User', backref=db.backref('gallery_entries', lazy=True))
+    
+    def __repr__(self):
+        return f'<GalleryEntry {self.title} for site {self.site_id}>'
 
 
 class User(UserMixin, db.Model):

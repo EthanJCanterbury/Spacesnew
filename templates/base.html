@@ -25,8 +25,9 @@
                 <span style="vertical-align: middle;">Spaces</span>
             </a>
             <div class="nav-links" id="navLinks">
-                <a href="/">Home</a>
-                <a href="{{ url_for('documentation') }}">Documentation</a>
+                <a href="/" class="nav-link">Home</a>
+                <a href="/gallery" class="nav-link">Gallery</a>
+                <a href="{{ url_for('documentation') }}" class="nav-link">Documentation</a>
                 <!-- Auth links for mobile -->
                 <div class="mobile-auth">
                     {% if current_user.is_authenticated %}
