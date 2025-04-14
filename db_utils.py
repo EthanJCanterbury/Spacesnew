@@ -51,6 +51,7 @@ def ensure_gallery_likes_table():
         return True
     except Exception as e:
         print(f"Error ensuring gallery likes table: {str(e)}")
+        reset_db_session()
         return False
 
                 IF NOT EXISTS (
