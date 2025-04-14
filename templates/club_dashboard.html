@@ -27,6 +27,7 @@
                     <button class="tab-btn" onclick="openTab('chat')"><i class="fas fa-comments"></i> Chat</button>
                     <button class="tab-btn" onclick="openTab('resources')"><i class="fas fa-link"></i> Resources</button>
                     <button class="tab-btn" onclick="openTab('schedule')"><i class="fas fa-calendar-alt"></i> Schedule</button>
+                    <button class="tab-btn" onclick="openTab('rewards')"><i class="fas fa-gift"></i> Rewards</button>
                     <button class="tab-btn" onclick="openTab('settings')"><i class="fas fa-cog"></i> Settings</button>
                 </div>
             </div>
@@ -324,6 +325,86 @@
                             <div class="loading-spinner"></div>
                             <p>Loading meetings...</p>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rewards Tab Content -->
+        <div id="rewards" class="tab-pane">
+            <div class="rewards-container">
+                <div class="rewards-header">
+                    <h3>Hack Club Rewards</h3>
+                    <p>Complete projects and workshops to earn awesome rewards!</p>
+                </div>
+                
+                <div class="rewards-grid">
+                    <div class="reward-card">
+                        <div class="reward-icon">
+                            <i class="fas fa-pizza-slice"></i>
+                        </div>
+                        <div class="reward-content">
+                            <h3>$5 for Pizza</h3>
+                            <p>Ship any project and get $5 for pizza to celebrate!</p>
+                            <div class="reward-meta">
+                                <span><i class="fas fa-users"></i> For all club members</span>
+                            </div>
+                        </div>
+                        <div class="reward-actions">
+                            <a href="https://airtable.com/appSUAc40CDu6bDAp/pagvu2xGhfsMC8AOL/form" target="_blank" class="btn-primary">
+                                Claim Reward
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="reward-card">
+                        <div class="reward-icon">
+                            <i class="fas fa-mug-hot"></i>
+                        </div>
+                        <div class="reward-content">
+                            <h3>Boba Workshop</h3>
+                            <p>Build a website and get boba delivered to your club meeting!</p>
+                            <div class="reward-meta">
+                                <span><i class="fas fa-users"></i> For club workshop</span>
+                            </div>
+                        </div>
+                        <div class="reward-actions">
+                            <a href="https://forms.hackclub.com/t/5r7VGppu9wus" target="_blank" class="btn-primary">
+                                Run Workshop
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="reward-card">
+                        <div class="reward-icon">
+                            <i class="fas fa-ice-cream"></i>
+                        </div>
+                        <div class="reward-content">
+                            <h3>Swirl Workshop</h3>
+                            <p>Make a website together and get ice cream for your club!</p>
+                            <div class="reward-meta">
+                                <span><i class="fas fa-users"></i> For club workshop</span>
+                            </div>
+                        </div>
+                        <div class="reward-actions">
+                            <a href="https://forms.hackclub.com/t/8JgE9XsQanus" target="_blank" class="btn-primary">
+                                Run Workshop
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="rewards-guide">
+                    <h4>How to claim rewards:</h4>
+                    <ol>
+                        <li>Complete the required project or workshop with your club</li>
+                        <li>Click the corresponding "Claim Reward" or "Run Workshop" button</li>
+                        <li>Fill out the form with your project details</li>
+                        <li>Wait for Hack Club to process your request</li>
+                    </ol>
+                    <div class="info-box">
+                        <i class="fas fa-info-circle"></i>
+                        <p>All rewards are provided by Hack Club and subject to their terms and availability.</p>
                     </div>
                 </div>
             </div>
@@ -2007,6 +2088,119 @@
         flex-direction: column;
         gap: 0.5rem;
     }
+}
+
+/* Rewards Tab Styles */
+.rewards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.rewards-header {
+    margin-bottom: 1rem;
+}
+
+.rewards-header h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.rewards-header p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.rewards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.reward-card {
+    background-color: white;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+}
+
+.reward-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.reward-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background-color: rgba(236, 55, 80, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.reward-content {
+    flex-grow: 1;
+}
+
+.reward-content h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.reward-content p {
+    margin: 0 0 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+}
+
+.reward-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.reward-actions {
+    margin-top: auto;
+}
+
+.rewards-guide {
+    background-color: var(--light);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.rewards-guide h4 {
+    margin: 0 0 1rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.rewards-guide ol {
+    margin: 0 0 1.5rem;
+    padding-left: 1.5rem;
+}
+
+.rewards-guide li {
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
 }
 
 /* Schedule Tab Styles */
