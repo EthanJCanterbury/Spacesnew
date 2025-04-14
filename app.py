@@ -4817,3 +4817,95 @@ if __name__ == '__main__':
 
     app.logger.info("Server running on http://0.0.0.0:3000")
     app.run(host='0.0.0.0', port=3000, debug=True)
+@app.route('/gallery')
+def gallery():
+    """Display the gallery of user-created websites."""
+    page = request.args.get('page', 1, type=int)
+    per_page = 12  # Number of entries per page
+    
+    entries = GalleryEntry.query.order_by(GalleryEntry.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False)
+    
+    # Get current user's sites if logged in for the add entry form
+    user_sites = []
+    if current_user.is_authenticated:
+        user_sites = Site.query.filter_by(user_id=current_user.id).all()
+    
+    return render_template('gallery.html', entries=entries.items, pagination=entries, user_sites=user_sites)
+
+
+@app.route('/api/gallery/entries', methods=['POST'])
+@login_required
+def create_gallery_entry():
+    """Create a new gallery entry."""
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        if not data.get('title') or not data.get('description') or not data.get('site_id'):
+            return jsonify({'success': False, 'message': 'Title, description, and site ID are required'}), 400
+        
+        # Check if site exists and belongs to the user
+        site = Site.query.get(data.get('site_id'))
+        if not site:
+            return jsonify({'success': False, 'message': 'Site not found'}), 404
+        
+        if site.user_id != current_user.id:
+            return jsonify({'success': False, 'message': 'You do not own this site'}), 403
+        
+        # Create the gallery entry
+        entry = GalleryEntry(
+            title=data.get('title'),
+            description=data.get('description'),
+            site_id=data.get('site_id'),
+            user_id=current_user.id,
+            screenshot_url=data.get('screenshot_url'),
+            category=data.get('category', 'other')
+        )
+        
+        db.session.add(entry)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Gallery entry created successfully'})
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Error creating gallery entry: {str(e)}'}), 500
+
+
+@app.route('/api/gallery/entries/<int:entry_id>/like', methods=['POST'])
+@login_required
+def like_gallery_entry(entry_id):
+    """Like or unlike a gallery entry."""
+    try:
+        entry = GalleryEntry.query.get_or_404(entry_id)
+        
+        # Simple implementation - just increment/decrement likes
+        # In a production app, you'd track which users liked which entries
+        if entry.user_id == current_user.id:
+            # Can't like your own entry
+            return jsonify({'success': False, 'message': 'You cannot like your own entry'}), 400
+        
+        # Toggle like (simplified implementation)
+        # In a real app, you'd use a separate table to track likes per user
+        if 'liked_entries' not in session:
+            session['liked_entries'] = []
+            
+        if entry_id in session['liked_entries']:
+            # Unlike
+            entry.likes = max(0, entry.likes - 1)
+            session['liked_entries'].remove(entry_id)
+            liked = False
+        else:
+            # Like
+            entry.likes = entry.likes + 1
+            session['liked_entries'].append(entry_id)
+            liked = True
+            
+        db.session.commit()
+        
+        return jsonify({'success': True, 'likes': entry.likes, 'liked': liked})
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Error liking gallery entry: {str(e)}'}), 500
