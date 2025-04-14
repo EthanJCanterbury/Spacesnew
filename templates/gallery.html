@@ -13,6 +13,7 @@
     .gallery-header {
         text-align: center;
         margin-bottom: 3rem;
+        padding-top: 2rem;
     }
 
     .gallery-title {
@@ -490,15 +491,6 @@
                 </div>
                 <h2 class="empty-title">No Spaces in the Gallery Yet</h2>
                 <p class="empty-text">Be the first to add your amazing creation!</p>
-                {% if current_user.is_authenticated %}
-                <a href="#" class="add-entry-btn" id="addToGalleryBtnEmpty">
-                    <i class="fas fa-plus"></i> Add Your Space
-                </a>
-                {% else %}
-                <a href="{{ url_for('login') }}" class="add-entry-btn">
-                    <i class="fas fa-sign-in-alt"></i> Login to Add Your Space
-                </a>
-                {% endif %}
             </div>
         {% endif %}
     </div>
@@ -625,13 +617,6 @@
 
         if (addToGalleryBtn) {
             addToGalleryBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                galleryModal.classList.add('active');
-            });
-        }
-
-        if (addToGalleryBtnEmpty) {
-            addToGalleryBtnEmpty.addEventListener('click', function(e) {
                 e.preventDefault();
                 galleryModal.classList.add('active');
             });
