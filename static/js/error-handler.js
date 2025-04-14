@@ -260,6 +260,7 @@ function reportError() {
         timestamp: new Date().toISOString()
     };
 
+    // First log the error to our server
     fetch('/api/report-error', {
         method: 'POST',
         headers: {
@@ -270,10 +271,31 @@ function reportError() {
         const data = await response.json();
         console.log('Report submission response:', data);
         showToast('success', 'Error report sent successfully. Thank you for helping us improve!');
+        
+        // Prepare GitHub issue URL with error details
+        const title = encodeURIComponent(`Error Report: ${errorDetails.type}`);
+        const body = encodeURIComponent(
+            `## Error Details\n\n` +
+            `**Type:** ${errorDetails.type}\n` +
+            `**Message:** ${errorDetails.message}\n` +
+            `**Location:** ${errorDetails.location}\n\n` +
+            `**User Agent:** ${errorDetails.userAgent}\n` +
+            `**Timestamp:** ${errorDetails.timestamp}\n\n` +
+            `## Stack Trace\n\`\`\`\n${errorDetails.stack || 'No stack trace available'}\n\`\`\``
+        );
+        
+        // Open GitHub new issue page with prefilled details
+        window.open(`https://github.com/hackclub/spaces/issues/new?title=${title}&body=${body}`, '_blank');
+        
         closeErrorModal();
     }).catch(err => {
         console.error('Failed to send error report:', err);
         showToast('error', 'Failed to send error report. Please try again later.');
+        
+        // Try to open GitHub issue anyway as a fallback
+        const title = encodeURIComponent(`Error Report: ${errorDetails.type}`);
+        const body = encodeURIComponent(`Error occurred but failed to submit to server.\n\n${errorDetails.message}`);
+        window.open(`https://github.com/hackclub/spaces/issues/new?title=${title}&body=${body}`, '_blank');
     });
 }
 
