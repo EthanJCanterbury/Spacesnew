@@ -2076,9 +2076,9 @@ def admin_reset_join_code(club_id):
         db.session.commit()
 
         return jsonify({
-            'message': 'Join code reset successfully',
-            'join_code': club.join_code
-        })
+                'message': 'Join code reset successfully',
+                'join_code': club.join_code
+            })
 
     except Exception as e:
         db.session.rollback()
