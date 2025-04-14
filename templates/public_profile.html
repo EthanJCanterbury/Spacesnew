@@ -3,18 +3,12 @@
 
 {% block content %}
 <div class="profile-container">
-    {% if profile_banner %}
-    <div class="profile-banner" style="background-image: url('{{ profile_banner }}')">
-        <div class="profile-banner-overlay"></div>
+    <div class="profile-header-banner" {% if profile_banner %}style="background-image: url('{{ profile_banner }}')"{% endif %}>
+        <div class="banner-overlay"></div>
     </div>
-    {% else %}
-    <div class="profile-banner default-banner">
-        <div class="profile-banner-overlay"></div>
-    </div>
-    {% endif %}
-
+    
     <div class="profile-content">
-        <div class="profile-header">
+        <div class="profile-info-card">
             <div class="profile-avatar-container">
                 {% if profile_user.avatar %}
                 <div class="profile-avatar" style="background-image: url('{{ profile_user.avatar }}')"></div>
@@ -24,9 +18,10 @@
                 </div>
                 {% endif %}
             </div>
-
+            
             <div class="profile-info">
                 <h1 class="profile-username">{{ profile_user.username }}</h1>
+                
                 {% if social_links %}
                 <div class="profile-social-links">
                     {% if social_links.website %}
@@ -39,33 +34,28 @@
                         <i class="fab fa-github"></i>
                     </a>
                     {% endif %}
-                    {% if social_links.twitter %}
-                    <a href="{{ social_links.twitter }}" target="_blank" class="social-link" title="Twitter">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    {% endif %}
-                    {% if social_links.linkedin %}
-                    <a href="{{ social_links.linkedin }}" target="_blank" class="social-link" title="LinkedIn">
-                        <i class="fab fa-linkedin"></i>
-                    </a>
-                    {% endif %}
                 </div>
                 {% endif %}
             </div>
         </div>
 
         {% if profile_user.bio %}
-        <div class="profile-bio">
-            <h2>About Me</h2>
-            <div class="bio-content">
+        <div class="profile-section">
+            <div class="section-header">
+                <h2><i class="fas fa-user-edit"></i> About Me</h2>
+            </div>
+            <div class="section-content bio-content">
                 {{ profile_user.bio|safe }}
             </div>
         </div>
         {% endif %}
 
         {% if projects %}
-        <div class="profile-projects">
-            <h2>Projects</h2>
+        <div class="profile-section">
+            <div class="section-header">
+                <h2><i class="fas fa-project-diagram"></i> Projects</h2>
+            </div>
+            
             <div class="projects-grid">
                 {% for site in projects %}
                 <div class="project-card">
@@ -79,11 +69,16 @@
                             {% endif %}
                         </span>
                     </div>
-                    <div class="project-date">
-                        <i class="far fa-calendar-alt"></i> Created: {{ site.created_at|string|truncate(10, True, '') if site.created_at else 'Unknown' }}
+                    
+                    <div class="project-meta">
+                        <div class="meta-item">
+                            <i class="far fa-calendar-alt"></i> 
+                            <span>Created: {{ site.created_at|string|truncate(10, True, '') if site.created_at else 'Unknown' }}</span>
+                        </div>
                     </div>
+                    
                     <div class="project-actions">
-                        <a href="/s/{{ site.slug }}" class="btn btn-primary" target="_blank">
+                        <a href="/s/{{ site.slug }}" class="btn-primary" target="_blank">
                             <i class="fas fa-external-link-alt"></i> View
                         </a>
                     </div>
@@ -92,11 +87,297 @@
             </div>
         </div>
         {% else %}
-        <div class="no-projects">
-            <i class="fas fa-folder-open"></i>
-            <p>No public projects to display.</p>
+        <div class="profile-section">
+            <div class="section-header">
+                <h2><i class="fas fa-project-diagram"></i> Projects</h2>
+            </div>
+            <div class="empty-state">
+                <i class="fas fa-folder-open"></i>
+                <p>No public projects to display.</p>
+            </div>
         </div>
         {% endif %}
     </div>
 </div>
+
+<style>
+/* Modern Public Profile Styles */
+.profile-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 80px auto 60px;
+    padding: 0;
+}
+
+.profile-header-banner {
+    position: relative;
+    height: 300px;
+    background: linear-gradient(135deg, #ec3750, #ff8c37);
+    background-size: cover;
+    background-position: center;
+    border-radius: 16px 16px 0 0;
+}
+
+.banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px 16px 0 0;
+}
+
+.profile-content {
+    position: relative;
+    padding: 0 24px 40px;
+    max-width: 1100px;
+    margin: -60px auto 0;
+}
+
+.profile-info-card {
+    background-color: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    position: relative;
+}
+
+.profile-avatar-container {
+    margin-right: 24px;
+    position: relative;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 5px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.default-avatar {
+    background-color: #ec3750;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.default-avatar i {
+    font-size: 48px;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-username {
+    font-size: 2.2rem;
+    margin: 0 0 12px;
+    color: #1f2d3d;
+}
+
+.profile-social-links {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    color: #4b5563;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.social-link:hover {
+    background-color: #ec3750;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.profile-section {
+    background-color: white;
+    border-radius: 16px;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.section-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: #1f2d3d;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-header h2 i {
+    color: #ec3750;
+}
+
+.section-content {
+    padding: 24px;
+}
+
+.bio-content {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #4b5563;
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    padding: 24px;
+}
+
+.project-card {
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.project-title {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #1f2d3d;
+}
+
+.project-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.python-badge {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+}
+
+.web-badge {
+    background-color: rgba(240, 130, 50, 0.1);
+    color: #f08232;
+}
+
+.project-meta {
+    margin-bottom: 20px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 6px;
+}
+
+.project-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background-color: #ec3750;
+    color: white;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #d23048;
+    transform: translateY(-1px);
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 24px;
+    color: #64748b;
+    text-align: center;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    color: #d1d5db;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .profile-info-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .profile-avatar-container {
+        margin-right: 0;
+        margin-bottom: 16px;
+    }
+    
+    .profile-social-links {
+        justify-content: center;
+    }
+    
+    .projects-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .profile-header-banner {
+        height: 200px;
+    }
+}
+</style>
 {% endblock %}

@@ -495,13 +495,14 @@ input:checked + .toggle-slider:before {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 12px 24px;
+    padding: 10px 20px;
     border: none;
     border-radius: 8px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
+    height: 42px;
 }
 
 .btn-primary {
@@ -530,7 +531,7 @@ input:checked + .toggle-slider:before {
 }
 
 .toast {
-    background-color: var(--surface-primary);
+    background-color: white;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     padding: 16px;
@@ -552,8 +553,16 @@ input:checked + .toggle-slider:before {
     gap: 12px;
 }
 
+.toast-success {
+    border-left: 4px solid #2ecc71;
+}
+
 .toast-success i {
     color: #2ecc71;
+}
+
+.toast-error {
+    border-left: 4px solid #e74c3c;
 }
 
 .toast-error i {
