@@ -1,84 +1,227 @@
+
 {% extends 'base.html' %}
 
 {% block title %}Submit to Gallery - Hack Club Spaces{% endblock %}
 
 {% block head %}
 <style>
+    :root {
+        --primary-color: #ec3750;
+        --secondary-color: #ff8c37;
+        --primary-gradient: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        --neutral-light: #f8f9fa;
+        --neutral-dark: #343a40;
+        --shadow-light: 0 5px 15px rgba(0, 0, 0, 0.05);
+        --shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
+        --transition-normal: all 0.3s ease;
+    }
+
     .gallery-submit-container {
         max-width: 800px;
-        margin: 80px auto 40px;
-        padding: 2rem;
+        margin: 100px auto 60px;
+        padding: 2.5rem;
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        border-radius: 16px;
+        box-shadow: var(--shadow-light);
+        border: 1px solid rgba(0,0,0,0.05);
     }
 
     .gallery-submit-header {
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
         text-align: center;
     }
 
     .gallery-submit-header h1 {
-        font-size: 2.5rem;
-        color: #ec3750;
-        margin-bottom: 0.5rem;
+        font-size: 2.8rem;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
     }
 
     .gallery-submit-header p {
-        font-size: 1.1rem;
-        color: #666;
+        font-size: 1.2rem;
+        color: #555;
+        max-width: 500px;
+        margin: 0 auto;
+        line-height: 1.5;
     }
 
     .form-group {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.8rem;
     }
 
     .form-group label {
         display: block;
         font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: #333;
+        margin-bottom: 0.8rem;
+        color: #444;
+        font-size: 1.05rem;
     }
 
     .form-control {
         width: 100%;
-        padding: 0.8rem;
-        border: 1px solid #ddd;
-        border-radius: 8px;
+        padding: 1rem;
+        border: 2px solid #eee;
+        border-radius: 10px;
         font-size: 1rem;
-        transition: border-color 0.2s ease;
+        transition: all 0.2s ease;
+        background-color: #fafafa;
     }
 
     .form-control:focus {
-        border-color: #ec3750;
+        border-color: var(--primary-color);
         outline: none;
         box-shadow: 0 0 0 3px rgba(236, 55, 80, 0.1);
+        background-color: white;
+    }
+
+    select.form-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23444' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 16px 12px;
+        padding-right: 2.5rem;
     }
 
     .form-text {
         display: block;
-        margin-top: 0.5rem;
+        margin-top: 0.7rem;
         font-size: 0.9rem;
         color: #777;
     }
 
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
     .btn-submit-gallery {
         display: inline-block;
-        background: linear-gradient(to right, #ec3750, #ff8c37);
+        background: var(--primary-gradient);
         color: white;
         border: none;
-        padding: 0.8rem 2rem;
-        border-radius: 8px;
-        font-size: 1rem;
+        padding: 1rem 2.5rem;
+        border-radius: 10px;
+        font-size: 1.1rem;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: var(--transition-normal);
         box-shadow: 0 4px 6px rgba(236, 55, 80, 0.2);
     }
 
     .btn-submit-gallery:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-hover);
+    }
+    
+    .btn-submit-gallery:active {
+        transform: translateY(-1px);
+    }
+    
+    .submit-actions {
+        text-align: center;
+        margin-top: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .back-to-gallery {
+        color: #777;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: var(--transition-normal);
+    }
+    
+    .back-to-gallery:hover {
+        background-color: var(--neutral-light);
+        color: var(--primary-color);
+    }
+    
+    .no-sites-message {
+        text-align: center;
+        padding: 3rem 2rem;
+        background-color: var(--neutral-light);
+        border-radius: 12px;
+        margin: 2rem 0;
+    }
+    
+    .no-sites-message i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 1rem;
+    }
+    
+    .no-sites-message h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #555;
+    }
+    
+    .no-sites-message p {
+        color: #777;
+        margin-bottom: 1.5rem;
+    }
+    
+    .create-site-btn {
+        display: inline-flex;
+        align-items: center;
+        background: var(--primary-gradient);
+        color: white;
+        text-decoration: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: var(--transition-normal);
+        gap: 0.5rem;
+    }
+    
+    .create-site-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 8px rgba(236, 55, 80, 0.3);
+        box-shadow: var(--shadow-hover);
+    }
+    
+    .required-indicator {
+        color: var(--primary-color);
+        margin-left: 0.2rem;
+    }
+    
+    .form-group-row {
+        display: flex;
+        gap: 1.5rem;
+    }
+    
+    .form-group-row .form-group {
+        flex: 1;
+    }
+    
+    @media (max-width: 768px) {
+        .gallery-submit-container {
+            margin: 80px 20px 40px;
+            padding: 1.5rem;
+        }
+        
+        .gallery-submit-header h1 {
+            font-size: 2rem;
+        }
+        
+        .form-group-row {
+            flex-direction: column;
+            gap: 0;
+        }
+        
+        .submit-actions {
+            flex-direction: column-reverse;
+            gap: 1.5rem;
+        }
     }
 </style>
 {% endblock %}
@@ -87,12 +230,13 @@
 <div class="gallery-submit-container">
     <div class="gallery-submit-header">
         <h1>Submit Your Site to the Gallery</h1>
-        <p>Share your amazing project with the Hack Club community</p>
+        <p>Share your amazing project with the Hack Club community and inspire others with your creation</p>
     </div>
 
-    <form method="POST" action="{{ url_for('gallery_submit') }}">
+    {% if sites %}
+    <form method="POST" action="{{ url_for('gallery_submit') }}" id="gallerySubmitForm">
         <div class="form-group">
-            <label for="site_id">Choose Your Site</label>
+            <label for="site_id">Choose Your Site <span class="required-indicator">*</span></label>
             <select name="site_id" id="site_id" class="form-control" required>
                 <option value="">-- Select a site --</option>
                 {% for site in sites %}
@@ -103,13 +247,15 @@
         </div>
 
         <div class="form-group">
-            <label for="title">Title</label>
+            <label for="title">Title <span class="required-indicator">*</span></label>
             <input type="text" name="title" id="title" class="form-control" required placeholder="A catchy title for your project">
+            <small class="form-text">Make it descriptive and attention-grabbing</small>
         </div>
 
         <div class="form-group">
             <label for="description">Description</label>
             <textarea name="description" id="description" class="form-control" rows="4" placeholder="What makes your project special? What technologies did you use?"></textarea>
+            <small class="form-text">Describe your project, what it does, and why it's interesting</small>
         </div>
 
         <div class="form-group">
@@ -118,9 +264,58 @@
             <small class="form-text">Add relevant tags to help others find your project</small>
         </div>
 
-        <div style="text-align: center;">
-            <button type="submit" class="btn-submit-gallery">Submit to Gallery</button>
+        <div class="submit-actions">
+            <a href="{{ url_for('gallery') }}" class="back-to-gallery">
+                <i class="fas fa-arrow-left"></i> Back to Gallery
+            </a>
+            <button type="submit" class="btn-submit-gallery">
+                <i class="fas fa-paper-plane"></i> Submit to Gallery
+            </button>
         </div>
     </form>
+    {% else %}
+    <div class="no-sites-message">
+        <i class="fas fa-desktop"></i>
+        <h3>No Available Sites</h3>
+        <p>You don't have any sites available to submit to the gallery. This could be because all your sites are already in the gallery or you haven't created any sites yet.</p>
+        <a href="{{ url_for('welcome') }}" class="create-site-btn">
+            <i class="fas fa-plus"></i> Create a New Site
+        </a>
+    </div>
+    <div class="submit-actions">
+        <a href="{{ url_for('gallery') }}" class="back-to-gallery">
+            <i class="fas fa-arrow-left"></i> Back to Gallery
+        </a>
+    </div>
+    {% endif %}
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('gallerySubmitForm');
+        
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                const siteSelect = document.getElementById('site_id');
+                const titleInput = document.getElementById('title');
+                
+                if (!siteSelect.value) {
+                    event.preventDefault();
+                    alert('Please select a site to submit');
+                    siteSelect.focus();
+                    return false;
+                }
+                
+                if (!titleInput.value.trim()) {
+                    event.preventDefault();
+                    alert('Please enter a title for your project');
+                    titleInput.focus();
+                    return false;
+                }
+                
+                // Form is valid, will submit normally
+            });
+        }
+    });
+</script>
 {% endblock %}
