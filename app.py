@@ -4823,8 +4823,13 @@ def gallery():
     page = request.args.get('page', 1, type=int)
     per_page = 12  # Number of entries per page
     
-    entries = GalleryEntry.query.order_by(GalleryEntry.created_at.desc()).paginate(
-        page=page, per_page=per_page, error_out=False)
+    try:
+        entries = GalleryEntry.query.order_by(GalleryEntry.created_at.desc()).paginate(
+            page=page, per_page=per_page, error_out=False)
+    except Exception as e:
+        # Fallback if created_at column doesn't exist
+        entries = GalleryEntry.query.paginate(
+            page=page, per_page=per_page, error_out=False)
     
     # Get current user's sites if logged in for the add entry form
     user_sites = []
