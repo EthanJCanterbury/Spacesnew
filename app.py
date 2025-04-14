@@ -1318,6 +1318,8 @@ def admin_panel():
 @login_required
 @admin_required
 def delete_user(user_id):
+    from models import ClubPost, ClubPostLike, ClubChatChannel, ClubChatMessage, ClubResource, ClubAssignment
+    
     if user_id == current_user.id:
         return jsonify({'message': 'Cannot delete yourself'}), 400
 
