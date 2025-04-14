@@ -12,7 +12,7 @@ from functools import wraps
 from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, flash, request, jsonify, url_for, abort, session, Response
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from models import db, User, Site, SitePage, UserActivity, Club, ClubMembership
+from models import db, User, Site, SitePage, UserActivity, Club, ClubMembership, GalleryEntry
 
 
 def slugify(text):
