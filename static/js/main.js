@@ -1,10 +1,7 @@
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
-        const href = this.getAttribute('href');
-        if (href === "#") return;
-        
         e.preventDefault();
-        const targetElement = document.querySelector(href);
+        const targetElement = document.querySelector(this.getAttribute('href'));
         if (targetElement) {
             targetElement.scrollIntoView({
                 behavior: 'smooth'

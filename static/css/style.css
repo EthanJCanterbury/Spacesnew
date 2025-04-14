@@ -409,11 +409,10 @@ body.editor-page {
     text-decoration: none;
     color: var(--text);
     transition: all 0.2s ease;
-    font-weight: 600;
-    padding: 0.75rem 1.25rem;
-    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
     display: inline-block;
-    position: relative;
 }
 
 .nav-links a:not(.auth-button) {
@@ -423,22 +422,6 @@ body.editor-page {
 .nav-links a:not(.auth-button):hover {
     background: rgba(236, 55, 80, 0.1);
     color: var(--primary);
-}
-
-.nav-links a:not(.auth-button)::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: 5px;
-    left: 50%;
-    background-color: var(--primary);
-    transition: all 0.3s ease;
-    transform: translateX(-50%);
-}
-
-.nav-links a:not(.auth-button):hover::after {
-    width: 50%;
 }
 
 /* Hamburger menu styles */
