@@ -80,7 +80,7 @@
                         </span>
                     </div>
                     <div class="project-date">
-                        <i class="far fa-calendar-alt"></i> Created: {{ site.created_at.strftime('%b %d, %Y') }}
+                        <i class="far fa-calendar-alt"></i> Created: {{ site.created_at|string|truncate(10, True, '') if site.created_at else 'Unknown' }}
                     </div>
                     <div class="project-actions">
                         <a href="/s/{{ site.slug }}" class="btn btn-primary" target="_blank">

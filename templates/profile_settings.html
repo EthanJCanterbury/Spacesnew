@@ -66,14 +66,6 @@
                         <i class="fab fa-github"></i>
                         <input type="url" id="github" name="github" value="{{ social_links.github or '' }}" placeholder="GitHub profile URL">
                     </div>
-                    <div class="social-input">
-                        <i class="fab fa-twitter"></i>
-                        <input type="url" id="twitter" name="twitter" value="{{ social_links.twitter or '' }}" placeholder="Twitter profile URL">
-                    </div>
-                    <div class="social-input">
-                        <i class="fab fa-linkedin"></i>
-                        <input type="url" id="linkedin" name="linkedin" value="{{ social_links.linkedin or '' }}" placeholder="LinkedIn profile URL">
-                    </div>
                 </div>
             </div>
 
@@ -113,12 +105,10 @@
                     <i class="fas fa-save"></i>
                     Save Profile
                 </button>
-                {% if current_user.is_profile_public %}
                 <a href="{{ url_for('public_profile', username=current_user.username) }}" class="btn-secondary" target="_blank">
                     <i class="fas fa-eye"></i>
                     View Public Profile
                 </a>
-                {% endif %}
             </div>
         </form>
     </div>
@@ -157,9 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Social links
         const socialLinks = {
             website: document.getElementById('website').value,
-            github: document.getElementById('github').value,
-            twitter: document.getElementById('twitter').value,
-            linkedin: document.getElementById('linkedin').value
+            github: document.getElementById('github').value
         };
         formData.append('social_links', JSON.stringify(socialLinks));
         
@@ -244,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .settings-card {
-    background: white;
+    background-color: white;
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     padding: 32px;
@@ -310,15 +298,13 @@ document.addEventListener('DOMContentLoaded', function() {
     display: inline-block;
     width: 48px;
     height: 24px;
-    z-index: 5;
+    z-index: 10;
 }
 
 .toggle-switch input {
     opacity: 0;
-    width: 0;
-    height: 0;
     position: absolute;
-    z-index: 10;
+    z-index: 15;
     cursor: pointer;
     left: 0;
     top: 0;
