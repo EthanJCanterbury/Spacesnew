@@ -20,7 +20,19 @@
             </div>
             
             <div class="profile-info">
-                <h1 class="profile-username">{{ profile_user.username }}</h1>
+                <div class="username-container">
+                    <h1 class="profile-username">{{ profile_user.username }}</h1>
+                    {% if profile_user.is_admin %}
+                    <span class="role-badge admin-badge" title="Administrator">
+                        <i class="fas fa-shield-alt"></i> Admin
+                    </span>
+                    {% endif %}
+                    {% if profile_user.is_club_leader %}
+                    <span class="role-badge leader-badge" title="Club Leader">
+                        <i class="fas fa-crown"></i> Leader
+                    </span>
+                    {% endif %}
+                </div>
                 
                 {% if social_links %}
                 <div class="profile-social-links">
@@ -149,6 +161,9 @@
 .profile-avatar-container {
     margin-right: 24px;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .profile-avatar {
@@ -177,10 +192,40 @@
     flex: 1;
 }
 
+.username-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
 .profile-username {
     font-size: 2.2rem;
-    margin: 0 0 12px;
+    margin: 0;
     color: #1f2d3d;
+}
+
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-badge {
+    background-color: rgba(236, 55, 80, 0.15);
+    color: #ec3750;
+    border: 1px solid rgba(236, 55, 80, 0.3);
+}
+
+.leader-badge {
+    background-color: rgba(138, 100, 235, 0.15);
+    color: #8a64eb;
+    border: 1px solid rgba(138, 100, 235, 0.3);
 }
 
 .profile-social-links {
