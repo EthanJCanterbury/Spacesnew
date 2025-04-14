@@ -1211,6 +1211,64 @@ def documentation():
     return render_template('documentation.html')
 
 
+@app.route('/gallery')
+def gallery():
+    from models import GalleryEntry, Site, User
+    entries = db.session.query(GalleryEntry, Site, User)\
+        .join(Site, GalleryEntry.site_id == Site.id)\
+        .join(User, GalleryEntry.user_id == User.id)\
+        .filter(GalleryEntry.is_featured == True)\
+        .order_by(GalleryEntry.added_at.desc())\
+        .all()
+    
+    recent_entries = db.session.query(GalleryEntry, Site, User)\
+        .join(Site, GalleryEntry.site_id == Site.id)\
+        .join(User, GalleryEntry.user_id == User.id)\
+        .order_by(GalleryEntry.added_at.desc())\
+        .limit(20)\
+        .all()
+    
+    return render_template('gallery.html', featured_entries=entries, recent_entries=recent_entries)
+
+
+@app.route('/gallery/submit', methods=['GET', 'POST'])
+@login_required
+def gallery_submit():
+    if request.method == 'POST':
+        site_id = request.form.get('site_id')
+        title = request.form.get('title')
+        description = request.form.get('description', '')
+        tags = request.form.get('tags', '')
+        
+        if not site_id or not title:
+            flash('Site and title are required', 'error')
+            return redirect(url_for('gallery_submit'))
+        
+        site = Site.query.get(site_id)
+        if not site or site.user_id != current_user.id:
+            flash('Invalid site selected', 'error')
+            return redirect(url_for('gallery_submit'))
+        
+        from models import GalleryEntry
+        entry = GalleryEntry(
+            site_id=site_id,
+            user_id=current_user.id,
+            title=title,
+            description=description,
+            tags=tags
+        )
+        
+        db.session.add(entry)
+        db.session.commit()
+        
+        flash('Your site has been submitted to the gallery!', 'success')
+        return redirect(url_for('gallery'))
+    
+    # GET request
+    sites = Site.query.filter_by(user_id=current_user.id).all()
+    return render_template('gallery_submit.html', sites=sites)
+
+
 @app.route('/apps')
 def apps():
     return render_template('apps.html')
