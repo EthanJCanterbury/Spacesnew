@@ -3524,6 +3524,192 @@ def settings():
     return render_template('settings.html')
 
 
+@app.route('/profile')
+@login_required
+def profile_settings():
+    """Route for the user to edit their public profile settings"""
+    # Get user's sites
+    sites = Site.query.filter_by(user_id=current_user.id).all()
+    
+    # Get social links from the database
+    social_links = {}
+    if current_user.social_links:
+        try:
+            # Convert from JSONB to dict
+            social_links = current_user.social_links
+        except:
+            # In case of error, provide empty dict
+            social_links = {}
+    
+    # Get list of public site IDs
+    with db.engine.connect() as conn:
+        result = conn.execute(
+            db.text("SELECT site_id FROM public_site WHERE user_id = :user_id"),
+            {"user_id": current_user.id}
+        )
+        public_site_ids = [row[0] for row in result]
+    
+    return render_template(
+        'profile_settings.html',
+        sites=sites,
+        social_links=social_links,
+        public_site_ids=public_site_ids
+    )
+
+
+@app.route('/api/profile/settings', methods=['POST'])
+@login_required
+def update_profile_settings():
+    """API endpoint to update user profile settings"""
+    try:
+        # Get form data
+        is_profile_public = request.form.get('is_profile_public') == 'true'
+        avatar = request.form.get('avatar', '')
+        profile_banner = request.form.get('profile_banner', '')
+        bio = request.form.get('bio', '')
+        
+        # Validate image URLs
+        valid_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+        
+        if avatar and not any(avatar.lower().endswith(ext) for ext in valid_extensions):
+            return jsonify({
+                'status': 'error',
+                'message': 'Avatar URL must point to an image file (jpg, png, gif, etc.)'
+            }), 400
+            
+        if profile_banner and not any(profile_banner.lower().endswith(ext) for ext in valid_extensions):
+            return jsonify({
+                'status': 'error',
+                'message': 'Banner URL must point to an image file (jpg, png, gif, etc.)'
+            }), 400
+        
+        # Parse social links from JSON string
+        social_links = {}
+        social_links_str = request.form.get('social_links', '{}')
+        try:
+            social_links = json.loads(social_links_str)
+        except:
+            # In case of error, use empty dict
+            social_links = {}
+        
+        # Update user profile in database
+        with db.engine.connect() as conn:
+            conn.execute(
+                db.text("""
+                    UPDATE "user" 
+                    SET is_profile_public = :is_public,
+                        avatar = :avatar,
+                        profile_banner = :banner,
+                        bio = :bio,
+                        social_links = :social_links
+                    WHERE id = :user_id
+                """),
+                {
+                    "is_public": is_profile_public,
+                    "avatar": avatar,
+                    "banner": profile_banner,
+                    "bio": bio,
+                    "social_links": json.dumps(social_links),
+                    "user_id": current_user.id
+                }
+            )
+            conn.commit()
+            
+        # Process public sites
+        public_sites_str = request.form.get('public_sites', '[]')
+        try:
+            public_site_ids = json.loads(public_sites_str)
+            
+            # Clear existing public sites
+            with db.engine.connect() as conn:
+                conn.execute(
+                    db.text("DELETE FROM public_site WHERE user_id = :user_id"),
+                    {"user_id": current_user.id}
+                )
+                
+                # Insert new public sites
+                for site_id in public_site_ids:
+                    # Verify the site belongs to the user
+                    site = Site.query.get(site_id)
+                    if site and site.user_id == current_user.id:
+                        conn.execute(
+                            db.text("""
+                                INSERT INTO public_site (user_id, site_id)
+                                VALUES (:user_id, :site_id)
+                            """),
+                            {"user_id": current_user.id, "site_id": site_id}
+                        )
+                
+                conn.commit()
+        except:
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid public sites data'
+            }), 400
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Profile settings updated successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error updating profile settings: {str(e)}')
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to update profile settings: {str(e)}'
+        }), 500
+
+
+@app.route('/p/<string:username>')
+def public_profile(username):
+    """Route to view a user's public profile"""
+    # Get the user profile
+    profile_user = User.query.filter_by(username=username).first_or_404()
+    
+    # Check if profile is public
+    if not profile_user.is_profile_public:
+        abort(404)
+    
+    # Get social links
+    social_links = {}
+    if profile_user.social_links:
+        try:
+            social_links = profile_user.social_links
+        except:
+            social_links = {}
+    
+    # Get public projects
+    with db.engine.connect() as conn:
+        result = conn.execute(
+            db.text("""
+                SELECT s.* FROM site s
+                JOIN public_site ps ON s.id = ps.site_id
+                WHERE ps.user_id = :user_id
+            """),
+            {"user_id": profile_user.id}
+        )
+        
+        projects = []
+        for row in result:
+            projects.append({
+                'id': row[0],
+                'name': row[1],
+                'slug': row[2],
+                'site_type': row[3],
+                'created_at': row[9],
+                'updated_at': row[10]
+            })
+    
+    return render_template(
+        'public_profile.html',
+        profile_user=profile_user,
+        social_links=social_links,
+        projects=projects,
+        profile_banner=profile_user.profile_banner
+    )
+
+
 @app.route('/club-dashboard')
 @app.route('/club-dashboard/<int:club_id>')
 @login_required

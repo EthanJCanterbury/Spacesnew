@@ -1,0 +1,102 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="profile-container">
+    {% if profile_banner %}
+    <div class="profile-banner" style="background-image: url('{{ profile_banner }}')">
+        <div class="profile-banner-overlay"></div>
+    </div>
+    {% else %}
+    <div class="profile-banner default-banner">
+        <div class="profile-banner-overlay"></div>
+    </div>
+    {% endif %}
+
+    <div class="profile-content">
+        <div class="profile-header">
+            <div class="profile-avatar-container">
+                {% if profile_user.avatar %}
+                <div class="profile-avatar" style="background-image: url('{{ profile_user.avatar }}')"></div>
+                {% else %}
+                <div class="profile-avatar default-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="profile-info">
+                <h1 class="profile-username">{{ profile_user.username }}</h1>
+                {% if social_links %}
+                <div class="profile-social-links">
+                    {% if social_links.website %}
+                    <a href="{{ social_links.website }}" target="_blank" class="social-link" title="Website">
+                        <i class="fas fa-globe"></i>
+                    </a>
+                    {% endif %}
+                    {% if social_links.github %}
+                    <a href="{{ social_links.github }}" target="_blank" class="social-link" title="GitHub">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    {% endif %}
+                    {% if social_links.twitter %}
+                    <a href="{{ social_links.twitter }}" target="_blank" class="social-link" title="Twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    {% endif %}
+                    {% if social_links.linkedin %}
+                    <a href="{{ social_links.linkedin }}" target="_blank" class="social-link" title="LinkedIn">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if profile_user.bio %}
+        <div class="profile-bio">
+            <h2>About Me</h2>
+            <div class="bio-content">
+                {{ profile_user.bio|safe }}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if projects %}
+        <div class="profile-projects">
+            <h2>Projects</h2>
+            <div class="projects-grid">
+                {% for site in projects %}
+                <div class="project-card">
+                    <div class="project-header">
+                        <h3 class="project-title">{{ site.name }}</h3>
+                        <span class="project-type {% if site.site_type == 'python' %}python-badge{% else %}web-badge{% endif %}">
+                            {% if site.site_type == 'python' %}
+                            <i class="fab fa-python"></i> Python
+                            {% else %}
+                            <i class="fas fa-code"></i> Web
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="project-date">
+                        <i class="far fa-calendar-alt"></i> Created: {{ site.created_at.strftime('%b %d, %Y') }}
+                    </div>
+                    <div class="project-actions">
+                        <a href="/s/{{ site.slug }}" class="btn btn-primary" target="_blank">
+                            <i class="fas fa-external-link-alt"></i> View
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="no-projects">
+            <i class="fas fa-folder-open"></i>
+            <p>No public projects to display.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
