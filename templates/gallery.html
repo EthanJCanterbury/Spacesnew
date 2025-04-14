@@ -1,0 +1,923 @@
+
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+    .gallery-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    
+    .gallery-header h1 {
+        color: var(--primary);
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .gallery-description {
+        max-width: 800px;
+        margin: 0 auto 2rem;
+        text-align: center;
+        color: #666;
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+    
+    .gallery-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .gallery-search {
+        flex: 1;
+        max-width: 400px;
+    }
+    
+    .gallery-search input {
+        width: 100%;
+        padding: 10px 15px;
+        border-radius: 20px;
+        border: 1px solid #ddd;
+        font-size: 0.9rem;
+    }
+    
+    .gallery-filters {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .filter-btn {
+        padding: 8px 16px;
+        border-radius: 20px;
+        border: 1px solid #ddd;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .filter-btn:hover, .filter-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+    
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+    
+    .gallery-card {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+        background: white;
+        position: relative;
+    }
+    
+    .gallery-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card-preview {
+        height: 200px;
+        background-size: cover;
+        background-position: top center;
+        background-color: #f5f5f5;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .card-preview::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0));
+    }
+    
+    .featured-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: var(--primary);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        z-index: 2;
+    }
+    
+    .card-info {
+        padding: 1.2rem;
+    }
+    
+    .card-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem;
+        color: #333;
+    }
+    
+    .card-desc {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .card-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .card-tags {
+        display: flex;
+        gap: 5px;
+        margin-top: 0.8rem;
+        flex-wrap: wrap;
+    }
+    
+    .tag {
+        background: #f0f0f0;
+        color: #666;
+        padding: 3px 8px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+    }
+    
+    .card-author {
+        color: #888;
+    }
+    
+    .card-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+        border-top: 1px solid #eee;
+        padding-top: 1rem;
+    }
+    
+    .card-btn {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    
+    .view-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+    }
+    
+    .view-btn:hover {
+        background: #ff7e7e;
+    }
+    
+    .like-btn {
+        background: white;
+        color: #666;
+        border: 1px solid #ddd;
+    }
+    
+    .like-btn:hover, .like-btn.liked {
+        color: #e74c3c;
+        border-color: #e74c3c;
+    }
+    
+    .like-count {
+        font-size: 0.85rem;
+        color: #666;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        margin-top: 2rem;
+    }
+    
+    .page-btn {
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        border: 1px solid #ddd;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .page-btn:hover, .page-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+    
+    .submit-banner {
+        background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin: 3rem 0;
+        text-align: center;
+    }
+    
+    .submit-banner h2 {
+        margin-top: 0;
+        font-size: 1.8rem;
+    }
+    
+    .submit-btn {
+        background: white;
+        color: var(--primary);
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        display: inline-block;
+        margin-top: 1rem;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .submit-btn:hover {
+        background: rgba(255,255,255,0.9);
+        transform: translateY(-2px);
+    }
+    
+    .empty-gallery {
+        text-align: center;
+        padding: 3rem 0;
+        color: #888;
+    }
+    
+    .empty-gallery i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #ddd;
+    }
+    
+    @media (max-width: 768px) {
+        .gallery-controls {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+        
+        .gallery-search {
+            max-width: 100%;
+        }
+        
+        .gallery-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        }
+    }
+
+    /* Modal styles */
+    .gallery-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.6);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .gallery-modal.show {
+        display: flex;
+    }
+    
+    .modal-content {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 0;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        animation: modalFadeIn 0.3s;
+    }
+
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .modal-preview {
+        height: 250px;
+        background-size: cover;
+        background-position: top center;
+        position: relative;
+    }
+    
+    .modal-title {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 20px;
+        background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0));
+        color: white;
+    }
+    
+    .modal-title h2 {
+        margin: 0;
+        font-size: 1.8rem;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .modal-section {
+        margin-bottom: 20px;
+    }
+    
+    .modal-section h3 {
+        margin-top: 0;
+        color: #333;
+        font-size: 1.2rem;
+    }
+    
+    .modal-section p {
+        color: #666;
+        line-height: 1.6;
+    }
+    
+    .modal-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+    }
+    
+    .modal-author {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .author-info span {
+        display: block;
+    }
+    
+    .author-name {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .submission-date {
+        font-size: 0.8rem;
+        color: #888;
+    }
+    
+    .modal-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+    
+    .close-modal {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 30px;
+        height: 30px;
+        background: rgba(0,0,0,0.5);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 10;
+    }
+    
+    .close-modal:hover {
+        background: rgba(0,0,0,0.8);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="gallery-header">
+        <h1>Space Gallery</h1>
+        <p class="gallery-description">Discover and explore amazing web spaces created by our community. Get inspired and share your own creations with the world!</p>
+    </div>
+    
+    <div class="gallery-controls">
+        <div class="gallery-search">
+            <input type="text" id="gallerySearch" placeholder="Search by title, tag, or author...">
+        </div>
+        <div class="gallery-filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="featured">Featured</button>
+            <button class="filter-btn" data-filter="newest">Newest</button>
+            <button class="filter-btn" data-filter="popular">Most Liked</button>
+        </div>
+    </div>
+    
+    <div class="gallery-grid" id="galleryGrid">
+        {% if gallery_entries %}
+            {% for entry in gallery_entries %}
+            <div class="gallery-card" data-id="{{ entry.id }}">
+                {% if entry.featured %}
+                <span class="featured-badge">Featured</span>
+                {% endif %}
+                
+                <div class="card-preview" style="background-image: url('{{ entry.screenshot_url or url_for('static', filename='images/fallback-preview.jpg') }}');">
+                </div>
+                
+                <div class="card-info">
+                    <h3 class="card-title">{{ entry.title }}</h3>
+                    <p class="card-desc">{{ entry.description }}</p>
+                    
+                    <div class="card-tags">
+                        {% if entry.tags %}
+                            {% for tag in entry.tags.split(',') %}
+                                <span class="tag">{{ tag }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-meta">
+                        <span class="card-author">By {{ entry.user.username }}</span>
+                        <span class="like-count">{{ entry.likes }} likes</span>
+                    </div>
+                    
+                    <div class="card-actions">
+                        <a href="/s/{{ entry.site.slug }}" target="_blank" class="card-btn view-btn">
+                            <i class="fas fa-external-link-alt"></i> Visit
+                        </a>
+                        
+                        <button class="card-btn like-btn {% if current_user.is_authenticated and entry.id in user_likes %}liked{% endif %}" data-id="{{ entry.id }}">
+                            <i class="fas fa-heart"></i> Like
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-gallery" style="grid-column: 1 / -1;">
+                <i class="fas fa-rocket"></i>
+                <h2>No spaces yet!</h2>
+                <p>Be the first to showcase your amazing creation.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    {% if total_pages > 1 %}
+    <div class="pagination">
+        <button class="page-btn" id="prevPage" {% if current_page == 1 %}disabled{% endif %}>
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        
+        {% for page in range(1, total_pages + 1) %}
+            <button class="page-btn {% if page == current_page %}active{% endif %}" data-page="{{ page }}">{{ page }}</button>
+        {% endfor %}
+        
+        <button class="page-btn" id="nextPage" {% if current_page == total_pages %}disabled{% endif %}>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+    {% endif %}
+    
+    <div class="submit-banner">
+        <h2>Have a space you're proud of?</h2>
+        <p>Share your creation with the community and get featured!</p>
+        {% if current_user.is_authenticated %}
+            <a href="#" class="submit-btn" id="submitSpaceBtn">Submit Your Space</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="submit-btn">Login to Submit</a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Submit Space Modal -->
+<div id="submitModal" class="gallery-modal">
+    <div class="modal-content">
+        <button class="close-modal" id="closeSubmitModal">&times;</button>
+        <div class="modal-body">
+            <h2>Submit Your Space</h2>
+            <form id="submitSpaceForm">
+                <div class="form-group">
+                    <label for="spaceSelect">Select Your Space</label>
+                    <select id="spaceSelect" name="site_id" class="form-control" required>
+                        <option value="" disabled selected>Choose a space...</option>
+                        {% for site in user_sites %}
+                            <option value="{{ site.id }}">{{ site.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="spaceTitle">Title</label>
+                    <input type="text" id="spaceTitle" name="title" class="form-control" required maxlength="100">
+                </div>
+                
+                <div class="form-group">
+                    <label for="spaceDescription">Description</label>
+                    <textarea id="spaceDescription" name="description" class="form-control" rows="3" maxlength="500"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="spaceTags">Tags (comma separated)</label>
+                    <input type="text" id="spaceTags" name="tags" class="form-control" placeholder="e.g. portfolio, game, blog">
+                </div>
+                
+                <div class="form-group">
+                    <label for="spaceScreenshot">Screenshot URL (optional)</label>
+                    <input type="text" id="spaceScreenshot" name="screenshot_url" class="form-control" placeholder="https://example.com/image.jpg">
+                </div>
+                
+                <div class="form-group">
+                    <p class="text-muted">
+                        <small>By submitting your space, you agree to showcase it publicly in the gallery.</small>
+                    </p>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancelSubmit">Cancel</button>
+                    <button type="submit" class="btn-primary">Submit Space</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Detail Modal -->
+<div id="detailModal" class="gallery-modal">
+    <div class="modal-content">
+        <button class="close-modal" id="closeDetailModal">&times;</button>
+        <div class="modal-preview" id="modalPreview">
+            <div class="modal-title">
+                <h2 id="modalTitle"></h2>
+            </div>
+        </div>
+        <div class="modal-body">
+            <div class="modal-section">
+                <h3>Description</h3>
+                <p id="modalDescription"></p>
+            </div>
+            
+            <div class="modal-section">
+                <h3>Tags</h3>
+                <div class="modal-tags" id="modalTags"></div>
+            </div>
+            
+            <div class="modal-section">
+                <h3>Created By</h3>
+                <div class="modal-author">
+                    <div class="author-info">
+                        <span class="author-name" id="modalAuthor"></span>
+                        <span class="submission-date" id="modalDate"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <a href="#" class="btn-primary" id="modalVisitBtn" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> Visit Space
+                </a>
+                
+                <button class="btn-secondary" id="modalLikeBtn">
+                    <i class="fas fa-heart"></i> <span id="modalLikes">0</span> Likes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Submit space functionality
+    const submitBtn = document.getElementById('submitSpaceBtn');
+    const submitModal = document.getElementById('submitModal');
+    const closeSubmitModal = document.getElementById('closeSubmitModal');
+    const cancelSubmit = document.getElementById('cancelSubmit');
+    const submitForm = document.getElementById('submitSpaceForm');
+    
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            submitModal.classList.add('show');
+        });
+    }
+    
+    if (closeSubmitModal) {
+        closeSubmitModal.addEventListener('click', function() {
+            submitModal.classList.remove('show');
+        });
+    }
+    
+    if (cancelSubmit) {
+        cancelSubmit.addEventListener('click', function() {
+            submitModal.classList.remove('show');
+        });
+    }
+    
+    if (submitForm) {
+        submitForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(submitForm);
+            const data = Object.fromEntries(formData.entries());
+            
+            fetch('/api/gallery/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('success', 'Space submitted successfully!');
+                    submitModal.classList.remove('show');
+                    // Reload page after short delay
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showToast('error', data.message || 'Error submitting space');
+                }
+            })
+            .catch(error => {
+                showToast('error', 'Failed to submit space');
+                console.error('Error:', error);
+            });
+        });
+    }
+    
+    // Like functionality
+    const likeButtons = document.querySelectorAll('.like-btn');
+    likeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const entryId = this.getAttribute('data-id');
+            
+            fetch(`/api/gallery/${entryId}/like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Toggle like button state
+                    this.classList.toggle('liked');
+                    
+                    // Update like count
+                    const likeCount = this.closest('.gallery-card').querySelector('.like-count');
+                    if (likeCount) {
+                        likeCount.textContent = `${data.likes} likes`;
+                    }
+                    
+                    showToast('success', data.message);
+                } else {
+                    showToast('error', data.message || 'Error liking space');
+                }
+            })
+            .catch(error => {
+                showToast('error', 'Failed to like space');
+                console.error('Error:', error);
+            });
+        });
+    });
+    
+    // Search functionality
+    const searchInput = document.getElementById('gallerySearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const cards = document.querySelectorAll('.gallery-card');
+            
+            cards.forEach(card => {
+                const title = card.querySelector('.card-title').textContent.toLowerCase();
+                const description = card.querySelector('.card-desc').textContent.toLowerCase();
+                const author = card.querySelector('.card-author').textContent.toLowerCase();
+                const tags = Array.from(card.querySelectorAll('.tag')).map(tag => tag.textContent.toLowerCase());
+                
+                const matches = title.includes(searchTerm) || 
+                              description.includes(searchTerm) || 
+                              author.includes(searchTerm) ||
+                              tags.some(tag => tag.includes(searchTerm));
+                              
+                card.style.display = matches ? 'block' : 'none';
+            });
+        });
+    }
+    
+    // Filter functionality
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Update active button
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter');
+            const cards = document.querySelectorAll('.gallery-card');
+            
+            cards.forEach(card => {
+                // Reset display
+                card.style.display = 'block';
+                
+                if (filter === 'featured') {
+                    if (!card.querySelector('.featured-badge')) {
+                        card.style.display = 'none';
+                    }
+                } else if (filter === 'newest') {
+                    // Server should already send these sorted by newest
+                } else if (filter === 'popular') {
+                    // Would need to reorder, but for now we'll just use server order
+                }
+            });
+        });
+    });
+    
+    // Pagination handling
+    const pageButtons = document.querySelectorAll('.page-btn[data-page]');
+    const prevPageBtn = document.getElementById('prevPage');
+    const nextPageBtn = document.getElementById('nextPage');
+    
+    pageButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const page = this.getAttribute('data-page');
+            window.location.href = `/gallery?page=${page}`;
+        });
+    });
+    
+    if (prevPageBtn) {
+        prevPageBtn.addEventListener('click', function() {
+            const currentPage = parseInt("{{ current_page }}");
+            if (currentPage > 1) {
+                window.location.href = `/gallery?page=${currentPage - 1}`;
+            }
+        });
+    }
+    
+    if (nextPageBtn) {
+        nextPageBtn.addEventListener('click', function() {
+            const currentPage = parseInt("{{ current_page }}");
+            const totalPages = parseInt("{{ total_pages }}");
+            if (currentPage < totalPages) {
+                window.location.href = `/gallery?page=${currentPage + 1}`;
+            }
+        });
+    }
+    
+    // Detail modal functionality
+    const galleryCards = document.querySelectorAll('.gallery-card');
+    const detailModal = document.getElementById('detailModal');
+    const closeDetailModal = document.getElementById('closeDetailModal');
+    
+    galleryCards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Don't open modal if clicking on buttons
+            if (e.target.closest('.card-btn')) {
+                return;
+            }
+            
+            const entryId = this.getAttribute('data-id');
+            
+            fetch(`/api/gallery/${entryId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Populate modal with data
+                    document.getElementById('modalTitle').textContent = data.entry.title;
+                    document.getElementById('modalDescription').textContent = data.entry.description || 'No description provided.';
+                    document.getElementById('modalAuthor').textContent = data.entry.user.username;
+                    document.getElementById('modalDate').textContent = `Submitted on ${new Date(data.entry.submission_date).toLocaleDateString()}`;
+                    document.getElementById('modalLikes').textContent = data.entry.likes;
+                    document.getElementById('modalVisitBtn').href = `/s/${data.entry.site.slug}`;
+                    
+                    const modalPreview = document.getElementById('modalPreview');
+                    modalPreview.style.backgroundImage = `url('${data.entry.screenshot_url || "/static/images/fallback-preview.jpg"}')`;
+                    
+                    // Populate tags
+                    const tagsContainer = document.getElementById('modalTags');
+                    tagsContainer.innerHTML = '';
+                    if (data.entry.tags) {
+                        const tags = data.entry.tags.split(',');
+                        tags.forEach(tag => {
+                            const tagSpan = document.createElement('span');
+                            tagSpan.className = 'tag';
+                            tagSpan.textContent = tag.trim();
+                            tagsContainer.appendChild(tagSpan);
+                        });
+                    } else {
+                        const noTagsSpan = document.createElement('span');
+                        noTagsSpan.textContent = 'No tags';
+                        noTagsSpan.style.color = '#888';
+                        tagsContainer.appendChild(noTagsSpan);
+                    }
+                    
+                    // Update like button state
+                    const likeBtn = document.getElementById('modalLikeBtn');
+                    if (data.user_liked) {
+                        likeBtn.classList.add('liked');
+                    } else {
+                        likeBtn.classList.remove('liked');
+                    }
+                    
+                    // Show modal
+                    detailModal.classList.add('show');
+                } else {
+                    showToast('error', 'Failed to load space details');
+                }
+            })
+            .catch(error => {
+                showToast('error', 'Error loading space details');
+                console.error('Error:', error);
+            });
+        });
+    });
+    
+    if (closeDetailModal) {
+        closeDetailModal.addEventListener('click', function() {
+            detailModal.classList.remove('show');
+        });
+    }
+    
+    // Handle like from detail modal
+    const modalLikeBtn = document.getElementById('modalLikeBtn');
+    if (modalLikeBtn) {
+        modalLikeBtn.addEventListener('click', function() {
+            const entryId = document.querySelector('.gallery-card[data-id]').getAttribute('data-id');
+            
+            fetch(`/api/gallery/${entryId}/like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Toggle like button state
+                    this.classList.toggle('liked');
+                    
+                    // Update like count
+                    document.getElementById('modalLikes').textContent = data.likes;
+                    
+                    // Also update card like count
+                    const card = document.querySelector(`.gallery-card[data-id="${entryId}"]`);
+                    if (card) {
+                        const likeCount = card.querySelector('.like-count');
+                        if (likeCount) {
+                            likeCount.textContent = `${data.likes} likes`;
+                        }
+                        
+                        const likeBtn = card.querySelector('.like-btn');
+                        if (likeBtn) {
+                            likeBtn.classList.toggle('liked');
+                        }
+                    }
+                    
+                    showToast('success', data.message);
+                } else {
+                    showToast('error', data.message || 'Error liking space');
+                }
+            })
+            .catch(error => {
+                showToast('error', 'Failed to like space');
+                console.error('Error:', error);
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

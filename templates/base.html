@@ -26,7 +26,19 @@
             </a>
             <div class="nav-links" id="navLinks">
                 <a href="/">Home</a>
-                <a href="{{ url_for('documentation') }}">Documentation</a>
+                <a href="{{ url_for('documentation') }}" class="nav-link">
+                        <i class="fas fa-book"></i>
+                        <span>Docs</span>
+                    </a>
+                <a href="{{ url_for('gallery') }}" class="nav-link">
+                        <i class="fas fa-images"></i>
+                        <span>Gallery</span>
+                    </a>
+                <a href="{{ url_for('apps') }}" class="nav-link">
+                        <i class="fas fa-puzzle-piece"></i>
+                        <span>Example Apps</span>
+                    </a>
+
                 <!-- Auth links for mobile -->
                 <div class="mobile-auth">
                     {% if current_user.is_authenticated %}
