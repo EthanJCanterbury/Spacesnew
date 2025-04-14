@@ -1,285 +1,126 @@
-
 {% extends 'base.html' %}
 
 {% block title %}Submit to Gallery - Hack Club Spaces{% endblock %}
 
-{% block styles %}
+{% block head %}
 <style>
-    .submit-container {
+    .gallery-submit-container {
         max-width: 800px;
-        margin: 2rem auto;
+        margin: 80px auto 40px;
         padding: 2rem;
-        background-color: white;
+        background: white;
         border-radius: 12px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
     }
-    
-    .submit-header {
-        text-align: center;
+
+    .gallery-submit-header {
         margin-bottom: 2rem;
+        text-align: center;
     }
-    
-    .submit-header h1 {
+
+    .gallery-submit-header h1 {
+        font-size: 2.5rem;
         color: #ec3750;
         margin-bottom: 0.5rem;
     }
-    
-    .submit-header p {
+
+    .gallery-submit-header p {
+        font-size: 1.1rem;
         color: #666;
     }
-    
+
     .form-group {
         margin-bottom: 1.5rem;
     }
-    
+
     .form-group label {
         display: block;
-        margin-bottom: 0.5rem;
         font-weight: 600;
-        color: #444;
+        margin-bottom: 0.5rem;
+        color: #333;
     }
-    
+
     .form-control {
         width: 100%;
         padding: 0.8rem;
         border: 1px solid #ddd;
-        border-radius: 6px;
+        border-radius: 8px;
         font-size: 1rem;
         transition: border-color 0.2s ease;
     }
-    
+
     .form-control:focus {
         border-color: #ec3750;
         outline: none;
+        box-shadow: 0 0 0 3px rgba(236, 55, 80, 0.1);
     }
-    
-    textarea.form-control {
-        min-height: 120px;
-        resize: vertical;
-    }
-    
-    .form-hint {
+
+    .form-text {
         display: block;
-        margin-top: 0.4rem;
+        margin-top: 0.5rem;
         font-size: 0.9rem;
         color: #777;
     }
-    
-    .tags-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-    }
-    
-    .tag {
-        background-color: rgba(236, 55, 80, 0.1);
-        color: #ec3750;
-        padding: 0.3rem 0.8rem;
-        border-radius: 20px;
-        display: inline-flex;
-        align-items: center;
-        font-size: 0.9rem;
-    }
-    
-    .tag .remove-tag {
-        margin-left: 0.5rem;
-        cursor: pointer;
-        font-size: 0.8rem;
-    }
-    
-    .submit-actions {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 2rem;
-    }
-    
-    .cancel-btn {
-        padding: 0.8rem 1.5rem;
-        border: 1px solid #ddd;
-        background-color: white;
-        color: #555;
-        border-radius: 6px;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-    }
-    
-    .cancel-btn:hover {
-        background-color: #f5f5f5;
-    }
-    
-    .submit-btn {
-        padding: 0.8rem 1.5rem;
-        border: none;
+
+    .btn-submit-gallery {
+        display: inline-block;
         background: linear-gradient(to right, #ec3750, #ff8c37);
         color: white;
-        border-radius: 6px;
+        border: none;
+        padding: 0.8rem 2rem;
+        border-radius: 8px;
         font-size: 1rem;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
         box-shadow: 0 4px 6px rgba(236, 55, 80, 0.2);
     }
-    
-    .submit-btn:hover {
+
+    .btn-submit-gallery:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 8px rgba(236, 55, 80, 0.3);
-    }
-    
-    .submit-btn:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-    }
-    
-    .no-sites {
-        text-align: center;
-        padding: 3rem 0;
-    }
-    
-    .no-sites i {
-        font-size: 4rem;
-        color: #ddd;
-        margin-bottom: 1rem;
-    }
-    
-    .no-sites h2 {
-        font-size: 1.8rem;
-        margin-bottom: 1rem;
-        color: #555;
-    }
-    
-    .thumbnail-preview {
-        max-width: 300px;
-        margin-top: 1rem;
-        border-radius: 6px;
-        overflow: hidden;
-        border: 1px solid #ddd;
-    }
-    
-    .thumbnail-preview img {
-        width: 100%;
-        display: block;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="submit-container">
-    <div class="submit-header">
+<div class="gallery-submit-container">
+    <div class="gallery-submit-header">
         <h1>Submit Your Site to the Gallery</h1>
         <p>Share your amazing project with the Hack Club community</p>
     </div>
-    
-    {% if sites %}
-    <form action="{{ url_for('gallery_submit') }}" method="POST">
+
+    <form method="POST" action="{{ url_for('gallery_submit') }}">
         <div class="form-group">
             <label for="site_id">Choose Your Site</label>
-            <select id="site_id" name="site_id" class="form-control" required>
+            <select name="site_id" id="site_id" class="form-control" required>
                 <option value="">-- Select a site --</option>
                 {% for site in sites %}
                 <option value="{{ site.id }}">{{ site.name }}</option>
                 {% endfor %}
             </select>
-            <span class="form-hint">Only your web spaces that aren't already in the gallery are shown</span>
+            <small class="form-text">Only your web spaces that aren't already in the gallery are shown</small>
         </div>
-        
+
         <div class="form-group">
             <label for="title">Title</label>
-            <input type="text" id="title" name="title" class="form-control" maxlength="100" required placeholder="A catchy title for your project">
+            <input type="text" name="title" id="title" class="form-control" required placeholder="A catchy title for your project">
         </div>
-        
+
         <div class="form-group">
             <label for="description">Description</label>
-            <textarea id="description" name="description" class="form-control" placeholder="What makes your project special? What technologies did you use?"></textarea>
+            <textarea name="description" id="description" class="form-control" rows="4" placeholder="What makes your project special? What technologies did you use?"></textarea>
         </div>
-        
+
         <div class="form-group">
             <label for="tags">Tags</label>
-            <input type="text" id="tag-input" class="form-control" placeholder="Add tags (e.g., game, portfolio, javascript)">
-            <span class="form-hint">Press Enter after each tag</span>
-            
-            <div class="tags-container" id="tags-container"></div>
-            <input type="hidden" id="tags" name="tags" value="">
+            <input type="text" name="tags" id="tags" class="form-control" placeholder="html, css, javascript, animation, game (comma separated)">
+            <small class="form-text">Add relevant tags to help others find your project</small>
         </div>
-        
-        <div class="submit-actions">
-            <a href="{{ url_for('gallery') }}" class="cancel-btn">
-                <i class="fas fa-arrow-left"></i>&nbsp; Back to Gallery
-            </a>
-            <button type="submit" class="submit-btn">
-                <i class="fas fa-plus"></i>&nbsp; Submit to Gallery
-            </button>
+
+        <div style="text-align: center;">
+            <button type="submit" class="btn-submit-gallery">Submit to Gallery</button>
         </div>
     </form>
-    {% else %}
-    <div class="no-sites">
-        <i class="fas fa-exclamation-circle"></i>
-        <h2>No sites available for submission</h2>
-        <p>You don't have any web spaces that can be submitted to the gallery, or all your sites are already in the gallery.</p>
-        <div style="margin-top: 1.5rem;">
-            <a href="{{ url_for('welcome') }}" class="submit-btn">
-                <i class="fas fa-plus"></i>&nbsp; Create a New Space
-            </a>
-            <a href="{{ url_for('gallery') }}" class="cancel-btn" style="margin-left: 1rem;">
-                <i class="fas fa-arrow-left"></i>&nbsp; Back to Gallery
-            </a>
-        </div>
-    </div>
-    {% endif %}
 </div>
-
-<script>
-    // Tags handling
-    document.addEventListener('DOMContentLoaded', function() {
-        const tagInput = document.getElementById('tag-input');
-        const tagsContainer = document.getElementById('tags-container');
-        const tagsHiddenInput = document.getElementById('tags');
-        
-        let tags = [];
-        
-        function updateTags() {
-            // Update hidden input with comma-separated tags
-            tagsHiddenInput.value = tags.join(',');
-            
-            // Clear and rebuild tags container
-            tagsContainer.innerHTML = '';
-            
-            tags.forEach((tag, index) => {
-                const tagEl = document.createElement('span');
-                tagEl.className = 'tag';
-                tagEl.innerHTML = `${tag} <span class="remove-tag" data-index="${index}">×</span>`;
-                tagsContainer.appendChild(tagEl);
-            });
-            
-            // Add event listeners to remove buttons
-            document.querySelectorAll('.remove-tag').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    tags.splice(index, 1);
-                    updateTags();
-                });
-            });
-        }
-        
-        tagInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' || e.key === ',') {
-                e.preventDefault();
-                
-                const tag = tagInput.value.trim();
-                if (tag && !tags.includes(tag) && tags.length < 10) {
-                    tags.push(tag);
-                    updateTags();
-                    tagInput.value = '';
-                }
-            }
-        });
-        
-        // Initialize empty tags
-        updateTags();
-    });
-</script>
 {% endblock %}
