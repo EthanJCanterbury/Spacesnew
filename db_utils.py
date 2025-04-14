@@ -1,6 +1,6 @@
+
 from app import db
 from models import User, Site
-from sqlalchemy import text
 
 def reset_db_session():
     """Reset the database session to recover from transaction errors"""
@@ -26,38 +26,19 @@ def repair_gallery_entries():
     try:
         from app import db
         from models import GalleryEntry
-
+        
         # Add the category column if missing
         db.session.execute(db.text("""
             DO $$
             BEGIN
 
-                IF NOT EXISTS (
-                    SELECT 1 FROM information_schema.columns 
-                    WHERE table_name = 'gallery_entry' AND column_name = 'category'
-                ) THEN
-                    ALTER TABLE gallery_entry ADD COLUMN category VARCHAR(50);
-                END IF;
-            END
-            $$;
-        """))
-
-        # Set default category for entries with NULL category
-        db.session.execute(db.text("UPDATE gallery_entry SET category = 'other' WHERE category IS NULL"))
-        db.session.commit()
-        return True
-    except Exception as e:
-        print(f"Error repairing gallery entries: {str(e)}")
-        reset_db_session()
-        return False
-
 def ensure_gallery_likes_table():
     """Ensure the gallery_entry_like table exists"""
     try:
         from app import db
-
+        
         # Create the gallery_entry_like table if it doesn't exist
-        db.session.execute(text("""
+        db.session.execute(db.text("""
             CREATE TABLE IF NOT EXISTS gallery_entry_like (
                 id SERIAL PRIMARY KEY,
                 entry_id INTEGER NOT NULL REFERENCES gallery_entry(id) ON DELETE CASCADE,
@@ -70,4 +51,23 @@ def ensure_gallery_likes_table():
         return True
     except Exception as e:
         print(f"Error ensuring gallery likes table: {str(e)}")
+        return False
+
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_name = 'gallery_entry' AND column_name = 'category'
+                ) THEN
+                    ALTER TABLE gallery_entry ADD COLUMN category VARCHAR(50);
+                END IF;
+            END
+            $$;
+        """))
+        
+        # Set default category for entries with NULL category
+        db.session.execute(db.text("UPDATE gallery_entry SET category = 'other' WHERE category IS NULL"))
+        db.session.commit()
+        return True
+    except Exception as e:
+        print(f"Error repairing gallery entries: {str(e)}")
+        reset_db_session()
         return False

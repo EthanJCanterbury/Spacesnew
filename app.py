@@ -2076,15 +2076,7 @@ def admin_reset_join_code(club_id):
         db.session.commit()
 
         return jsonify({
-                'message': 'Join code reset successfully',
-                'join_code': club.join_code
-            })
-
-    except Exception as e:
-        db.session.rollback()
-        app.logger.error(f'Error resetting join code: {str(e)}')
-        return jsonify({'error': 'Failed to reset join code'}), 500
-
+            'message': 'Join code reset successfully',
 
 @app.route('/api/gallery/entries/<int:entry_id>', methods=['DELETE'])
 @login_required
