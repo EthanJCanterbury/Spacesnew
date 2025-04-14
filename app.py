@@ -1324,13 +1324,55 @@ def delete_user(user_id):
     user = User.query.get_or_404(user_id)
 
     try:
-        Site.query.filter_by(user_id=user.id).delete()
+        # Delete user activities
+        UserActivity.query.filter_by(user_id=user.id).delete()
+        
+        # If the user is a club leader, we need to handle club relationships
+        clubs_led = Club.query.filter_by(leader_id=user.id).all()
+        for club in clubs_led:
+            # Delete club memberships
+            ClubMembership.query.filter_by(club_id=club.id).delete()
+            # Delete club posts
+            ClubPost.query.filter_by(club_id=club.id).delete()
+            # Delete club assignments
+            ClubAssignment.query.filter_by(club_id=club.id).delete()
+            # Delete club resources
+            ClubResource.query.filter_by(club_id=club.id).delete()
+            # Delete club chat channels and messages
+            channels = ClubChatChannel.query.filter_by(club_id=club.id).all()
+            for channel in channels:
+                ClubChatMessage.query.filter_by(channel_id=channel.id).delete()
+            ClubChatChannel.query.filter_by(club_id=club.id).delete()
+            # Finally delete the club
+            db.session.delete(club)
+        
+        # Delete user's club memberships elsewhere
+        ClubMembership.query.filter_by(user_id=user.id).delete()
+        
+        # Delete user's sites and related pages
+        sites = Site.query.filter_by(user_id=user.id).all()
+        for site in sites:
+            SitePage.query.filter_by(site_id=site.id).delete()
+            db.session.delete(site)
+        
+        # Finally delete the user
         db.session.delete(user)
         db.session.commit()
+        
+        # Log this admin action
+        activity = UserActivity(
+            activity_type="admin_action",
+            message=f'Admin deleted user "{user.username}"',
+            username=current_user.username,
+            user_id=current_user.id)
+        db.session.add(activity)
+        db.session.commit()
+        
         return jsonify({'message': 'User deleted successfully'})
     except Exception as e:
         db.session.rollback()
-        return jsonify({'message': 'Failed to delete user'}), 500
+        app.logger.error(f'Error deleting user {user_id}: {str(e)}')
+        return jsonify({'message': f'Failed to delete user: {str(e)}'}), 500
 
 
 @app.route('/api/admin/sites/<int:site_id>', methods=['DELETE'])
