@@ -727,6 +727,17 @@ li.CodeMirror-hint-active {
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+/* Fix for the editor topbar dropdown positioning */
+.editor-topbar .dropdown-menu {
+  position: absolute;
+  top: auto;
+  bottom: 100%; 
+  margin-top: 0;
+  margin-bottom: 5px;
 }
 
 .dropdown:hover .dropdown-menu {
