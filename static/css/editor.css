@@ -1826,13 +1826,16 @@ iframe {
 
 /* File tabs styling supplement - specialized variations */
 .file-tabs {
-  padding: 0.5rem 1rem 0;
+  padding: 4px 15px 0;
   display: flex;
   flex-wrap: nowrap;
   overflow-x: auto;
   white-space: nowrap;
   scrollbar-width: thin;
   -ms-overflow-style: none;
+  height: 36px; /* Reduced height for tabs */
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .file-tabs::-webkit-scrollbar {
@@ -2074,7 +2077,7 @@ body.editor-page {
     display: flex;
     overflow: hidden;
     position: absolute;
-    top: 106px; /* 60px navbar + 46px topbar + file tabs height */
+    top: 102px; /* 60px navbar + 42px topbar + file tabs height */
     left: 0;
     right: 0;
     bottom: 0;
@@ -2084,12 +2087,13 @@ body.editor-page {
     position: relative;
     z-index: 10;
     background: white;
-    padding: 8px 15px 0;
+    padding: 4px 15px 0;
     display: flex;
     overflow-x: auto;
     border-bottom: 1px solid #e2e8f0;
-    height: 46px; /* Fixed height for tabs */
+    height: 36px; /* Fixed height for tabs */
     box-sizing: border-box;
+    width: 100%;
 }
 
 .editor-pane, .preview-pane {
