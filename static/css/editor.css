@@ -1215,10 +1215,22 @@ input:checked + .slider:before {
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   overflow-x: auto;
-  padding-bottom: 5px;
+  padding: 0 10px 5px 10px;
   white-space: nowrap;
+  scrollbar-width: thin;
+  -ms-overflow-style: none;
+  margin-right: 8px;
+}
+
+.topbar-actions::-webkit-scrollbar {
+  height: 5px;
+}
+
+.topbar-actions::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 4px;
 }
 
 .btn-primary {
@@ -1833,6 +1845,8 @@ iframe {
   white-space: nowrap;
   scrollbar-width: thin;
   -ms-overflow-style: none;
+  height: auto;
+  min-height: 45px;
 }
 
 .file-tabs::-webkit-scrollbar {
@@ -1857,6 +1871,9 @@ iframe {
   gap: 8px;
   flex-shrink: 0;
   white-space: nowrap;
+  padding: 8px 16px;
+  min-width: 100px;
+  justify-content: center;
 }
 
 .file-tab.active {
