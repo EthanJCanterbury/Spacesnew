@@ -845,54 +845,39 @@ function initializeTabs() {
 
 
 document.addEventListener('DOMContentLoaded', function() {
-    const editorElement = document.getElementById('editor');
-    const siteTypeElement = document.getElementById('site-type');
-    
-    if (editorElement && siteTypeElement) {
-        const siteContent = editorElement.value;
-        const siteType = siteTypeElement.value;
-        initEditor(siteContent, siteType);
-    }
+    const siteContent = document.getElementById('editor').value;
+    const siteType = document.getElementById('site-type').value;
+    initEditor(siteContent, siteType);
 
     const addFileBtn = document.getElementById('addFileBtn');
     const newFileModal = document.getElementById('new-file-modal');
-    
-    if (newFileModal) {
-        const closeBtn = newFileModal.querySelector('.close-btn');
-        const cancelBtn = document.getElementById('cancelNewFile');
+    const closeBtn = newFileModal.querySelector('.close-btn');
+    const cancelBtn = document.getElementById('cancelNewFile');
 
-        if (addFileBtn) {
-            addFileBtn.addEventListener('click', function() {
-                newFileModal.style.display = 'flex';
-                const newFilenameElement = document.getElementById('newFilename');
-                if (newFilenameElement) {
-                    newFilenameElement.focus();
-                }
-            });
-        }
+    if (addFileBtn) {
+        addFileBtn.addEventListener('click', function() {
+            newFileModal.style.display = 'flex';
+            document.getElementById('newFilename').focus();
+        });
+    }
 
     if (closeBtn) {
         closeBtn.addEventListener('click', function() {
-            if (newFileModal) {
-                newFileModal.style.display = 'none';
-            }
+            newFileModal.style.display = 'none';
         });
     }
 
     if (cancelBtn) {
         cancelBtn.addEventListener('click', function() {
-            if (newFileModal) {
-                newFileModal.style.display = 'none';
-            }
+            newFileModal.style.display = 'none';
         });
     }
 
     window.addEventListener('click', function(event) {
-        if (newFileModal && event.target === newFileModal) {
+        if (event.target === newFileModal) {
             newFileModal.style.display = 'none';
         }
     });
-}
     if (document.getElementById('particles-js')) {
         particlesJS('particles-js', {
             "particles": {

@@ -288,9 +288,6 @@ class Site(db.Model):
     python_content = db.Column(db.Text,
                                nullable=False,
                                default='print("Hello, World!")')
-    pixi_content = db.Column(db.Text,
-                           nullable=False,
-                           default='<!DOCTYPE html>\n<html>\n<head>\n  <script src="https://pixijs.download/release/pixi.js"></script>\n</head>\n<body>\n  <script type="module">\n    // Create the application\n    const app = new PIXI.Application();\n    await app.init({ width: 800, height: 600 });\n    document.body.appendChild(app.canvas);\n\n    // Add a sprite\n    await PIXI.Assets.load("https://pixijs.download/release/docs/ground-night.jpg");\n    const sprite = PIXI.Sprite.from("https://pixijs.download/release/docs/ground-night.jpg");\n    app.stage.addChild(sprite);\n\n    // Animation loop\n    let elapsed = 0.0;\n    app.ticker.add((ticker) => {\n      elapsed += ticker.deltaTime;\n      sprite.x = 100.0 + Math.cos(elapsed/50.0) * 100.0;\n    });\n  </script>\n</body>\n</html>')
     is_public = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime,
