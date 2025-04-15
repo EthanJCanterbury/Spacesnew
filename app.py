@@ -966,6 +966,10 @@ h1 {
                                     filename="index.html",
                                     content=pixi_content,
                                     file_type="html")
+                
+                # Update the site type to ensure it's properly marked as pixi
+                site.site_type = 'pixi'
+                db.session.commit()
             else:
                 # For regular web sites, use the default web content
                 css_page = SitePage(site_id=site.id,

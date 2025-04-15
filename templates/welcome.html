@@ -919,7 +919,7 @@ async function createNewSpace(event) {
     try {
         const endpoint = spaceType === 'python' ? '/api/sites/python' : '/api/sites';
         const response = await fetch(endpoint, {
-            method: ''POST',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
