@@ -961,6 +961,11 @@ h1 {
                                   filename="script.js",
                                   content="// Your game logic can go here",
                                   file_type="js")
+                
+                html_page = SitePage(site_id=site.id,
+                                    filename="index.html",
+                                    content=pixi_content,
+                                    file_type="html")")
 
                 html_page = SitePage(site_id=site.id,
                                     filename="index.html",

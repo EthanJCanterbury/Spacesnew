@@ -245,27 +245,48 @@ function setupFileTabListeners() {
 }
 
 function switchToFile(filename) {
-    if (currentFile) {
-        fileContents[currentFile] = editor.getValue();
+    if (isDirty) {
+        if (confirm("You have unsaved changes. Do you want to save before switching files?")) {
+            saveContent();
+        }
     }
 
+    // Save current content to memory
+    fileContents[currentFile] = editor.getValue();
+
+    // Update the UI
+    document.querySelectorAll('.file-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelector(`.file-tab[data-filename="${filename}"]`).classList.add('active');
+
+    // Load new content
     currentFile = filename;
     currentFilename = filename;
+    editor.setValue(fileContents[filename] || '');
 
-    document.querySelectorAll('.file-tab').forEach(tab => {
-        if (tab.dataset.filename === filename) {
-            tab.classList.add('active');
-        } else {
-            tab.classList.remove('active');
-        }
-    });
+    // Set the appropriate mode based on file extension
+    const mode = getEditorModeForFile(filename);
+    editor.setOption('mode', mode);
 
-    editor.setValue(fileContents[filename] || "");
-
-    setEditorMode(filename);
-
-    updateFileSize();
+    // Update status bar
+    updateFileStatus();
 }
+
+function getEditorModeForFile(filename) {
+    const extension = filename.split('.').pop().toLowerCase();
+    switch (extension) {
+        case 'html':
+            return 'htmlmixed';
+        case 'css':
+            return 'css';
+        case 'js':
+            return 'javascript';
+        default:
+            return 'text/plain';
+    }
+}
+
 
 function setEditorMode(filename) {
     const extension = filename.split('.').pop().toLowerCase();
@@ -980,7 +1001,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     "remove": {
                         "particles_nb": 2
                     }
-                }
+                }            }
             },
             "retina_detect": true
         });
@@ -1026,4 +1047,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function openNewFileModal() {
   openModal('new-file-modal');
+}
+
+function updateFileStatus() {
+    updateCursorPosition();
+    updateFileSize();
 }
