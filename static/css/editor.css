@@ -2028,5 +2028,27 @@ body.editor-page {
 }
 
 .editor-container {
-  height: 100%; /* Ensure editor container fills available height */
+    height: 100vh;
+    max-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.editor-main {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.editor-pane, .preview-pane {
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.CodeMirror {
+    flex: 1;
+    height: auto !important;
 }

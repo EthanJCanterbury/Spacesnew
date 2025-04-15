@@ -93,6 +93,13 @@
   overflow: hidden;
 }
 
+.split-layout .editor-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}
+
 .editor-main {
   display: flex;
   flex: 1;
