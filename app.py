@@ -5179,6 +5179,11 @@ def integrations():
     return render_template('integrations.html')
 
 
+@app.route('/bash-editor')
+def bash_editor():
+    return render_template('bash_editor.html')
+
+
 if __name__ == '__main__':
     # Configure more detailed logging
     import logging
