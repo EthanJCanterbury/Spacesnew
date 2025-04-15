@@ -2055,7 +2055,7 @@ body.editor-page {
     flex-direction: column;
     overflow: hidden;
     position: absolute;
-    top: 40px;
+    top: 60px; /* Increased to account for taller navbar */
     left: 0;
     right: 0;
     bottom: 0;
