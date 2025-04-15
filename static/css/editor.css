@@ -2065,9 +2065,15 @@ body.editor-page {
     flex-shrink: 0;
     margin-top: 0;
     z-index: 900;
-    position: relative;
+    position: sticky;
+    top: 0;
     background-color: white;
     border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    height: 58px;
+    box-sizing: border-box;
 }
 
 .editor-main {
@@ -2079,11 +2085,12 @@ body.editor-page {
     left: 0;
     right: 0;
     bottom: 0;
+    z-index: 100;
 }
 
 .file-tabs {
     position: relative;
-    z-index: 10;
+    z-index: 200;
     background: white;
     padding: 8px 15px 0;
     display: flex;
@@ -2092,6 +2099,7 @@ body.editor-page {
     height: 45px;
     box-sizing: border-box;
     margin-top: 0;
+    width: 100%;
 }
 
 .editor-pane, .preview-pane {
