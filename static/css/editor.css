@@ -1215,10 +1215,13 @@ input:checked + .slider:before {
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   overflow-x: auto;
-  padding-bottom: 5px;
+  padding: 0 15px 5px 15px;
   white-space: nowrap;
+  margin-right: 10px;
+  scrollbar-width: thin;
+  width: 100%;
 }
 
 .btn-primary {
@@ -2143,4 +2146,11 @@ body.editor-page {
     bottom: 0;
     height: 100% !important;
     width: 100% !important;
+}
+
+/* Increased tab height */
+.file-tab {
+  min-height: 48px; /* Adjust as needed */
+  align-items: center; /* Vertically center content */
+  padding: 10px 16px; /* Adjust padding for better spacing */
 }
