@@ -965,11 +965,6 @@ h1 {
                 html_page = SitePage(site_id=site.id,
                                     filename="index.html",
                                     content=pixi_content,
-                                    file_type="html")")
-
-                html_page = SitePage(site_id=site.id,
-                                    filename="index.html",
-                                    content=pixi_content,
                                     file_type="html")
                 
                 # Update the site type to ensure it's properly marked as pixi
