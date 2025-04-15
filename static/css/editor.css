@@ -2055,7 +2055,7 @@ body.editor-page {
     flex-direction: column;
     overflow: hidden;
     position: absolute;
-    top: 60px; /* Increased to account for taller navbar */
+    top: 60px; /* Account for navbar */
     left: 0;
     right: 0;
     bottom: 0;
@@ -2066,6 +2066,7 @@ body.editor-page {
     margin-top: 0;
     z-index: 900;
     position: relative;
+    height: 48px; /* Fixed height for topbar */
 }
 
 .editor-main {
@@ -2073,7 +2074,7 @@ body.editor-page {
     display: flex;
     overflow: hidden;
     position: absolute;
-    top: 58px; /* Adjusted to account for topbar only */
+    top: 106px; /* 60px navbar + 46px topbar + file tabs height */
     left: 0;
     right: 0;
     bottom: 0;
@@ -2087,7 +2088,7 @@ body.editor-page {
     display: flex;
     overflow-x: auto;
     border-bottom: 1px solid #e2e8f0;
-    height: 55px;
+    height: 46px; /* Fixed height for tabs */
     box-sizing: border-box;
 }
 
@@ -2122,7 +2123,7 @@ body.editor-page {
 
 .CodeMirror {
     position: absolute;
-    top: 40px; /* Position below tabs */
+    top: 0; /* Position at the top of editor pane */
     left: 0;
     right: 0;
     bottom: 26px; /* Account for statusbar */
