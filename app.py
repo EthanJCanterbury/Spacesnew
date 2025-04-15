@@ -254,7 +254,7 @@ def log_response_info(response):
 def add_security_headers(response):
     is_preview = request.args.get('preview') == 'true'
 
-    csp = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://webring.hackclub.com https://copy.sh; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: https: http:; font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com; connect-src 'self' wss: ws: https://copy.sh; media-src 'self' https://hc-cdn.hel1.your-objectstorage.com; frame-src 'self' https://copy.sh;"
+    csp = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://webring.hackclub.com https://copy.sh; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: https: http:; font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com; connect-src 'self' wss: ws: https://copy.sh; media-src 'self' https://hc-cdn.hel1.your-objectstorage.com; frame-src 'self' https://copy.sh *.copy.sh;"
 
     if is_preview:
         csp += " frame-ancestors *;"

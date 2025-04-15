@@ -4,6 +4,7 @@
     height: calc(100vh - 64px);
     padding: 20px;
     background-color: #f5f7fa;
+    margin-top: 60px;
 }
 
 .bash-editor-header {
