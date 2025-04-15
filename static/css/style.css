@@ -1079,7 +1079,7 @@ footer {
     border: 1px solid rgba(72, 187, 120, 0.2);
 }
 
-.alert.error {.alert.error {
+.alert.error {
     background: rgba(236, 55, 80, 0.1);color: var(--primary);
     border: 1px solid rgba(236, 55, 80, 0.2);
 }
@@ -1569,7 +1569,7 @@ footer {
     .hero {
         grid-template-columns: 1fr;
     }
-
+    
     .hero-image {
         display: none;
     }
@@ -2179,19 +2179,19 @@ footer {
         flex-direction: column;
         align-items: center;
     }
-
+    
     .workflow-step {
         max-width: 100%;
     }
-
+    
     .hero h1 {
         font-size: 2.5rem;
     }
-
+    
     .hero .subtitle {
         font-size: 1.1rem;
     }
-
+    
     .cta-content h2 {
         font-size: 2rem;
     }
@@ -4366,23 +4366,4 @@ select:focus {
     justify-content: flex-end;
     gap: 1rem;
     margin-top: 1.5rem;
-}
-
-.python-badge {
-    background-color: rgba(55, 118, 171, 0.15);
-    color: #3776AB;
-}
-
-.web-badge {
-    background-color: rgba(255, 87, 34, 0.15);
-    color: #FF5722;
-}
-
-.pixi-badge {
-    background-color: rgba(236, 64, 122, 0.15);
-    color: #EC407A;
-}
-
-.site-icon.pixi {
-    color: #EC407A;
 }
