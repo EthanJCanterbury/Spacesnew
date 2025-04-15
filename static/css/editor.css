@@ -731,13 +731,9 @@ li.CodeMirror-hint-active {
   overflow-y: auto;
 }
 
-/* Fix for the editor topbar dropdown positioning */
-.editor-topbar .dropdown-menu {
-  position: absolute;
-  top: auto;
-  bottom: 100%; 
-  margin-top: 0;
-  margin-bottom: 5px;
+/* Hide dropdown menus in the editor topbar */
+.editor-topbar .dropdown {
+  display: none;
 }
 
 .dropdown:hover .dropdown-menu {
