@@ -2059,7 +2059,7 @@ body.editor-page {
 }
 
 .navbar + .editor-container {
-    margin-top: 59px; /* Adjust to remove the gap */
+    margin-top: 56px; /* Adjust to remove the gap completely */
 }
 
 .editor-container {
