@@ -868,6 +868,8 @@ def create_site():
                 {'message': 'Please provide valid space information'}), 400
 
         name = data.get('name')
+        site_type = data.get('type', 'web')  # Default to 'web' if not specified
+        
         if not name:
             app.logger.warning('Site name not provided')
             return jsonify({'message':
@@ -899,9 +901,70 @@ def create_site():
                 {'message': 'A space with this name already exists'}), 400
 
         app.logger.info(
-            f'Creating new site "{name}" for user {current_user.id}')
+            f'Creating new {site_type} site "{name}" for user {current_user.id}')
 
-        default_html = f'''<!DOCTYPE html>
+        # Default HTML content based on site type
+        if site_type == 'pixi':
+            default_html = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Pixi.js Game</title>
+    <script src="https://pixijs.download/release/pixi.js"></script>
+    <style>
+        body {{
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+        }}
+    </style>
+</head>
+<body>
+    <script type="module">
+        // Create the application helper and add its render target to the page
+        const app = new PIXI.Application();
+        await app.init({{ width: 800, height: 600, backgroundColor: 0x1099bb }});
+        document.body.appendChild(app.canvas);
+
+        // Create a container for everything
+        const container = new PIXI.Container();
+        app.stage.addChild(container);
+
+        // Create a new texture
+        const texture = PIXI.Texture.from('https://pixijs.com/assets/files/sample-747abf529b135a1f549dff3ec846afbc.png');
+
+        // Create a sprite with the texture
+        const sprite = new PIXI.Sprite(texture);
+        
+        // Center the sprite's anchor point
+        sprite.anchor.set(0.5);
+        
+        // Move the sprite to the center of the screen
+        sprite.x = app.screen.width / 2;
+        sprite.y = app.screen.height / 2;
+        
+        // Add the sprite to the scene
+        container.addChild(sprite);
+
+        // Add a ticker callback to rotate the sprite
+        let elapsed = 0.0;
+        app.ticker.add((ticker) => {{
+            elapsed += ticker.deltaTime;
+            
+            // Make the sprite rotate
+            sprite.rotation = elapsed / 50;
+            
+            // Make the sprite bounce
+            sprite.scale.x = 1.0 + Math.sin(elapsed / 30) * 0.2;
+            sprite.scale.y = 1.0 + Math.cos(elapsed / 30) * 0.2;
+        }});
+    </script>
+</body>
+</html>'''
+        else:
+            default_html = f'''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -918,7 +981,8 @@ def create_site():
 
         site = Site(name=name,
                     user_id=current_user.id,
-                    html_content=default_html)
+                    html_content=default_html,
+                    site_type=site_type)
         db.session.add(site)
         db.session.commit()
 
@@ -943,32 +1007,41 @@ h1 {
 });'''
 
         try:
-            css_page = SitePage(site_id=site.id,
-                                filename="styles.css",
-                                content=default_css,
-                                file_type="css")
+            if site_type == 'pixi':
+                # For Pixi spaces, we only create a single index.html file
+                html_page = SitePage(site_id=site.id,
+                                    filename="index.html",
+                                    content=default_html,
+                                    file_type="html")
+                db.session.add(html_page)
+            else:
+                # For standard web spaces, create CSS, JS, and HTML files
+                css_page = SitePage(site_id=site.id,
+                                    filename="styles.css",
+                                    content=default_css,
+                                    file_type="css")
 
-            js_page = SitePage(site_id=site.id,
-                               filename="script.js",
-                               content=default_js,
-                               file_type="js")
+                js_page = SitePage(site_id=site.id,
+                                filename="script.js",
+                                content=default_js,
+                                file_type="js")
 
-            html_page = SitePage(site_id=site.id,
-                                 filename="index.html",
-                                 content=default_html,
-                                 file_type="html")
+                html_page = SitePage(site_id=site.id,
+                                    filename="index.html",
+                                    content=default_html,
+                                    file_type="html")
 
-            db.session.add_all([css_page, js_page, html_page])
+                db.session.add_all([css_page, js_page, html_page])
+            
             db.session.commit()
-
             app.logger.info(
-                f"Successfully created site pages for site {site.id}")
+                f"Successfully created site pages for {site_type} site {site.id}")
         except Exception as e:
             app.logger.error(f"Error creating site pages: {str(e)}")
             db.session.rollback()
 
         activity = UserActivity(activity_type="site_creation",
-                                message='New site "{}" created by {}'.format(
+                                message='New {site_type} site "{}" created by {}'.format(
                                     name, current_user.username),
                                 username=current_user.username,
                                 user_id=current_user.id,
@@ -976,15 +1049,15 @@ h1 {
         db.session.add(activity)
         db.session.commit()
 
-        app.logger.info(f'Successfully created site {site.id}')
+        app.logger.info(f'Successfully created {site_type} site {site.id}')
         return jsonify({
-            'message': 'Site created successfully',
+            'message': f'{site_type.capitalize()} site created successfully',
             'site_id': site.id
         })
     except Exception as e:
         db.session.rollback()
         app.logger.error(f'Error creating site: {str(e)}')
-        return jsonify({'message': 'Failed to createsite'}), 500
+        return jsonify({'message': 'Failed to create site'}), 500
 
 
 @app.route('/api/sites/<int:site_id>', methods=['PUT'])
