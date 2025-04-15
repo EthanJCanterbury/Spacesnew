@@ -2055,7 +2055,7 @@ body.editor-page {
     flex-direction: column;
     overflow: hidden;
     position: absolute;
-    top: 0;
+    top: 40px;
     left: 0;
     right: 0;
     bottom: 0;
@@ -2063,6 +2063,9 @@ body.editor-page {
 
 .editor-topbar {
     flex-shrink: 0;
+    margin-top: 40px;
+    z-index: 900;
+    position: relative;
 }
 
 .editor-main {
@@ -2070,7 +2073,7 @@ body.editor-page {
     display: flex;
     overflow: hidden;
     position: absolute;
-    top: 58px; /* Adjust based on your header height */
+    top: 98px; /* Increased to account for navbar + topbar */
     left: 0;
     right: 0;
     bottom: 0;
