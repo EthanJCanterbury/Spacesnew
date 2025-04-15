@@ -141,12 +141,28 @@
     cursor: not-allowed;
 }
 
+#terminal-frame {
+    flex: 1;
+    min-height: 600px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background-color: #000;
+}
+
+#terminal-frame iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
 @media (max-width: 768px) {
     .emulator-container {
         flex-direction: column;
     }
 
-    #screen_container {
+    #terminal-frame {
         height: 400px;
     }
 }

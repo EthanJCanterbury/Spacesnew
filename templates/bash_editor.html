@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block head %}
@@ -11,115 +10,34 @@
     <div class="bash-editor-header">
         <h1>Bash Terminal Emulator</h1>
         <div class="controls">
-            <button id="start-emulator" class="btn-primary">Start Emulator</button>
-            <button id="reset-emulator" class="btn-danger" disabled>Reset</button>
-            <span id="status">Ready to start</span>
+            <a href="https://copy.sh/v86/?profile=buildroot" target="_blank" class="btn-primary">Open in New Tab</a>
+            <span id="status">Buildroot Linux terminal emulator</span>
         </div>
     </div>
-    
+
     <div class="emulator-container">
-        <div id="screen_container">
-            <div id="loading">Loading emulator... Please wait</div>
-            <div id="screen"></div>
+        <div id="terminal-frame">
+            <iframe src="https://copy.sh/v86/?profile=buildroot" width="100%" height="600" frameborder="0" allowfullscreen></iframe>
         </div>
-        
+
         <div class="info-panel">
             <div class="info-box">
                 <h3>About Bash Editor</h3>
                 <p>This is a Buildroot Linux terminal emulator running in your browser. It uses <a href="https://github.com/copy/v86" target="_blank">v86</a> to emulate x86 hardware.</p>
                 <p>Note: This environment runs entirely in your browser and changes are not saved to your Spaces account.</p>
             </div>
-            
+
             <div class="info-box">
                 <h3>Quick Tips</h3>
                 <ul>
                     <li>No login required - Buildroot drops you directly into a shell</li>
                     <li>Use common bash commands: <code>ls</code>, <code>cd</code>, <code>mkdir</code>, <code>cat</code>, etc.</li>
-                    <li>Press CTRL+C to cancel commands</li>
+                    <li>Enable networking with <code>udhcpc</code></li>
+                    <li>Files sent via emulator appear in <code>/mnt/</code></li>
                     <li>Type <code>help</code> to see available commands</li>
                 </ul>
             </div>
         </div>
     </div>
 </div>
-
-<script src="https://copy.sh/v86/build/libv86.js"></script>
-<script>
-    // Wait for DOM content to be loaded and for V86Starter to be available
-    function checkV86Loaded() {
-        if (typeof V86Starter === 'undefined') {
-            console.log('V86Starter not loaded yet, waiting...');
-            setTimeout(checkV86Loaded, 100);
-            return;
-        }
-        console.log('V86Starter loaded successfully:', typeof V86Starter);
-        initEmulator();
-    }
-    
-    function initEmulator() {
-        const startButton = document.getElementById('start-emulator');
-        const resetButton = document.getElementById('reset-emulator');
-        const statusElement = document.getElementById('status');
-        const loadingElement = document.getElementById('loading');
-        let emulator = null;
-        
-        function updateStatus(message) {
-            statusElement.textContent = message;
-        }
-        
-        startButton.addEventListener('click', function() {
-            startButton.disabled = true;
-            updateStatus('Loading Debian Linux...');
-            loadingElement.style.display = 'flex';
-            
-            emulator = new V86Starter({
-                wasm_path: "https://copy.sh/v86/build/v86.wasm",
-                memory_size: 128 * 1024 * 1024,
-                vga_memory_size: 8 * 1024 * 1024,
-                screen_container: document.getElementById('screen'),
-                bzimage: {
-                    url: "https://copy.sh/v86/images/buildroot-bzimage.bin",
-                },
-                initrd: {
-                    url: "https://copy.sh/v86/images/buildroot-initrd.bin",
-                },
-                cmdline: "console=ttyS0 root=/dev/ram0 rw init=/sbin/init",
-                autostart: true,
-                disable_speaker: true,
-                network_relay_url: "wss://relay.widgetry.org/",
-                filesystem: {},
-                boot_order: 0x132
-            });
-            
-            emulator.add_listener("emulator-ready", function() {
-                updateStatus('Emulator ready');
-                resetButton.disabled = false;
-                loadingElement.style.display = 'none';
-            });
-            
-            emulator.add_listener("emulator-started", function() {
-                updateStatus('Emulator started');
-            });
-        });
-        
-        resetButton.addEventListener('click', function() {
-            if (confirm('This will reset the emulator and all unsaved work will be lost. Continue?')) {
-                if (emulator) {
-                    emulator.stop();
-                    emulator = null;
-                }
-                startButton.disabled = false;
-                resetButton.disabled = true;
-                updateStatus('Ready to start');
-                loadingElement.style.display = 'none';
-                document.getElementById('screen').innerHTML = '';
-            }
-        });
-    }
-    
-    // Initialize when DOM is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        checkV86Loaded();
-    });
-</script>
 {% endblock %}
