@@ -19,7 +19,7 @@
     
     <div class="emulator-container">
         <div id="screen_container">
-            <div id="loading">Loading...</div>
+            <div id="loading">Loading emulator... Please wait</div>
             <div id="screen"></div>
         </div>
         
@@ -43,9 +43,21 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/libv86@latest/build/libv86.js"></script>
 <script>
+    // Load the v86 library
+    function loadScript(url, callback) {
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = url;
+        script.onload = callback;
+        document.head.appendChild(script);
+    }
+
+    // Wait for DOM content to be loaded
     document.addEventListener('DOMContentLoaded', function() {
+        // Load v86 library dynamically
+        loadScript('https://copy.sh/v86/build/libv86.js', function() {
+            console.log('v86 library loaded successfully');
         const startButton = document.getElementById('start-emulator');
         const resetButton = document.getElementById('reset-emulator');
         const statusElement = document.getElementById('status');
@@ -101,6 +113,7 @@
                 document.getElementById('screen').innerHTML = '';
             }
         });
+    });
     });
 </script>
 {% endblock %}
