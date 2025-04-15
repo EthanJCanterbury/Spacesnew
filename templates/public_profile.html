@@ -46,6 +46,16 @@
                         <i class="fab fa-github"></i>
                     </a>
                     {% endif %}
+                    {% if social_links.slack %}
+                    <a href="{{ social_links.slack }}" target="_blank" class="social-link" title="Slack">
+                        <i class="fab fa-slack"></i>
+                    </a>
+                    {% endif %}
+                    {% if social_links.scrapbook %}
+                    <a href="{{ social_links.scrapbook }}" target="_blank" class="social-link" title="Scrapbook">
+                        <i class="fas fa-book"></i>
+                    </a>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>
