@@ -2059,7 +2059,8 @@ body.editor-page {
 }
 
 .navbar + .editor-container {
-    margin-top: 56px; /* Adjust to remove the gap completely */
+    margin-top: 0;
+    top: 60px; /* Set to exact navbar height */
 }
 
 .editor-container {
