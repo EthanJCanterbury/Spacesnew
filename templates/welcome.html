@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block head %}
@@ -329,15 +330,6 @@
         color: #FF5722;
     }
 
-    .pixi-badge {
-        background-color: rgba(230, 126, 34, 0.15);
-        color: #E67E22;
-    }
-
-    .site-icon.pixi {
-        color: #E67E22;
-    }
-
     .shared-site-card {
         border-left: 3px solid #ec3750;
     }
@@ -565,14 +557,14 @@
             flex-direction: column;
             align-items: flex-start;
         }
-
+        
         .site-limit-info {
             position: relative;
             bottom: auto;
             right: auto;
             margin-top: 1rem;
         }
-
+        
         .sites-grid {
             grid-template-columns: 1fr;
         }
@@ -634,11 +626,6 @@
                             <i class="fab fa-python"></i>
                         </div>
                         <span class="site-type-badge python-badge">Python</span>
-                        {% elif site.site_type == 'pixi' %}
-                        <div class="site-icon pixi">
-                            <i class="fas fa-gamepad"></i>
-                        </div>
-                        <span class="site-type-badge pixi-badge">Pixi Game</span>
                         {% else %}
                         <div class="site-icon web">
                             <i class="fas fa-globe"></i>
@@ -659,10 +646,6 @@
                         <div class="site-actions">
                             {% if site.site_type == 'python' %}
                             <a href="{{ url_for('python_editor', site_id=site.id) }}" class="btn-icon" title="Edit Space">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            {% elif site.site_type == 'pixi' %}
-                            <a href="{{ url_for('edit_site', site_id=site.id) }}" class="btn-icon" title="Edit Space">
                                 <i class="fas fa-edit"></i>
                             </a>
                             {% else %}
@@ -786,7 +769,6 @@
                 <select id="spaceType" name="type" required class="space-type-select">
                     <option value="web">Web Space</option>
                     <option value="python">Python Space</option>
-                    <option value="pixi">Pixi Game</option>
                 </select>
             </div>
             <div class="modal-actions">
@@ -903,17 +885,17 @@ async function createNewSpace(event) {
     event.preventDefault();
     const form = event.target;
     const submitBtn = form.querySelector('button[type="submit"]');
-
+    
     const spaceName = document.getElementById('spaceName').value;
     const spaceType = document.getElementById('spaceType').value;
-
+    
     // Validate space name
     const namePattern = /^[a-zA-Z0-9_-]{1,15}$/;
     if (!namePattern.test(spaceName)) {
         showToast('error', 'Space name must be 1-15 characters and contain only letters, numbers, underscores and dashes (no spaces)');
         return;
     }
-
+    
     submitBtn.disabled = true;
 
     try {
@@ -926,21 +908,12 @@ async function createNewSpace(event) {
             body: JSON.stringify({ 
                 name: spaceName,
                 type: spaceType
-            }),
+            })
         });
 
         const data = await response.json();
         if (response.ok) {
-            let successMessage = '';
-            if (spaceType === 'python') {
-                successMessage = 'Python space created successfully!';
-            } else if (spaceType === 'pixi') {
-                successMessage = 'Pixi game space created successfully!';
-            } else {
-                successMessage = 'Web space created successfully!';
-            }
-
-            showToast('success', successMessage);
+            showToast('success', `${spaceType === 'python' ? 'Python' : 'Web'} space created successfully!`);
             window.location.href = spaceType === 'python' 
                 ? `/python/${data.site_id}`
                 : `/edit/${data.site_id}`;
@@ -1114,7 +1087,7 @@ async function renameSite(e) {
     e.preventDefault();
     const siteId = document.getElementById('renameSiteId').value;
     const newName = document.getElementById('newSiteName').value;
-
+    
     const submitBtn = e.target.querySelector('button[type="submit"]');
     const originalHtml = submitBtn.innerHTML;
     submitBtn.disabled = true;

@@ -873,9 +873,6 @@ def create_site():
             return jsonify({'message':
                             'Please enter a name for your space'}), 400
 
-        # Get the site type (web or pixi)
-        site_type = data.get('type', 'web')
-
         # Name validation
         name = str(name).strip()
         if len(name) < 1 or len(name) > 50:
@@ -902,7 +899,7 @@ def create_site():
                 {'message': 'A space with this name already exists'}), 400
 
         app.logger.info(
-            f'Creating new {site_type} site "{name}" for user {current_user.id}')
+            f'Creating new site "{name}" for user {current_user.id}')
 
         default_html = f'''<!DOCTYPE html>
 <html lang="en">
@@ -919,11 +916,9 @@ def create_site():
 </body>
 </html>'''
 
-        # Create the site with the appropriate type
         site = Site(name=name,
                     user_id=current_user.id,
-                    html_content=default_html,
-                    site_type=site_type)
+                    html_content=default_html)
         db.session.add(site)
         db.session.commit()
 
@@ -948,44 +943,20 @@ h1 {
 });'''
 
         try:
-            if site_type == 'pixi':
-                # For Pixi sites, use the default pixi content instead
-                pixi_content = site.pixi_content
-                
-                css_page = SitePage(site_id=site.id,
-                                    filename="styles.css",
-                                    content="body { margin: 0; overflow: hidden; }",
-                                    file_type="css")
+            css_page = SitePage(site_id=site.id,
+                                filename="styles.css",
+                                content=default_css,
+                                file_type="css")
 
-                js_page = SitePage(site_id=site.id,
-                                  filename="script.js",
-                                  content="// Your game logic can go here",
-                                  file_type="js")
-                
-                html_page = SitePage(site_id=site.id,
-                                    filename="index.html",
-                                    content=pixi_content,
-                                    file_type="html")
-                
-                # Update the site type to ensure it's properly marked as pixi
-                site.site_type = 'pixi'
-                db.session.commit()
-            else:
-                # For regular web sites, use the default web content
-                css_page = SitePage(site_id=site.id,
-                                    filename="styles.css",
-                                    content=default_css,
-                                    file_type="css")
+            js_page = SitePage(site_id=site.id,
+                               filename="script.js",
+                               content=default_js,
+                               file_type="js")
 
-                js_page = SitePage(site_id=site.id,
-                                  filename="script.js",
-                                  content=default_js,
-                                  file_type="js")
-
-                html_page = SitePage(site_id=site.id,
-                                    filename="index.html",
-                                    content=default_html,
-                                    file_type="html")
+            html_page = SitePage(site_id=site.id,
+                                 filename="index.html",
+                                 content=default_html,
+                                 file_type="html")
 
             db.session.add_all([css_page, js_page, html_page])
             db.session.commit()
@@ -997,16 +968,17 @@ h1 {
             db.session.rollback()
 
         activity = UserActivity(activity_type="site_creation",
-                                message=f'New {site_type} site "{name}" created by {current_user.username}',
+                                message='New site "{}" created by {}'.format(
+                                    name, current_user.username),
                                 username=current_user.username,
                                 user_id=current_user.id,
                                 site_id=site.id)
         db.session.add(activity)
         db.session.commit()
 
-        app.logger.info(f'Successfully created {site_type} site {site.id}')
+        app.logger.info(f'Successfully created site {site.id}')
         return jsonify({
-            'message': f'{site_type.capitalize()} site created successfully',
+            'message': 'Site created successfully',
             'site_id': site.id
         })
     except Exception as e:

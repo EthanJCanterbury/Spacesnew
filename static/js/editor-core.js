@@ -245,48 +245,27 @@ function setupFileTabListeners() {
 }
 
 function switchToFile(filename) {
-    if (isDirty) {
-        if (confirm("You have unsaved changes. Do you want to save before switching files?")) {
-            saveContent();
-        }
+    if (currentFile) {
+        fileContents[currentFile] = editor.getValue();
     }
 
-    // Save current content to memory
-    fileContents[currentFile] = editor.getValue();
-
-    // Update the UI
-    document.querySelectorAll('.file-tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    document.querySelector(`.file-tab[data-filename="${filename}"]`).classList.add('active');
-
-    // Load new content
     currentFile = filename;
     currentFilename = filename;
-    editor.setValue(fileContents[filename] || '');
 
-    // Set the appropriate mode based on file extension
-    const mode = getEditorModeForFile(filename);
-    editor.setOption('mode', mode);
+    document.querySelectorAll('.file-tab').forEach(tab => {
+        if (tab.dataset.filename === filename) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
 
-    // Update status bar
-    updateFileStatus();
+    editor.setValue(fileContents[filename] || "");
+
+    setEditorMode(filename);
+
+    updateFileSize();
 }
-
-function getEditorModeForFile(filename) {
-    const extension = filename.split('.').pop().toLowerCase();
-    switch (extension) {
-        case 'html':
-            return 'htmlmixed';
-        case 'css':
-            return 'css';
-        case 'js':
-            return 'javascript';
-        default:
-            return 'text/plain';
-    }
-}
-
 
 function setEditorMode(filename) {
     const extension = filename.split('.').pop().toLowerCase();
@@ -580,7 +559,7 @@ function saveContent(silent = false) {
             if (data.success) {
                 isDirty = false;
                 if (!silent) {
-                    showToast("Changes saved successfully!", "success");
+                    showToast("success", "Changes saved successfully!");
                 }
                 updatePreview();
             } else {
@@ -612,7 +591,7 @@ function saveContent(silent = false) {
             if (data.success) {
                 isDirty = false;
                 if (!silent) {
-                    showToast("Changes saved successfully!", "success");
+                    showToast("success", "Changes saved successfully!");
                 }
             } else {
                 showToast("Error saving content", "error");
@@ -759,9 +738,9 @@ function closeDeployModal() {
 }
 
 // Using the unified showToast function from main.js
-function showToast(message, type) {
+function showToast(type, message) {
     // Using the global showToast function defined in main.js
-    window.showToast(message, type);
+    window.showToast(type, message);
 }
 
 
@@ -1047,9 +1026,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function openNewFileModal() {
   openModal('new-file-modal');
-}
-
-function updateFileStatus() {
-    updateCursorPosition();
-    updateFileSize();
 }
