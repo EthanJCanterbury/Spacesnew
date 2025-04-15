@@ -254,7 +254,7 @@ def log_response_info(response):
 def add_security_headers(response):
     is_preview = request.args.get('preview') == 'true'
 
-    csp = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://webring.hackclub.com https://copy.sh; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; img-src 'self' data: https: http:; font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com; connect-src 'self' wss: ws: https://copy.sh; media-src 'self' https://hc-cdn.hel1.your-objectstorage.com; frame-src 'self' https://copy.sh *.copy.sh;"
+    csp = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://webring.hackclub.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https: http:; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' wss: ws:; media-src 'self' https://hc-cdn.hel1.your-objectstorage.com;"
 
     if is_preview:
         csp += " frame-ancestors *;"
@@ -5179,12 +5179,6 @@ def integrations():
     return render_template('integrations.html')
 
 
-@app.route('/bash-editor')
-def bash_editor():
-    """Render the bash terminal emulator page with direct terminal emulation."""
-    return render_template('bash_editor.html')
-
-
 if __name__ == '__main__':
     # Configure more detailed logging
     import logging
@@ -5201,11 +5195,4 @@ if __name__ == '__main__':
         app.logger.warning(f"Database initialization error: {e}")
 
     app.logger.info("Server running on http://0.0.0.0:3000")
-
-@app.route('/api/log-error', methods=['POST'])
-def log_error():
-    error_data = request.json
-    app.logger.error(f"Client error: {error_data}")
-    return jsonify({"status": "error logged"})
-
     app.run(host='0.0.0.0', port=3000, debug=True)
