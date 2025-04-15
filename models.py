@@ -282,8 +282,8 @@ class Site(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     slug = db.Column(db.String(100), nullable=False, unique=True)
-    site_type = db.Column(db.String(20), nullable=False, default='web', 
-                          db.CheckConstraint("site_type in ('web', 'python', 'pixi')"))
+    site_type = db.Column(db.String(20), nullable=False, default='web')
+    __table_args__ = (db.CheckConstraint("site_type in ('web', 'python', 'pixi')", name="site_type_check"),)
     html_content = db.Column(db.Text,
                              nullable=False,
                              default='<h1>Welcome to my site!</h1>')
