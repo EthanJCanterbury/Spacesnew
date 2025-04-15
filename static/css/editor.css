@@ -727,6 +727,28 @@ li.CodeMirror-hint-active {
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
+  max-height: calc(100vh - 70px);
+  overflow-y: auto;
+}
+
+/* Fix for dropdown menu position */
+.editor-topbar .dropdown {
+  position: relative;
+}
+
+/* Make sure dropdown doesn't get cut off by container boundaries */
+.editor-topbar .dropdown:hover .dropdown-menu {
+  transform: translateY(0);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* If dropdown is near right edge, adjust position */
+@media (max-width: 768px) {
+  .editor-topbar .dropdown-menu {
+    right: auto;
+    left: 0;
+  }
 }
 
 .dropdown:hover .dropdown-menu {
