@@ -2065,6 +2065,8 @@ body.editor-page {
     display: flex;
     overflow-x: auto;
     border-bottom: 1px solid #e2e8f0;
+    height: 40px;
+    box-sizing: border-box;
 }
 
 .editor-pane, .preview-pane {
@@ -2073,7 +2075,6 @@ body.editor-page {
     flex-direction: column;
     overflow: hidden;
     position: relative;
-    padding-top: 40px; /* Make room for tabs */
 }
 
 .file-tab {
@@ -2099,7 +2100,7 @@ body.editor-page {
 
 .CodeMirror {
     position: absolute;
-    top: 0;
+    top: 40px; /* Position below tabs */
     left: 0;
     right: 0;
     bottom: 26px; /* Account for statusbar */
