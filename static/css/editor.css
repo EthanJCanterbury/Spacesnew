@@ -1826,16 +1826,13 @@ iframe {
 
 /* File tabs styling supplement - specialized variations */
 .file-tabs {
-  padding: 4px 15px 0;
+  padding: 0.5rem 1rem 0;
   display: flex;
   flex-wrap: nowrap;
   overflow-x: auto;
   white-space: nowrap;
   scrollbar-width: thin;
   -ms-overflow-style: none;
-  height: 36px; /* Reduced height for tabs */
-  box-sizing: border-box;
-  width: 100%;
 }
 
 .file-tabs::-webkit-scrollbar {
@@ -2058,7 +2055,7 @@ body.editor-page {
     flex-direction: column;
     overflow: hidden;
     position: absolute;
-    top: 60px; /* Account for navbar */
+    top: 40px;
     left: 0;
     right: 0;
     bottom: 0;
@@ -2066,10 +2063,9 @@ body.editor-page {
 
 .editor-topbar {
     flex-shrink: 0;
-    margin-top: 0;
+    margin-top: 40px;
     z-index: 900;
     position: relative;
-    height: 48px; /* Fixed height for topbar */
 }
 
 .editor-main {
@@ -2077,7 +2073,7 @@ body.editor-page {
     display: flex;
     overflow: hidden;
     position: absolute;
-    top: 102px; /* 60px navbar + 42px topbar + file tabs height */
+    top: 98px; /* Increased to account for navbar + topbar */
     left: 0;
     right: 0;
     bottom: 0;
@@ -2087,13 +2083,12 @@ body.editor-page {
     position: relative;
     z-index: 10;
     background: white;
-    padding: 4px 15px 0;
+    padding: 8px 15px 0;
     display: flex;
     overflow-x: auto;
     border-bottom: 1px solid #e2e8f0;
-    height: 36px; /* Fixed height for tabs */
+    height: 55px;
     box-sizing: border-box;
-    width: 100%;
 }
 
 .editor-pane, .preview-pane {
@@ -2127,7 +2122,7 @@ body.editor-page {
 
 .CodeMirror {
     position: absolute;
-    top: 0; /* Position at the top of editor pane */
+    top: 40px; /* Position below tabs */
     left: 0;
     right: 0;
     bottom: 26px; /* Account for statusbar */
