@@ -26,17 +26,17 @@
         <div class="info-panel">
             <div class="info-box">
                 <h3>About Bash Editor</h3>
-                <p>This is a Debian Linux terminal emulator running in your browser. It uses <a href="https://github.com/copy/v86" target="_blank">v86</a> to emulate x86 hardware.</p>
+                <p>This is a Buildroot Linux terminal emulator running in your browser. It uses <a href="https://github.com/copy/v86" target="_blank">v86</a> to emulate x86 hardware.</p>
                 <p>Note: This environment runs entirely in your browser and changes are not saved to your Spaces account.</p>
             </div>
             
             <div class="info-box">
                 <h3>Quick Tips</h3>
                 <ul>
-                    <li>Username: <code>user</code></li>
-                    <li>Password: <code>passw0rd</code></li>
-                    <li>Use common bash commands: <code>ls</code>, <code>cd</code>, <code>mkdir</code>, <code>vim</code>, etc.</li>
+                    <li>No login required - Buildroot drops you directly into a shell</li>
+                    <li>Use common bash commands: <code>ls</code>, <code>cd</code>, <code>mkdir</code>, <code>cat</code>, etc.</li>
                     <li>Press CTRL+C to cancel commands</li>
+                    <li>Type <code>help</code> to see available commands</li>
                 </ul>
             </div>
         </div>
@@ -77,14 +77,17 @@
                 memory_size: 128 * 1024 * 1024,
                 vga_memory_size: 8 * 1024 * 1024,
                 screen_container: document.getElementById('screen'),
-                initial_state: {
-                    url: "https://copy.sh/v86/images/debian-state-base.bin.zst",
+                bzimage: {
+                    url: "https://copy.sh/v86/images/buildroot-bzimage.bin",
                 },
-                bzimage_initrd_from_filesystem: false,
+                initrd: {
+                    url: "https://copy.sh/v86/images/buildroot-initrd.bin",
+                },
+                cmdline: "console=ttyS0 root=/dev/ram0 rw init=/sbin/init",
                 autostart: true,
                 disable_speaker: true,
-                filesystem: {},
                 network_relay_url: "wss://relay.widgetry.org/",
+                filesystem: {},
                 boot_order: 0x132
             });
             
