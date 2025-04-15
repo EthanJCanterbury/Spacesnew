@@ -1163,6 +1163,7 @@ input:checked + .slider:before {
     height: calc(100vh - 60px);  /* Subtract navbar height */
     background-color: #f8f9fa;
     margin-top: 60px; /* Add margin for navbar */
+    border-top: none;
 }
 
 .editor-topbar {
@@ -2055,6 +2056,10 @@ html, body.editor-page {
 body.editor-page {
     display: flex;
     flex-direction: column;
+}
+
+.navbar + .editor-container {
+    margin-top: 59px; /* Adjust to remove the gap */
 }
 
 .editor-container {
