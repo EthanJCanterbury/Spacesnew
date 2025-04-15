@@ -2063,7 +2063,7 @@ body.editor-page {
 
 .editor-topbar {
     flex-shrink: 0;
-    margin-top: 40px;
+    margin-top: 0;
     z-index: 900;
     position: relative;
 }
@@ -2073,7 +2073,7 @@ body.editor-page {
     display: flex;
     overflow: hidden;
     position: absolute;
-    top: 98px; /* Increased to account for navbar + topbar */
+    top: 58px; /* Adjusted to account for topbar only */
     left: 0;
     right: 0;
     bottom: 0;
