@@ -43,21 +43,11 @@
     </div>
 </div>
 
+<script src="https://copy.sh/v86/build/libv86.js"></script>
 <script>
-    // Load the v86 library
-    function loadScript(url, callback) {
-        const script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.src = url;
-        script.onload = callback;
-        document.head.appendChild(script);
-    }
-
     // Wait for DOM content to be loaded
     document.addEventListener('DOMContentLoaded', function() {
-        // Load v86 library dynamically
-        loadScript('https://copy.sh/v86/build/libv86.js', function() {
-            console.log('v86 library loaded successfully');
+        console.log('DOM loaded, checking if V86Starter is defined:', typeof V86Starter);
         const startButton = document.getElementById('start-emulator');
         const resetButton = document.getElementById('reset-emulator');
         const statusElement = document.getElementById('status');
@@ -74,7 +64,7 @@
             loadingElement.style.display = 'flex';
             
             emulator = new V86Starter({
-                wasm_path: "https://cdn.jsdelivr.net/npm/libv86@latest/build/v86.wasm",
+                wasm_path: "https://copy.sh/v86/build/v86.wasm",
                 memory_size: 128 * 1024 * 1024,
                 vga_memory_size: 8 * 1024 * 1024,
                 screen_container: document.getElementById('screen'),
