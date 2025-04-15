@@ -580,7 +580,7 @@ function saveContent(silent = false) {
             if (data.success) {
                 isDirty = false;
                 if (!silent) {
-                    showToast("success", "Changes saved successfully!");
+                    showToast("Changes saved successfully!", "success");
                 }
                 updatePreview();
             } else {
@@ -612,7 +612,7 @@ function saveContent(silent = false) {
             if (data.success) {
                 isDirty = false;
                 if (!silent) {
-                    showToast("success", "Changes saved successfully!");
+                    showToast("Changes saved successfully!", "success");
                 }
             } else {
                 showToast("Error saving content", "error");
@@ -759,7 +759,7 @@ function closeDeployModal() {
 }
 
 // Using the unified showToast function from main.js
-function showToast(type, message) {
+function showToast(message, type) {
     // Using the global showToast function defined in main.js
     window.showToast(type, message);
 }
@@ -1008,7 +1008,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const loadingFacts = [
-        "Building your digital canvas...",
+        "Buildingyour digital canvas...",
         "Preparing your creative space...",
         "Loading coding environment...",
         "Initializing web tools...",
