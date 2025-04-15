@@ -932,7 +932,16 @@ async function createNewSpace(event) {
 
         const data = await response.json();
         if (response.ok) {
-            showToast('success', `${spaceType === 'python' ? 'Python' : 'Web'} space created successfully!`);
+            let successMessage = '';
+            if (spaceType === 'python') {
+                successMessage = 'Python space created successfully!';
+            } else if (spaceType === 'pixi') {
+                successMessage = 'Pixi game space created successfully!';
+            } else {
+                successMessage = 'Web space created successfully!';
+            }
+            
+            showToast('success', successMessage);
             window.location.href = spaceType === 'python' 
                 ? `/python/${data.site_id}`
                 : `/edit/${data.site_id}`;
