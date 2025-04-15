@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block head %}
@@ -41,7 +40,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm-addon-fit/0.8.0/xterm-addon-fit.min.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('load', () => {
+        // Check if Terminal is available
+        if (typeof Terminal === 'undefined') {
+            document.getElementById('status').innerText = 'Terminal library not loaded. Please refresh.';
+            return;
+        }
+
         // Create Terminal
         const term = new Terminal({
             cursorBlink: true,
@@ -52,50 +57,50 @@
                 foreground: '#f0f0f0'
             }
         });
-        
+
         const fitAddon = new FitAddon.FitAddon();
         term.loadAddon(fitAddon);
-        
+
         // Open terminal and fit it to container
         term.open(document.getElementById('terminal'));
         fitAddon.fit();
-        
+
         // Handle terminal resize
         window.addEventListener('resize', () => {
             fitAddon.fit();
         });
-        
+
         // Initial welcome message
         term.writeln('Welcome to Bash Terminal Emulator');
         term.writeln('Type commands below:');
         term.writeln('');
-        
+
         // Command history
         let history = [];
         let historyIndex = 0;
-        
+
         // Current command buffer
         let command = '';
         let prompt = '$ ';
-        
+
         // Write prompt
         function writePrompt() {
             term.write('\r\n' + prompt);
         }
-        
+
         // Initialize with a prompt
         writePrompt();
-        
+
         // Process commands
         function processCommand(cmd) {
             if (cmd.trim() === '') {
                 return;
             }
-            
+
             // Add to history
             history.push(cmd);
             historyIndex = history.length;
-            
+
             // Process command (this is a simple emulation)
             switch(cmd.trim()) {
                 case 'clear':
@@ -118,11 +123,11 @@
                     term.writeln(`Command not found: ${cmd}`);
             }
         }
-        
+
         // Handle key input
         term.onKey(({ key, domEvent }) => {
             const printable = !domEvent.altKey && !domEvent.ctrlKey && !domEvent.metaKey;
-            
+
             if (domEvent.keyCode === 13) { // Enter
                 term.writeln('');
                 processCommand(command);
