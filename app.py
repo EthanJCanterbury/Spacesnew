@@ -5181,6 +5181,7 @@ def integrations():
 
 @app.route('/bash-editor')
 def bash_editor():
+    """Render the bash terminal emulator page with direct terminal emulation."""
     return render_template('bash_editor.html')
 
 
