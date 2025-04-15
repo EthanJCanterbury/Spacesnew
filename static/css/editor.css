@@ -1160,8 +1160,14 @@ input:checked + .slider:before {
 .editor-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - 60px);
   background-color: #f8f9fa;
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
 }
 
 .editor-topbar {
@@ -2084,7 +2090,7 @@ body.editor-page {
     display: flex;
     overflow-x: auto;
     border-bottom: 1px solid #e2e8f0;
-    height: 55px;
+    height: 45px;
     box-sizing: border-box;
 }
 
