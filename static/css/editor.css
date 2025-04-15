@@ -1216,6 +1216,9 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+  white-space: nowrap;
 }
 
 .btn-primary {
@@ -1824,7 +1827,21 @@ iframe {
 /* File tabs styling supplement - specialized variations */
 .file-tabs {
   padding: 0.5rem 1rem 0;
-  flex-wrap: wrap;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: thin;
+  -ms-overflow-style: none;
+}
+
+.file-tabs::-webkit-scrollbar {
+  height: 5px;
+}
+
+.file-tabs::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 4px;
 }
 
 .file-tab {
@@ -1838,6 +1855,8 @@ iframe {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .file-tab.active {
