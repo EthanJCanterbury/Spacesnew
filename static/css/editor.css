@@ -1215,21 +1215,10 @@ input:checked + .slider:before {
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   overflow-x: auto;
-  padding: 0 15px 5px 15px;
+  padding-bottom: 5px;
   white-space: nowrap;
-  margin-right: 10px;
-  scrollbar-width: thin;
-}
-
-.topbar-actions::-webkit-scrollbar {
-  height: 6px;
-}
-
-.topbar-actions::-webkit-scrollbar-thumb {
-  background-color: rgba(0,0,0,0.2);
-  border-radius: 4px;
 }
 
 .btn-primary {
@@ -1868,8 +1857,6 @@ iframe {
   gap: 8px;
   flex-shrink: 0;
   white-space: nowrap;
-  padding: 8px 16px;
-  min-width: 120px;
 }
 
 .file-tab.active {
