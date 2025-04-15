@@ -45,9 +45,18 @@
 
 <script src="https://copy.sh/v86/build/libv86.js"></script>
 <script>
-    // Wait for DOM content to be loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM loaded, checking if V86Starter is defined:', typeof V86Starter);
+    // Wait for DOM content to be loaded and for V86Starter to be available
+    function checkV86Loaded() {
+        if (typeof V86Starter === 'undefined') {
+            console.log('V86Starter not loaded yet, waiting...');
+            setTimeout(checkV86Loaded, 100);
+            return;
+        }
+        console.log('V86Starter loaded successfully:', typeof V86Starter);
+        initEmulator();
+    }
+    
+    function initEmulator() {
         const startButton = document.getElementById('start-emulator');
         const resetButton = document.getElementById('reset-emulator');
         const statusElement = document.getElementById('status');
@@ -103,6 +112,11 @@
                 document.getElementById('screen').innerHTML = '';
             }
         });
+    }
+    
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        checkV86Loaded();
     });
 </script>
 {% endblock %}
