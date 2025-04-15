@@ -1008,7 +1008,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const loadingFacts = [
-        "Buildingyour digital canvas...",
+        "Building your digital canvas...",
         "Preparing your creative space...",
         "Loading coding environment...",
         "Initializing web tools...",
