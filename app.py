@@ -819,7 +819,12 @@ def view_site(slug, filename):
             connection.commit()
 
     if not filename:
-        return site.html_content
+        if site.site_type == 'pixi':
+            # For Pixi sites, get the index.html content
+            page = SitePage.query.filter_by(site_id=site.id, filename="index.html").first()
+            return page.content if page else site.pixi_content
+        else:
+            return site.html_content
 
     try:
         page = SitePage.query.filter_by(site_id=site.id,
@@ -1133,6 +1138,58 @@ if __name__ == "__main__":
     except Exception as e:
         db.session.rollback()
         return jsonify({'message': 'Failed to create Python script'}), 500
+        
+@app.route('/api/sites/pixi', methods=['POST'])
+@login_required
+def create_pixi_site():
+    try:
+        site_count = Site.query.filter_by(user_id=current_user.id).count()
+        max_sites = get_max_sites_per_user()
+        if site_count >= max_sites:
+            return jsonify({
+                'message':
+                f'You have reached the maximum limit of {max_sites} sites per account'
+            }), 403
+
+        data = request.get_json()
+        if not data:
+            return jsonify({'message': 'Invalid request data'}), 400
+
+        name = data.get('name')
+        if not name:
+            return jsonify({'message': 'Name is required'}), 400
+
+        site = Site(name=name,
+                    user_id=current_user.id,
+                    site_type='pixi')
+        db.session.add(site)
+        db.session.commit()
+
+        # Create the single HTML file for the Pixi space
+        page = SitePage(site_id=site.id,
+                        filename="index.html",
+                        content=site.pixi_content,
+                        file_type="html")
+        db.session.add(page)
+
+        activity = UserActivity(
+            activity_type="site_creation",
+            message='New Pixi space "{}" created by {}'.format(
+                name, current_user.username),
+            username=current_user.username,
+            user_id=current_user.id,
+            site_id=site.id)
+        db.session.add(activity)
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Pixi game created successfully',
+            'site_id': site.id
+        })
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error creating Pixi space: {str(e)}')
+        return jsonify({'message': 'Failed to create Pixi space'}), 500
 
 
 @app.route('/python/<int:site_id>')
@@ -1171,6 +1228,36 @@ def python_editor(site_id):
                                additional_scripts=socket_join_script)
     except Exception as e:
         app.logger.error(f'Error in python_editor: {str(e)}')
+        abort(500)
+        
+@app.route('/pixi/<int:site_id>')
+@login_required
+def pixi_editor(site_id):
+    try:
+        site = Site.query.get_or_404(site_id)
+
+        is_admin = current_user.is_admin
+        is_owner = site.user_id == current_user.id
+
+        if not is_owner and not is_admin:
+            app.logger.warning(
+                f'User {current_user.id} attempted to access Pixi site {site_id} owned by {site.user_id}'
+            )
+            abort(403)
+
+        app.logger.info(
+            f'User {current_user.id} editing Pixi site {site_id}')
+
+        # Get the index.html content
+        page = SitePage.query.filter_by(site_id=site_id, filename="index.html").first()
+        content = page.content if page else site.pixi_content
+
+        return render_template('editor.html', 
+                              site=site, 
+                              current_file="index.html", 
+                              file_content=content)
+    except Exception as e:
+        app.logger.error(f'Error in pixi_editor: {str(e)}')
         abort(500)
 
 
