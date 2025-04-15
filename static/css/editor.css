@@ -1158,20 +1158,22 @@ input:checked + .slider:before {
 }
 
 .editor-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 60px);  /* Subtract navbar height */
+    background-color: #f8f9fa;
+    margin-top: 60px; /* Add margin for navbar */
 }
 
 .editor-topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1.5rem;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    z-index: 10;
+    position: relative; /* Ensure proper stacking */
 }
 
 .topbar-left {
@@ -1248,24 +1250,30 @@ input:checked + .slider:before {
 }
 
 .editor-main {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    position: relative;
 }
 
-.editor-pane {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  background-color: white;
-  border-right: 1px solid #e2e8f0;
-  overflow: hidden;
+.editor-pane, .preview-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
 }
 
-.preview-pane {
-  flex: 1;
-  background-color: white;
-  overflow: hidden;
+.file-tabs {
+    position: relative;
+    z-index: 10;
+    background: white;
+    padding: 8px 15px 0;
+    display: flex;
+    overflow-x: auto;
+    border-bottom: 1px solid #e2e8f0;
+    height: 48px; /* Slightly smaller height */
+    box-sizing: border-box;
 }
 
 .CodeMirror {
@@ -2006,7 +2014,7 @@ iframe {
 }
 
 .tutorial-prev-btn {
-  margin-right: 10px;
+  margin-right:10px;
   background-color: #f1f5f9;
   color: #334155;
   border: 1px solid #e2e8f0;
@@ -2070,7 +2078,7 @@ body.editor-page {
     display: flex;
     overflow: hidden;
     position: absolute;
-    top: 58px; /* Adjust based on your header height */
+    top: 60px; /* Adjust based on your header height */
     left: 0;
     right: 0;
     bottom: 0;
@@ -2084,7 +2092,7 @@ body.editor-page {
     display: flex;
     overflow-x: auto;
     border-bottom: 1px solid #e2e8f0;
-    height: 55px;
+    height: 48px; /* Slightly smaller height */
     box-sizing: border-box;
 }
 
