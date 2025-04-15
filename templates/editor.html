@@ -143,11 +143,13 @@
     </div>
     <div class="editor-main">
         <div class="editor-pane">
-            {% if site.site_type == 'web' %}
+            {% if site.site_type == 'web' or site.site_type == 'pixi' %}
             <div class="file-tabs">
                 <button class="file-tab active" data-filename="index.html" data-filetype="html">index.html</button>
+                {% if site.site_type == 'web' %}
                 <button class="file-tab" data-filename="styles.css" data-filetype="css">styles.css</button>
                 <button class="file-tab" data-filename="script.js" data-filetype="js">script.js</button>
+                {% endif %}
                 <button class="file-tab-add" title="Add new file" id="addFileBtn">
                     <i class="fas fa-plus"></i>
                 </button>
@@ -196,7 +198,7 @@
             </div>
         </div>
         <div class="preview-pane">
-            {% if site.site_type == 'web' %}
+            {% if site.site_type == 'web' or site.site_type == 'pixi' %}
             <div class="browser-frame">
                 <div class="browser-header">
                     <div class="browser-address" style="display: flex; align-items: center; width: 100%;">
