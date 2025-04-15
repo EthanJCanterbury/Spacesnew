@@ -761,7 +761,7 @@ function closeDeployModal() {
 // Using the unified showToast function from main.js
 function showToast(message, type) {
     // Using the global showToast function defined in main.js
-    window.showToast(type, message);
+    window.showToast(message, type);
 }
 
 
