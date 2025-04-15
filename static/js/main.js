@@ -7,11 +7,15 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         }
         
         e.preventDefault();
-        const targetElement = document.querySelector(href);
-        if (targetElement) {
-            targetElement.scrollIntoView({
-                behavior: 'smooth'
-            });
+        try {
+            const targetElement = document.querySelector(href);
+            if (targetElement) {
+                targetElement.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
+        } catch (error) {
+            console.error("Invalid selector:", href);
         }
     });
 });

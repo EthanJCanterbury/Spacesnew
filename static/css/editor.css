@@ -2011,7 +2011,7 @@ iframe {
 
 .tutorial-step-counter {
   display: flex;
-  align-items: center;
+  align-items:center;
   margin: 0 15px;
   font-size: 14px;
   color: #4a5568;
@@ -2075,6 +2075,8 @@ body.editor-page {
     flex-direction: column;
     overflow: hidden;
     position: relative;
+    margin-top: 40px; /* Make room for tabs */
+    padding-top: 0;
 }
 
 .file-tab {
