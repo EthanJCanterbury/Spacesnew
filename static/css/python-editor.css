@@ -88,16 +88,39 @@
 .split-layout {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow: hidden;
 }
 
 .split-layout .editor-main {
-  flex: 1;
-  min-height: 0;
+  position: absolute;
+  top: 58px; /* Adjust based on your header height */
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   overflow: hidden;
+}
+
+.split-layout .console-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.split-layout .console-output {
+  position: absolute;
+  top: 40px; /* Height of console header */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
 }
 
 .editor-main {
