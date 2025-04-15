@@ -2066,6 +2066,8 @@ body.editor-page {
     margin-top: 0;
     z-index: 900;
     position: relative;
+    background-color: white;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .editor-main {
@@ -2073,7 +2075,7 @@ body.editor-page {
     display: flex;
     overflow: hidden;
     position: absolute;
-    top: 58px; /* Adjusted to account for only topbar height */
+    top: 103px; /* Adjusted to account for topbar + tabs height */
     left: 0;
     right: 0;
     bottom: 0;
@@ -2087,8 +2089,9 @@ body.editor-page {
     display: flex;
     overflow-x: auto;
     border-bottom: 1px solid #e2e8f0;
-    height: 55px;
+    height: 45px;
     box-sizing: border-box;
+    margin-top: 0;
 }
 
 .editor-pane, .preview-pane {
@@ -2122,7 +2125,7 @@ body.editor-page {
 
 .CodeMirror {
     position: absolute;
-    top: 40px; /* Position below tabs */
+    top: 0; /* Position at the top of editor-pane */
     left: 0;
     right: 0;
     bottom: 26px; /* Account for statusbar */
