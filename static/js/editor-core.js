@@ -252,13 +252,17 @@ function switchToFile(filename) {
     currentFile = filename;
     currentFilename = filename;
 
-    document.querySelectorAll('.file-tab').forEach(tab => {
-        if (tab.dataset.filename === filename) {
-            tab.classList.add('active');
-        } else {
-            tab.classList.remove('active');
-        }
-    });
+    // Only try to update file tabs if they exist in this editor variant
+    const fileTabs = document.querySelectorAll('.file-tab');
+    if (fileTabs.length > 0) {
+        fileTabs.forEach(tab => {
+            if (tab.dataset.filename === filename) {
+                tab.classList.add('active');
+            } else {
+                tab.classList.remove('active');
+            }
+        });
+    }
 
     editor.setValue(fileContents[filename] || "");
 
@@ -811,7 +815,10 @@ function deleteRepo() {
 }
 
 function initializeTabs() {
-    if (document.querySelectorAll('.file-tab').length > 0) {
+    // Check if file tabs exist in this editor variant
+    const fileTabsExist = document.querySelectorAll('.file-tab').length > 0;
+    
+    if (fileTabsExist) {
         document.querySelectorAll('.file-tab').forEach(tab => {
             const filename = tab.getAttribute('data-filename');
 
@@ -838,7 +845,7 @@ function initializeTabs() {
         }
     }
 
-    if (typeof setupTabContextMenu === 'function') {
+    if (typeof setupTabContextMenu === 'function' && fileTabsExist) {
         setupTabContextMenu();
     }
 }
@@ -851,8 +858,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const addFileBtn = document.getElementById('addFileBtn');
     const newFileModal = document.getElementById('new-file-modal');
-    const closeBtn = newFileModal.querySelector('.close-btn');
-    const cancelBtn = document.getElementById('cancelNewFile');
+    
+    // Add null checks for elements that might not exist in all editor variants
+    if (newFileModal) {
+        const closeBtn = newFileModal.querySelector('.close-btn');
+        const cancelBtn = document.getElementById('cancelNewFile');
 
     if (addFileBtn) {
         addFileBtn.addEventListener('click', function() {
@@ -872,12 +882,16 @@ document.addEventListener('DOMContentLoaded', function() {
             newFileModal.style.display = 'none';
         });
     }
-
-    window.addEventListener('click', function(event) {
-        if (event.target === newFileModal) {
-            newFileModal.style.display = 'none';
-        }
-    });
+    
+    // Add event listener only if modal exists
+    if (newFileModal) {
+        window.addEventListener('click', function(event) {
+            if (event.target === newFileModal) {
+                newFileModal.style.display = 'none';
+            }
+        });
+    }
+}
     if (document.getElementById('particles-js')) {
         particlesJS('particles-js', {
             "particles": {
