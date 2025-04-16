@@ -130,6 +130,15 @@ function initEditor(initialContent, type) {
         setTimeout(() => {
             updatePreview();
         }, 500);
+    } else if (siteType === 'pixi') {
+        // Force HTML mode for Pixi editor
+        editor.setValue(initialContent || "");
+        editor.setOption('mode', 'htmlmixed');
+        
+        // Initialize preview for Pixi editor
+        setTimeout(() => {
+            updatePreview();
+        }, 500);
     } else {
         editor.setValue(initialContent || "print('Hello, World!')");
     }
@@ -273,6 +282,12 @@ function switchToFile(filename) {
 
 function setEditorMode(filename) {
     const extension = filename.split('.').pop().toLowerCase();
+    
+    // For Pixi editor, we need to force HTML mode
+    if (siteType === 'pixi') {
+        editor.setOption('mode', 'htmlmixed');
+        return;
+    }
 
     switch (extension) {
         case 'html':
@@ -578,6 +593,40 @@ function saveContent(silent = false) {
             saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
             saveBtn.disabled = false;
         });
+    } else if (siteType === 'pixi') {
+        // For Pixi editor, save content as HTML
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        saveBtn.disabled = true;
+
+        fetch(`/api/site/${siteId}/save`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ content: editor.getValue() })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                isDirty = false;
+                if (!silent) {
+                    showToast("success", "Changes saved successfully!");
+                }
+                // Update preview for Pixi content
+                updatePreview();
+            } else {
+                showToast("Error saving content", "error");
+            }
+        })
+        .catch(error => {
+            console.error("Error saving content:", error);
+            showToast("Error saving content", "error");
+        })
+        .finally(() => {
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+            saveBtn.disabled = false;
+        });
     } else {
         const saveBtn = document.getElementById('saveBtn');
         saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
@@ -613,7 +662,8 @@ function saveContent(silent = false) {
 }
 
 function updatePreview() {
-    if (siteType !== 'web') return;
+    // Allow preview for both web and pixi editors
+    if (siteType !== 'web' && siteType !== 'pixi') return;
 
     const previewFrame = document.getElementById('preview');
     if (!previewFrame) return;
@@ -854,7 +904,15 @@ function initializeTabs() {
 document.addEventListener('DOMContentLoaded', function() {
     const siteContent = document.getElementById('editor').value;
     const siteType = document.getElementById('site-type').value;
+    
+    // Initialize editor with content and type
     initEditor(siteContent, siteType);
+    
+    // For Pixi editor, force HTML mode
+    if (siteType === 'pixi') {
+        editor.setOption('mode', 'htmlmixed');
+        console.log('Initialized Pixi editor with HTML mode');
+    }
 
     const addFileBtn = document.getElementById('addFileBtn');
     const newFileModal = document.getElementById('new-file-modal');
