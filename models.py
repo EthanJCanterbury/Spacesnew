@@ -281,7 +281,7 @@ class Site(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     slug = db.Column(db.String(100), unique=True, nullable=False)
-    site_type = db.Column(db.String(20), nullable=False, default='web')
+    site_type = db.Column(db.String(20), nullable=False, default='web')  # Options: 'web', 'python', 'pixi'
     html_content = db.Column(db.Text,
                              nullable=False,
                              default='<h1>Welcome to my site!</h1>')
