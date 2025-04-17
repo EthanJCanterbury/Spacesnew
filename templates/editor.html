@@ -1109,11 +1109,11 @@ window.makeDraggable = function(element, dragHandle) {
     document.addEventListener('mouseup', endDrag);
 };
 
-// Function to check if GitHub repo is connected and push latest changes
+// Function to check GitHub connection and open GitHub modal for Boba Drops
 function checkGitHubAndApplyForBoba() {
     const bobaBtn = document.getElementById('bobaApplyBtn');
     
-    // Disable the button and change text to indicate checking
+    // Disable the button temporarily
     bobaBtn.disabled = true;
     bobaBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking GitHub connection...';
     
@@ -1155,38 +1155,43 @@ function checkGitHubAndApplyForBoba() {
                 return;
             }
             
-            // Repo is connected, let's push latest changes
-            bobaBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Pushing latest changes...';
+            // If we get here, GitHub is connected and repo exists
+            // Show a toast message prompting to push changes first
+            showToast('info', 'Remember to push your latest changes before applying!');
             
-            // Attempt to push latest changes
-            fetch('/api/github/push?site_id=' + siteId, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 
-                    message: 'Update before Boba Drops application' 
-                })
-            })
-            .then(response => response.json())
-            .then(pushData => {
-                // Regardless of push result, open the application form
-                bobaBtn.innerHTML = '<i class="fas fa-check"></i> Opening application form...';
-                
-                // Open the Boba Drops application form in a new tab
-                window.open('https://forms.hackclub.com/t/tLf8GYVBqSus', '_blank');
-                
-                // Reset button after a short delay
-                setTimeout(() => {
-                    bobaBtn.disabled = false;
-                    bobaBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Apply for Boba Drops';
-                }, 2000);
-            })
-            .catch(error => {
-                showToast('error', 'Error pushing changes: ' + error.message);
-                bobaBtn.disabled = false;
-                bobaBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Try Again';
-            });
+            // Open the GitHub modal for the user to manually push changes
+            GitHubManager.openModal();
+            
+            // Set a message that appears in the commit message box
+            const commitMsgElement = document.getElementById('commitMessage');
+            if (commitMsgElement) {
+                commitMsgElement.value = 'Update before Boba Drops application';
+            }
+            
+            // Create a new toast with application link
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast toast-success';
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <i class="fas fa-info-circle"></i>
+                    <span>
+                        After pushing your changes, 
+                        <a href="https://forms.hackclub.com/t/tLf8GYVBqSus" target="_blank" 
+                           style="color: white; text-decoration: underline;">
+                           click here to apply for Boba Drops
+                        </a>
+                    </span>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            toast.offsetHeight; // Force reflow
+            toast.classList.add('show');
+            
+            // Reset the button
+            bobaBtn.disabled = false;
+            bobaBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Apply for Boba Drops';
         })
         .catch(error => {
             showToast('error', 'Error checking GitHub status: ' + error.message);
@@ -1195,11 +1200,11 @@ function checkGitHubAndApplyForBoba() {
         });
 }
 
-// Function to check if GitHub repo is connected and push latest changes for Swirl
+// Function to check GitHub connection and open GitHub modal for Swirl
 function checkGitHubAndApplyForSwirl() {
     const swirlBtn = document.getElementById('swirlApplyBtn');
     
-    // Disable the button and change text to indicate checking
+    // Disable the button temporarily
     swirlBtn.disabled = true;
     swirlBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking GitHub connection...';
     
@@ -1241,38 +1246,43 @@ function checkGitHubAndApplyForSwirl() {
                 return;
             }
             
-            // Repo is connected, let's push latest changes
-            swirlBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Pushing latest changes...';
+            // If we get here, GitHub is connected and repo exists
+            // Show a toast message prompting to push changes first
+            showToast('info', 'Remember to push your latest changes before applying!');
             
-            // Attempt to push latest changes
-            fetch('/api/github/push?site_id=' + siteId, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 
-                    message: 'Update before Swirl application' 
-                })
-            })
-            .then(response => response.json())
-            .then(pushData => {
-                // Regardless of push result, open the application form
-                swirlBtn.innerHTML = '<i class="fas fa-check"></i> Opening application form...';
-                
-                // Open the Swirl application form in a new tab
-                window.open('https://forms.hackclub.com/t/t1UL6ZK4Nyus', '_blank');
-                
-                // Reset button after a short delay
-                setTimeout(() => {
-                    swirlBtn.disabled = false;
-                    swirlBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Apply for Swirl';
-                }, 2000);
-            })
-            .catch(error => {
-                showToast('error', 'Error pushing changes: ' + error.message);
-                swirlBtn.disabled = false;
-                swirlBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Try Again';
-            });
+            // Open the GitHub modal for the user to manually push changes
+            GitHubManager.openModal();
+            
+            // Set a message that appears in the commit message box
+            const commitMsgElement = document.getElementById('commitMessage');
+            if (commitMsgElement) {
+                commitMsgElement.value = 'Update before Swirl application';
+            }
+            
+            // Create a new toast with application link
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast toast-success';
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <i class="fas fa-info-circle"></i>
+                    <span>
+                        After pushing your changes, 
+                        <a href="https://forms.hackclub.com/t/t1UL6ZK4Nyus" target="_blank" 
+                           style="color: white; text-decoration: underline;">
+                           click here to apply for Swirl
+                        </a>
+                    </span>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            toast.offsetHeight; // Force reflow
+            toast.classList.add('show');
+            
+            // Reset the button
+            swirlBtn.disabled = false;
+            swirlBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Apply for Swirl';
         })
         .catch(error => {
             showToast('error', 'Error checking GitHub status: ' + error.message);
