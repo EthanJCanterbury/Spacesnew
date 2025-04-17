@@ -865,9 +865,9 @@ a:hover {
                 </ul>
             </div>
 
-            <a href="https://forms.hackclub.com/t/tLf8GYVBqSus" target="_blank" class="btn-primary" style="display: inline-block; margin-top: 15px; text-decoration: none; padding: 10px 20px; background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%); color: white; border-radius: 8px; font-weight: bold; transition: all 0.2s ease;">
+            <button id="bobaApplyBtn" onclick="checkGitHubAndApplyForBoba()" class="btn-primary" style="display: inline-block; margin-top: 15px; text-decoration: none; padding: 10px 20px; background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%); color: white; border-radius: 8px; font-weight: bold; transition: all 0.2s ease; border: none; cursor: pointer;">
                 <i class="fas fa-external-link-alt"></i> Apply for Boba Drops
-            </a>
+            </button>
         </div>
 
         <div class="ysws-section" style="margin-bottom: 30px; background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 4px solid #8c52ff;">
@@ -1108,6 +1108,92 @@ window.makeDraggable = function(element, dragHandle) {
     document.addEventListener('mousemove', moveDrag);
     document.addEventListener('mouseup', endDrag);
 };
+
+// Function to check if GitHub repo is connected and push latest changes
+function checkGitHubAndApplyForBoba() {
+    const bobaBtn = document.getElementById('bobaApplyBtn');
+    
+    // Disable the button and change text to indicate checking
+    bobaBtn.disabled = true;
+    bobaBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking GitHub connection...';
+    
+    // Get the site ID
+    const siteId = document.getElementById('site-id').value || sessionStorage.getItem('current_site_id');
+    
+    if (!siteId) {
+        showToast('error', 'Could not determine site ID. Please refresh the page.');
+        bobaBtn.disabled = false;
+        bobaBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Apply for Boba Drops';
+        return;
+    }
+    
+    // Check if GitHub is connected
+    fetch(`/api/github/status?site_id=${siteId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.connected) {
+                showToast('error', 'Please connect your GitHub account first!');
+                bobaBtn.disabled = false;
+                bobaBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Connect GitHub First';
+                
+                // Open GitHub modal to help user connect
+                setTimeout(() => {
+                    GitHubManager.openModal();
+                }, 1000);
+                return;
+            }
+            
+            if (!data.repo_connected) {
+                showToast('error', 'Please create or connect a GitHub repository first!');
+                bobaBtn.disabled = false;
+                bobaBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Create Repository First';
+                
+                // Open GitHub modal to help user create repo
+                setTimeout(() => {
+                    GitHubManager.openModal();
+                }, 1000);
+                return;
+            }
+            
+            // Repo is connected, let's push latest changes
+            bobaBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Pushing latest changes...';
+            
+            // Attempt to push latest changes
+            fetch('/api/github/push?site_id=' + siteId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    message: 'Update before Boba Drops application' 
+                })
+            })
+            .then(response => response.json())
+            .then(pushData => {
+                // Regardless of push result, open the application form
+                bobaBtn.innerHTML = '<i class="fas fa-check"></i> Opening application form...';
+                
+                // Open the Boba Drops application form in a new tab
+                window.open('https://forms.hackclub.com/t/tLf8GYVBqSus', '_blank');
+                
+                // Reset button after a short delay
+                setTimeout(() => {
+                    bobaBtn.disabled = false;
+                    bobaBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Apply for Boba Drops';
+                }, 2000);
+            })
+            .catch(error => {
+                showToast('error', 'Error pushing changes: ' + error.message);
+                bobaBtn.disabled = false;
+                bobaBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Try Again';
+            });
+        })
+        .catch(error => {
+            showToast('error', 'Error checking GitHub status: ' + error.message);
+            bobaBtn.disabled = false;
+            bobaBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Apply for Boba Drops';
+        });
+}
 
 // Initialize the modals when the document is ready
 document.addEventListener('DOMContentLoaded', function() {
