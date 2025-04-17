@@ -329,15 +329,6 @@
         background-color: rgba(255, 87, 34, 0.15);
         color: #FF5722;
     }
-    
-    .pixi-badge {
-        background-color: rgba(233, 30, 99, 0.15);
-        color: #E91E63;
-    }
-    
-    .site-icon.pixi {
-        color: #E91E63;
-    }
 
     .shared-site-card {
         border-left: 3px solid #ec3750;
@@ -635,11 +626,6 @@
                             <i class="fab fa-python"></i>
                         </div>
                         <span class="site-type-badge python-badge">Python</span>
-                        {% elif site.site_type == 'pixi' %}
-                        <div class="site-icon pixi">
-                            <i class="fas fa-gamepad"></i>
-                        </div>
-                        <span class="site-type-badge pixi-badge">Pixi Game</span>
                         {% else %}
                         <div class="site-icon web">
                             <i class="fas fa-globe"></i>
@@ -660,10 +646,6 @@
                         <div class="site-actions">
                             {% if site.site_type == 'python' %}
                             <a href="{{ url_for('python_editor', site_id=site.id) }}" class="btn-icon" title="Edit Space">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            {% elif site.site_type == 'pixi' %}
-                            <a href="{{ url_for('pixi_editor', site_id=site.id) }}" class="btn-icon" title="Edit Space">
                                 <i class="fas fa-edit"></i>
                             </a>
                             {% else %}
@@ -709,11 +691,6 @@
                             <i class="fab fa-python"></i>
                         </div>
                         <span class="site-type-badge python-badge">Python</span>
-                        {% elif collab.site.site_type == 'pixi' %}
-                        <div class="site-icon pixi">
-                            <i class="fas fa-gamepad"></i>
-                        </div>
-                        <span class="site-type-badge pixi-badge">Pixi Game</span>
                         {% else %}
                         <div class="site-icon web">
                             <i class="fas fa-globe"></i>
@@ -731,10 +708,6 @@
                             {% if collab.is_active %}
                                 {% if collab.site.site_type == 'python' %}
                                 <a href="{{ url_for('python_editor', site_id=collab.site.id) }}" class="btn-icon" title="Edit Space">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                {% elif collab.site.site_type == 'pixi' %}
-                                <a href="{{ url_for('pixi_editor', site_id=collab.site.id) }}" class="btn-icon" title="Edit Space">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 {% else %}
@@ -796,7 +769,6 @@
                 <select id="spaceType" name="type" required class="space-type-select">
                     <option value="web">Web Space</option>
                     <option value="python">Python Space</option>
-                    <option value="pixi">Pixi Game Space</option>
                 </select>
             </div>
             <div class="modal-actions">
@@ -927,13 +899,7 @@ async function createNewSpace(event) {
     submitBtn.disabled = true;
 
     try {
-        let endpoint = '/api/sites';
-        if (spaceType === 'python') {
-            endpoint = '/api/sites/python';
-        } else if (spaceType === 'pixi') {
-            endpoint = '/api/sites/pixi';
-        }
-        
+        const endpoint = spaceType === 'python' ? '/api/sites/python' : '/api/sites';
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -947,19 +913,10 @@ async function createNewSpace(event) {
 
         const data = await response.json();
         if (response.ok) {
-            let spaceTypeForMessage = 'Web';
-            if (spaceType === 'python') spaceTypeForMessage = 'Python';
-            if (spaceType === 'pixi') spaceTypeForMessage = 'Pixi Game';
-            
-            showToast('success', `${spaceTypeForMessage} space created successfully!`);
-            
-            if (spaceType === 'python') {
-                window.location.href = `/python/${data.site_id}`;
-            } else if (spaceType === 'pixi') {
-                window.location.href = `/pixi/${data.site_id}`;
-            } else {
-                window.location.href = `/edit/${data.site_id}`;
-            }
+            showToast('success', `${spaceType === 'python' ? 'Python' : 'Web'} space created successfully!`);
+            window.location.href = spaceType === 'python' 
+                ? `/python/${data.site_id}`
+                : `/edit/${data.site_id}`;
         } else {
             showToast('error', data.message || 'Failed to create space');
         }
