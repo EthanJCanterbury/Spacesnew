@@ -1406,51 +1406,9 @@ def gallery_submit():
 
 @app.route('/apps')
 def apps():
-    return render_template('apps.html')
+    return render_template('apps.html')'')
 
-
-@app.route('/api/changelog')
-def get_changelog():
-    try:
-        with open('changelog.md', 'r') as f:
-            content = f.read()
-            version = hashlib.md5(content.encode()).hexdigest()
-
-            lines = content.split('\n')
-            html_lines = []
-            in_list = False
-
-            for line in lines:
-                line = html.escape(line)
-                if line.startswith('# '):
-                    if in_list:
-                        html_lines.append('</ul>')
-                        in_list = False
-                    html_lines.append(f'<h1>{line[2:]}</h1>')
-                elif line.startswith('## '):
-                    if in_list:
-                        html_lines.append('</ul>')
-                        in_list = False
-                    html_lines.append(f'<h2>{line[3:]}</h2>')
-                elif line.startswith('- '):
-                    if not in_list:
-                        html_lines.append('<ul>')
-                        in_list = True
-                    html_lines.append(f'<li>{line[2:]}</li>')
-                elif line.strip():
-                    if in_list:
-                        html_lines.append('</ul>')
-                        in_list = False
-                    html_lines.append(f'<p>{line}</p>')
-
-            if in_list:
-                html_lines.append('</ul>')
-
-            html_content = '\n'.join(html_lines)
-            return jsonify({'content': html_content, 'version': version})
-    except Exception as e:
-        app.logger.error(f'Error reading changelog: {str(e)}')
-        return jsonify({'error': 'Failed to read changelog'}), 500
+            00
 
 
 def admin_required(f):
