@@ -549,6 +549,48 @@ window.runPythonCode = function() {
         pygameCanvas.style.display = 'none';
         pygameMessage.textContent = 'Launching pygame...';
     }
+    
+    // Send the code to the server to execute
+    fetch('/run_python', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            site_id: siteId,
+            code: code,
+            use_pygame: hasPygame
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            outputConsole.innerHTML = `<span class="console-error">${data.error}</span>`;
+            if (hasPygame) {
+                pygameMessage.textContent = `Error: ${data.error}`;
+            }
+            return;
+        }
+        
+        // Update the console output
+        outputConsole.innerHTML = data.output || 'Code executed successfully, but produced no output.';
+        
+        // Handle pygame output if available
+        if (data.pygame_output && hasPygame) {
+            if (data.pygame_output.image_data) {
+                // Create an iframe for pygame display
+                const iframeContainer = document.createElement('div');
+                iframeContainer.style.width = '100%';
+                iframeContainer.style.height = '100%';
+                iframeContainer.style.display = 'flex';
+                iframeContainer.style.justifyContent = 'center';
+                iframeContainer.style.alignItems = 'center';
+                
+                const iframe = document.createElement('iframe');
+                iframe.style.border = 'none';
+                iframe.style.width = '640px';
+                iframe.style.height = '480px';
+                iframe.src = data.pygame_output.image_data;
 
     fetch(`/api/sites/${siteId}/run`, {
         method: 'POST',
