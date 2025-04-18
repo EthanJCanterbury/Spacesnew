@@ -15,6 +15,7 @@
     "fractions",
     "os.path",
     "sys",
-    "csv"
+    "csv",
+    "turtle"
   ]
 }
