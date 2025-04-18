@@ -20,10 +20,11 @@
                     </div>
                 </div>
 
-                <div class="tabs">
+                <div class="tabs" style="overflow-x: auto; white-space: nowrap; padding-bottom: 5px;">
                     <button class="tab-btn active" onclick="openTab('stream')"><i class="fas fa-stream"></i> Stream</button>
                     <button class="tab-btn" onclick="openTab('assignments')"><i class="fas fa-tasks"></i> Assignments</button>
                     <button class="tab-btn" onclick="openTab('members')"><i class="fas fa-user-friends"></i> Members</button>
+                    <button class="tab-btn" onclick="openTab('projects')"><i class="fas fa-code"></i> Projects</button>
                     <button class="tab-btn" onclick="openTab('chat')"><i class="fas fa-comments"></i> Chat</button>
                     <button class="tab-btn" onclick="openTab('resources')"><i class="fas fa-link"></i> Resources</button>
                     <button class="tab-btn" onclick="openTab('schedule')"><i class="fas fa-calendar-alt"></i> Schedule</button>
@@ -330,6 +331,29 @@
             </div>
         </div>
 
+        <!-- Projects Tab Content -->
+        <div id="projects" class="tab-pane">
+            <div class="projects-container">
+                <div class="projects-header">
+                    <h3>Club Member Projects</h3>
+                    <div class="projects-actions">
+                        <button class="btn-secondary btn-sm" onclick="toggleFeaturedOnly()"><i class="fas fa-star"></i> <span id="featured-toggle-text">Show Featured Only</span></button>
+                        <div class="search-box">
+                            <input type="text" id="project-search" placeholder="Search projects..." onkeyup="filterProjects()">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="projects-grid" id="projects-container">
+                    <div class="loading-state">
+                        <div class="loading-spinner"></div>
+                        <p>Loading member projects...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Rewards Tab Content -->
         <div id="rewards" class="tab-pane">
             <div class="rewards-container">
@@ -4742,6 +4766,8 @@ document.addEventListener('DOMContentLoaded', function() {
             loadChatChannels();
         } else if (tabName === 'schedule') {
             loadMeetings();
+        } else if (tabName === 'projects') {
+            loadProjects();
         }
     }
 
@@ -4761,6 +4787,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadChatChannels();
             } else if (tabName === 'schedule') {
                 loadMeetings();
+            } else if (tabName === 'projects') {
+                loadProjects();
             }
         });
     });
@@ -4773,8 +4801,416 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+// Projects tab functionality
+let allProjects = [];
+let showingFeaturedOnly = false;
+let currentClubData = null;
+
+function loadProjects() {
+    const clubId = getClubId();
+    if (!clubId) return;
+    
+    const projectsContainer = document.getElementById('projects-container');
+    projectsContainer.innerHTML = `
+        <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Loading member projects...</p>
+        </div>
+    `;
+    
+    fetch(`/api/clubs/members/sites`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showToast('error', data.error);
+                projectsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <p>Error loading projects: ${data.error}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            allProjects = data.sites || [];
+            currentClubData = data.club || { id: clubId };
+            
+            // Featured status is now provided by the backend
+            displayProjects();
+        })
+        .catch(error => {
+            console.error('Error loading projects:', error);
+            projectsContainer.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <p>Failed to load projects. Please try again later.</p>
+                </div>
+            `;
+        });
+}
+
+function displayProjects() {
+    const projectsContainer = document.getElementById('projects-container');
+    const searchText = document.getElementById('project-search')?.value?.toLowerCase() || '';
+    
+    // Filter projects
+    let filteredProjects = allProjects;
+    
+    // Filter by search text
+    if (searchText) {
+        filteredProjects = filteredProjects.filter(project => 
+            project.name.toLowerCase().includes(searchText) || 
+            (project.owner && project.owner.username.toLowerCase().includes(searchText))
+        );
+    }
+    
+    // Filter by featured status
+    if (showingFeaturedOnly) {
+        filteredProjects = filteredProjects.filter(project => project.featured);
+    }
+    
+    // Check if we have projects to display
+    if (filteredProjects.length === 0) {
+        projectsContainer.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-code-branch"></i>
+                </div>
+                <p>${searchText ? 'No matching projects found' : 'No projects found'}</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Generate HTML for projects
+    let projectsHTML = '';
+    
+    filteredProjects.forEach(project => {
+        const updatedDate = project.updated_at ? new Date(project.updated_at).toLocaleDateString() : 'Unknown';
+        const projectTypeIcon = project.type === 'web' ? 'fas fa-globe' : 'fas fa-terminal';
+        const projectTypeClass = project.type || 'web';
+        
+        // Determine if user can feature/unfeature projects (only club leaders/co-leaders)
+        const canFeature = (typeof current_user !== 'undefined') && current_user.is_club_leader;
+        
+        projectsHTML += `
+            <div class="project-card ${project.featured ? 'featured' : ''}" data-project-id="${project.id}">
+                <div class="project-header">
+                    <h3>${project.name}</h3>
+                </div>
+                <div class="project-preview ${projectTypeClass}">
+                    <i class="${projectTypeIcon} fa-3x" style="opacity: 0.5;"></i>
+                </div>
+                <div class="project-content">
+                    <div class="project-meta">
+                        <span><i class="fas fa-user"></i> ${project.owner ? project.owner.username : 'Unknown'}</span>
+                        <span><i class="${projectTypeIcon}"></i> ${project.type === 'web' ? 'Web Project' : 'Python Project'}</span>
+                        <span><i class="fas fa-clock"></i> Updated: ${updatedDate}</span>
+                    </div>
+                </div>
+                <div class="project-actions">
+                    <div class="project-actions-left">
+                        <a href="/site/${project.id}" target="_blank" class="btn-primary btn-sm">View</a>
+                        <a href="/preview/${project.id}" target="_blank" class="btn-secondary btn-sm">Preview</a>
+                    </div>
+                    <div class="project-actions-right">
+                        ${canFeature ? 
+                            `<button onclick="toggleFeatured(${project.id})" class="btn-feature" title="${project.featured ? 'Unfeature Project' : 'Feature Project'}">` +
+                                `<i class="${project.featured ? 'fas' : 'far'} fa-star"></i>` +
+                                `${project.featured ? 'Featured' : 'Feature'}` +
+                            `</button>` 
+                        : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    projectsContainer.innerHTML = projectsHTML;
+}
+
+function toggleFeatured(projectId) {
+    const clubId = getClubId();
+    if (!clubId) return;
+    
+    // Find the project
+    const project = allProjects.find(p => p.id === projectId);
+    if (!project) return;
+    
+    // Set UI to loading state
+    const featureBtn = document.querySelector(`.project-card[data-project-id="${projectId}"] .btn-feature`);
+    if (featureBtn) {
+        const originalContent = featureBtn.innerHTML;
+        featureBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+        featureBtn.disabled = true;
+    }
+    
+    const method = project.featured ? 'DELETE' : 'POST';
+    
+    // Call API to toggle featured status
+    fetch(`/api/clubs/${clubId}/projects/${projectId}/feature`, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            showToast('error', data.error);
+            return;
+        }
+        
+        // Update project status
+        project.featured = data.featured;
+        
+        // Refresh display
+        displayProjects();
+        
+        showToast('success', data.message);
+    })
+    .catch(error => {
+        console.error('Error toggling featured status:', error);
+        showToast('error', 'Failed to update project status');
+        
+        // Reset button state
+        if (featureBtn) {
+            featureBtn.disabled = false;
+            featureBtn.innerHTML = `<i class="${project.featured ? 'fas' : 'far'} fa-star"></i> ${project.featured ? 'Featured' : 'Feature'}`;
+        }
+    });
+}
+
+function toggleFeaturedOnly() {
+    showingFeaturedOnly = !showingFeaturedOnly;
+    document.getElementById('featured-toggle-text').textContent = 
+        showingFeaturedOnly ? 'Show All Projects' : 'Show Featured Only';
+    displayProjects();
+}
+
+function filterProjects() {
+    displayProjects();
+}
 </script>
 <style>
+/* Custom Scrollbar Styles */
+.tabs::-webkit-scrollbar {
+    height: 8px;
+}
+
+.tabs::-webkit-scrollbar-track {
+    background: var(--lightest);
+    border-radius: 4px;
+}
+
+.tabs::-webkit-scrollbar-thumb {
+    background: var(--light-gray);
+    border-radius: 4px;
+}
+
+.tabs::-webkit-scrollbar-thumb:hover {
+    background: var(--gray);
+}
+
+/* For Firefox */
+.tabs {
+    scrollbar-width: thin;
+    scrollbar-color: var(--light-gray) var(--lightest);
+}
+
+/* Projects Tab Styles */
+.projects-container {
+    padding: 1.5rem;
+    background-color: var(--light);
+    min-height: 80vh;
+}
+
+.projects-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.projects-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.project-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.project-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.project-card.featured {
+    border: 2px solid var(--primary);
+}
+
+.project-card.featured::after {
+    content: '★';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--primary);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.project-header {
+    padding: 1.25rem 1.25rem 0.75rem;
+}
+
+.project-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--primary);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.project-preview {
+    height: 160px;
+    background-color: #f5f5f5;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    margin: 0 1.25rem;
+}
+
+.project-preview.web {
+    background-image: linear-gradient(135deg, #e6f7ff, #b3e0ff);
+}
+
+.project-preview.python {
+    background-image: linear-gradient(135deg, #e6ffee, #b3ffd9);
+}
+
+.project-content {
+    padding: 1rem 1.25rem;
+    flex-grow: 1;
+}
+
+.project-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.project-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.project-meta i {
+    width: 1rem;
+    text-align: center;
+    color: var(--primary);
+}
+
+.project-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    background-color: #f8f9fa;
+    border-top: 1px solid #edf2f7;
+    margin-top: auto;
+}
+
+.project-actions-left, .project-actions-right {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.search-box {
+    position: relative;
+    width: 250px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
+}
+
+.search-box i {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+}
+
+.btn-feature {
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
+    background: transparent;
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.btn-feature:hover {
+    background: #fff8eb;
+}
+
+.btn-feature i {
+    font-size: 0.9rem;
+}
+
+/* Existing styles */
 .post-menu {
     position: absolute;
     right: 0;

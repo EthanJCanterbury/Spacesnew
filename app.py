@@ -12,7 +12,7 @@ from functools import wraps
 from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, flash, request, jsonify, url_for, abort, session, Response
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from models import db, User, Site, SitePage, UserActivity, Club, ClubMembership
+from models import db, User, Site, SitePage, UserActivity, Club, ClubMembership, ClubFeaturedProject
 
 
 def slugify(text):
@@ -5031,17 +5031,29 @@ def manage_club_meeting(club_id, meeting_id):
 def get_member_sites():
     """Get all sites from members of the current user's club."""
     try:
-        # Check if the user is a club leader or co-leader
-        club = Club.query.filter_by(leader_id=current_user.id).first()
-        if not club:
-            # Check if they are a co-leader
+        # Check if the user is a club leader, co-leader, or member
+        club_id = request.args.get('club_id')
+        if club_id:
+            # If club_id is provided, check if user is a member of that club
             membership = ClubMembership.query.filter_by(
-                user_id=current_user.id, role='co-leader').first()
+                user_id=current_user.id, club_id=club_id).first()
             if not membership:
-                return jsonify(
-                    {'error':
-                     'Only club leaders can access member sites'}), 403
-            club = membership.club
+                return jsonify({'error': 'Not a member of this club'}), 403
+            club = Club.query.get(club_id)
+        else:
+            # Otherwise get user's club (if leader)
+            club = Club.query.filter_by(leader_id=current_user.id).first()
+            if not club:
+                # Check if they are a co-leader
+                membership = ClubMembership.query.filter_by(
+                    user_id=current_user.id, role='co-leader').first()
+                if not membership:
+                    # Check if they are a member
+                    membership = ClubMembership.query.filter_by(
+                        user_id=current_user.id).first()
+                    if not membership:
+                        return jsonify({'error': 'No club membership found'}), 404
+                club = membership.club
 
         app.logger.info(f"Getting sites for club {club.id} ({club.name})")
 
@@ -5076,6 +5088,13 @@ def get_member_sites():
                 app.logger.info(
                     f"Site found: {site.id} - {site.name} (Owner: {site.user_id})"
                 )
+                
+            # Get all featured projects for this club
+            featured_projects = ClubFeaturedProject.query.filter_by(
+                club_id=club.id).all()
+            featured_site_ids = [fp.site_id for fp in featured_projects]
+            app.logger.info(f"Found {len(featured_site_ids)} featured projects")
+            
         except Exception as query_error:
             app.logger.error(f"Error querying sites: {str(query_error)}")
             return jsonify({'error':
@@ -5093,14 +5112,11 @@ def get_member_sites():
                     continue
 
                 site_data = {
-                    'id':
-                    site.id,
-                    'name':
-                    site.name,
-                    'type':
-                    site.site_type,
-                    'updated_at':
-                    site.updated_at.isoformat() if site.updated_at else None,
+                    'id': site.id,
+                    'name': site.name,
+                    'type': site.site_type,
+                    'updated_at': site.updated_at.isoformat() if site.updated_at else None,
+                    'featured': site.id in featured_site_ids,
                     'owner': {
                         'id': user.id,
                         'username': user.username
@@ -5113,10 +5129,99 @@ def get_member_sites():
                 # Continue with other sites instead of failing completely
 
         app.logger.info(f"Returning {len(result)} formatted sites")
-        return jsonify({'sites': result})
+        return jsonify({'sites': result, 'club': {'id': club.id, 'name': club.name}})
     except Exception as e:
         app.logger.error(f'Error getting member sites: {str(e)}')
         return jsonify({'error': f'Failed to get member sites: {str(e)}'}), 500
+        
+
+@app.route('/api/clubs/<int:club_id>/projects/<int:site_id>/feature', methods=['POST'])
+@login_required
+def feature_project(club_id, site_id):
+    """Feature a project within a club."""
+    try:
+        # Verify club exists
+        club = Club.query.get_or_404(club_id)
+        
+        # Check if user is a club leader or co-leader
+        is_leader = club.leader_id == current_user.id
+        is_coleader = ClubMembership.query.filter_by(
+            user_id=current_user.id, club_id=club_id, role='co-leader').first() is not None
+            
+        if not (is_leader or is_coleader):
+            return jsonify({'error': 'Only club leaders can feature projects'}), 403
+            
+        # Verify site exists and belongs to a club member
+        site = Site.query.get_or_404(site_id)
+        
+        # Check if site owner is club member
+        is_member = ClubMembership.query.filter_by(
+            user_id=site.user_id, club_id=club_id).first() is not None
+            
+        if not is_member:
+            return jsonify({'error': 'This project does not belong to a club member'}), 400
+            
+        # Check if project is already featured
+        existing = ClubFeaturedProject.query.filter_by(
+            club_id=club_id, site_id=site_id).first()
+            
+        if existing:
+            return jsonify({'message': 'Project is already featured', 'featured': True})
+            
+        # Add to featured projects
+        featured_project = ClubFeaturedProject(
+            club_id=club_id,
+            site_id=site_id,
+            featured_by=current_user.id
+        )
+        
+        db.session.add(featured_project)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Project featured successfully',
+            'featured': True,
+            'featured_at': featured_project.featured_at.isoformat()
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error featuring project: {str(e)}')
+        return jsonify({'error': f'Failed to feature project: {str(e)}'}), 500
+        
+
+@app.route('/api/clubs/<int:club_id>/projects/<int:site_id>/feature', methods=['DELETE'])
+@login_required
+def unfeature_project(club_id, site_id):
+    """Remove a project from featured status within a club."""
+    try:
+        # Verify club exists
+        club = Club.query.get_or_404(club_id)
+        
+        # Check if user is a club leader or co-leader
+        is_leader = club.leader_id == current_user.id
+        is_coleader = ClubMembership.query.filter_by(
+            user_id=current_user.id, club_id=club_id, role='co-leader').first() is not None
+            
+        if not (is_leader or is_coleader):
+            return jsonify({'error': 'Only club leaders can unfeature projects'}), 403
+            
+        # Find and delete the featured project
+        featured_project = ClubFeaturedProject.query.filter_by(
+            club_id=club_id, site_id=site_id).first()
+            
+        if not featured_project:
+            return jsonify({'message': 'Project is not featured', 'featured': False})
+            
+        db.session.delete(featured_project)
+        db.session.commit()
+        
+        return jsonify({'message': 'Project unfeatured successfully', 'featured': False})
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error unfeaturing project: {str(e)}')
+        return jsonify({'error': f'Failed to unfeature project: {str(e)}'}), 500
 
 
 def initialize_database():

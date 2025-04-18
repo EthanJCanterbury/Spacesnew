@@ -337,3 +337,21 @@ class SitePage(db.Model):
 
     def __repr__(self):
         return f'<SitePage {self.filename} for Site {self.site_id}>'
+
+
+class ClubFeaturedProject(db.Model):
+    __tablename__ = 'club_featured_project'
+    id = db.Column(db.Integer, primary_key=True)
+    club_id = db.Column(db.Integer, db.ForeignKey('club.id', ondelete='CASCADE'), nullable=False)
+    site_id = db.Column(db.Integer, db.ForeignKey('site.id', ondelete='CASCADE'), nullable=False)
+    featured_at = db.Column(db.DateTime, default=datetime.utcnow)
+    featured_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    club = db.relationship('Club', backref=db.backref('featured_projects', lazy=True, cascade='all, delete-orphan'))
+    site = db.relationship('Site', backref=db.backref('featured_in', lazy=True))
+    user = db.relationship('User', backref=db.backref('featured_projects', lazy=True))
+    
+    __table_args__ = (db.UniqueConstraint('club_id', 'site_id', name='uix_club_site_featured'),)
+    
+    def __repr__(self):
+        return f'<ClubFeaturedProject {self.site_id} in club {self.club_id}>'
