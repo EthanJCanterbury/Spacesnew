@@ -180,37 +180,17 @@ function showToast(type, message) {
             </div>
         </div>
         <div class="preview-pane">
-            <div class="output-tabs">
-                <button class="output-tab active" data-target="console">Console</button>
-                <button class="output-tab" data-target="pygame">Pygame</button>
-            </div>
-            <div class="output-panel" id="console-panel">
-                <div class="console-frame">
-                    <div class="console-header">
-                        <div class="console-title">
-                            <i class="fas fa-terminal"></i>
-                            Output Console
-                        </div>
-                        <button id="clearConsoleBtn" class="btn-icon" title="Clear Console" onclick="clearPythonConsole()">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
+            <div class="console-frame">
+                <div class="console-header">
+                    <div class="console-title">
+                        <i class="fas fa-terminal"></i>
+                        Output Console
                     </div>
-                    <pre id="pythonOutput" class="console-output">Run your code to see the output here!</pre>
+                    <button id="clearConsoleBtn" class="btn-icon" title="Clear Console" onclick="clearPythonConsole()">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
                 </div>
-            </div>
-            <div class="output-panel" id="pygame-panel" style="display: none;">
-                <div class="pygame-frame">
-                    <div class="pygame-header">
-                        <div class="pygame-title">
-                            <i class="fas fa-gamepad"></i>
-                            Pygame Output
-                        </div>
-                    </div>
-                    <div class="pygame-container">
-                        <canvas id="pygameCanvas" width="640" height="480"></canvas>
-                        <div id="pygameMessage">Run your Pygame code to see the output here!</div>
-                    </div>
-                </div>
+                <pre id="pythonOutput" class="console-output">Run your code to see the output here!</pre>
             </div>
         </div>
     </div>
