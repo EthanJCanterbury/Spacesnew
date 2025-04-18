@@ -1412,7 +1412,7 @@ def apps():
 
 
 @app.route('/run_python', methods=['POST'])
-def run_python():
+def run_python_with_pygame():
     """Execute Python code with support for pygame"""
     if not current_user.is_authenticated:
         return jsonify({'error': 'Authentication required'}), 401
