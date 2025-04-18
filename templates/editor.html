@@ -774,8 +774,56 @@ a:hover {
             </div>
 
             <div class="tutorial-step" data-step="9" style="display: none;">
-                <h3 style="color: #4e54c8; margin-top: 0;">Part III: Publishing Your Site</h3>
-                <p>Now that you've created your website, it's time to share it with the world!</p>
+                <h3 style="color: #4e54c8; margin-top: 0;">Part III: Connecting GitHub</h3>
+                <p>Before publishing your site, you'll need to connect it to GitHub. This is <strong>required</strong> for YSWS applications (Boba Drops and Swirl)!</p>
+
+                <div style="margin: 15px 0; background: #f8f9fa; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <h4 style="margin-top: 0;">Why GitHub is Important:</h4>
+                    <ul style="padding-left: 20px; line-height: 1.6;">
+                        <li>Tracks your code changes and history</li>
+                        <li>Required for YSWS applications (Boba Drops & Swirl)</li>
+                        <li>Industry-standard tool used by professional developers</li>
+                        <li>Makes collaboration with others possible</li>
+                    </ul>
+                </div>
+                
+                <div style="margin: 15px 0; background: #f8f9fa; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <h4 style="margin-top: 0;">Connecting to GitHub:</h4>
+                    <ol style="padding-left: 20px; line-height: 1.6;">
+                        <li>Click the <strong>"Git"</strong> button in the editor toolbar</li>
+                        <li>Click <strong>"Link GitHub Account"</strong> and authorize Hack Club Spaces</li>
+                        <li>After connecting, you'll need to create a repository:
+                            <ul style="padding-left: 20px; margin-top: 5px;">
+                                <li>Enter a name for your repository (e.g., "my-personal-website")</li>
+                                <li>Optionally add a description</li>
+                                <li>Choose whether it should be public or private</li>
+                                <li>Click <strong>"Create Repository"</strong></li>
+                            </ul>
+                        </li>
+                        <li>Your site will automatically push its initial files to GitHub</li>
+                    </ol>
+                </div>
+
+                <div style="margin: 15px 0; background: #f8f9fa; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <h4 style="margin-top: 0;">Pushing Changes:</h4>
+                    <ol style="padding-left: 20px; line-height: 1.6;">
+                        <li>After making changes to your site, click the <strong>"Git"</strong> button again</li>
+                        <li>Enter a message describing your changes (e.g., "Update homepage design")</li>
+                        <li>Click <strong>"Push Changes"</strong> to update your GitHub repository</li>
+                        <li>Make sure to push your latest changes before applying for YSWS!</li>
+                    </ol>
+                </div>
+                
+                <div style="margin: 15px 0; text-align: center;">
+                    <img src="https://cloud-4zpw37atj-hack-club-bot.vercel.app/0github_tutorial.png" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" alt="GitHub integration screenshot">
+                </div>
+                
+                <p><strong>Remember:</strong> Both Boba Drops and Swirl require your code to be on GitHub. The reviewers will check your repository to verify your work!</p>
+            </div>
+
+            <div class="tutorial-step" data-step="10" style="display: none;">
+                <h3 style="color: #4e54c8; margin-top: 0;">Part IV: Publishing Your Site</h3>
+                <p>Now that you've created your website and connected GitHub, it's time to share it with the world!</p>
 
                 <div style="margin: 15px 0; background: #f8f9fa; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                     <h4 style="margin-top: 0;">Deploying with Hack Club Spaces:</h4>
@@ -795,7 +843,7 @@ a:hover {
                 <p><i>For a limited time: <a href="https://hack.club/boba" target="_blank">get a free bubble tea</a> after your site deploys!</i></p>
             </div>
 
-            <div class="tutorial-step" data-step="10" style="display: none;">
+            <div class="tutorial-step" data-step="11" style="display: none;">
                 <h3 style="color: #4e54c8; margin-top: 0;">Next Steps & Resources</h3>
                 <p>Congratulations on creating your personal website! Here are some ways to take it further:</p>
 
@@ -1031,7 +1079,7 @@ window.closeTutorialModal = function() {
 };
 
 let currentTutorialStep = 1;
-const totalTutorialSteps = 10;
+const totalTutorialSteps = 11;
 
 window.nextTutorialStep = function() {
     if (currentTutorialStep < totalTutorialSteps) {
