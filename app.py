@@ -1408,8 +1408,6 @@ def gallery_submit():
 def apps():
     return render_template('apps.html')
 
-            00
-
 
 def admin_required(f):
 
