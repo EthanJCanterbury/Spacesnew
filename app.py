@@ -1406,7 +1406,7 @@ def gallery_submit():
 
 @app.route('/apps')
 def apps():
-    return render_template('apps.html')'')
+    return render_template('apps.html')
 
             00
 
