@@ -47,20 +47,8 @@
                 </li>
                 <li>
                     <a href="#clubs" class="nav-link" data-section="clubs">
-                        <i class="fas fa-users-cog"></i>
+                        <i class="fas fa-users"></i>
                         <span>Clubs</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#security" class="nav-link" data-section="security">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>Security</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#maintenance" class="nav-link" data-section="maintenance">
-                        <i class="fas fa-tools"></i>
-                        <span>Maintenance</span>
                     </a>
                 </li>
                 <li>
@@ -76,26 +64,17 @@
             <div class="sidebar-collapse-btn" id="sidebarCollapseBtn">
                 <i class="fas fa-chevron-left"></i>
             </div>
-            <div class="admin-actions">
-                <a href="/logout" class="logout-link">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
-                </a>
-                <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">
-                    <i class="fas fa-moon"></i>
-                </button>
-            </div>
+            <a href="/logout" class="logout-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
         </div>
     </div>
 
     <div class="admin-content">
         <div class="admin-header">
-            <h1><i class="fas fa-shield-alt"></i> Hack Club HQ | Admin Panel</h1>
+            <h1><i class="fas fa-shield-alt"></i> Hack Club HQ | Panel for Spaces Admins</h1>
             <div class="header-actions">
-                <div class="last-refresh">
-                    <span>Last updated: </span>
-                    <span id="lastRefreshTime">Just now</span>
-                </div>
                 <button class="btn-primary email-btn" onclick="emailAllUsers()">
                     <i class="fas fa-envelope"></i> Email All Users
                 </button>
@@ -108,17 +87,12 @@
         <section id="dashboard" class="admin-section active">
             <div class="section-header">
                 <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
-                <p>Real-time overview of Hack Club Spaces performance and statistics</p>
-                <div class="time-filter">
-                    <button class="time-btn active" data-time="day">24h</button>
-                    <button class="time-btn" data-time="week">Week</button>
-                    <button class="time-btn" data-time="month">Month</button>
-                    <button class="time-btn" data-time="all">All Time</button>
-                </div>
+                <p>Overview of Hack Club Space's performance and statistics YAY!!!</p>
+                <p>This is a very early version of this dash since I like just made it. ~ Ethan</p>
             </div>
 
             <div class="dashboard-stats">
-                <div class="stats-row">
+                <div class="stats-wrapper">
                     <div class="stat-card">
                         <div class="stat-icon user-icon">
                             <i class="fas fa-users"></i>
@@ -126,24 +100,16 @@
                         <div class="stat-info">
                             <h3 id="totalUsers">Loading...</h3>
                             <p>Total Users</p>
-                            <div class="stat-trend positive">
-                                <i class="fas fa-arrow-up"></i>
-                                <span id="userTrend">5%</span> since last week
-                            </div>
                         </div>
                     </div>
 
                     <div class="stat-card">
-                        <div class="stat-icon site-icon">
+                        <div class="stat-icon user-icon">
                             <i class="fas fa-globe"></i>
                         </div>
                         <div class="stat-info">
                             <h3 id="totalSites">Loading...</h3>
                             <p>Total Sites</p>
-                            <div class="stat-trend positive">
-                                <i class="fas fa-arrow-up"></i>
-                                <span id="siteTrend">8%</span> since last week
-                            </div>
                         </div>
                     </div>
 
@@ -154,114 +120,15 @@
                         <div class="stat-info">
                             <h3 id="adminCount">Loading...</h3>
                             <p>Admins</p>
-                            <div class="stat-trend neutral">
-                                <i class="fas fa-minus"></i>
-                                <span>No change</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon visit-icon">
-                            <i class="fas fa-eye"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="totalVisits">Loading...</h3>
-                            <p>Site Visits</p>
-                            <div class="stat-trend positive">
-                                <i class="fas fa-arrow-up"></i>
-                                <span id="visitTrend">12%</span> since last week
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="stats-row">
-                    <div class="stat-card">
-                        <div class="stat-icon club-icon">
-                            <i class="fas fa-users-cog"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="totalClubs">Loading...</h3>
-                            <p>Active Clubs</p>
-                            <div class="stat-trend positive">
-                                <i class="fas fa-arrow-up"></i>
-                                <span id="clubTrend">3%</span> since last week
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon new-users-icon">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="newUsers">Loading...</h3>
-                            <p>New Users Today</p>
-                            <div class="stat-trend positive">
-                                <i class="fas fa-arrow-up"></i>
-                                <span id="newUserTrend">15%</span> since yesterday
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon active-icon">
-                            <i class="fas fa-bolt"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="activeUsers">Loading...</h3>
-                            <p>Active Users</p>
-                            <div class="stat-trend positive">
-                                <i class="fas fa-arrow-up"></i>
-                                <span id="activeUserTrend">7%</span> since last week
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon deploy-icon">
-                            <i class="fas fa-rocket"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="totalDeploys">Loading...</h3>
-                            <p>Deployments Today</p>
-                            <div class="stat-trend positive">
-                                <i class="fas fa-arrow-up"></i>
-                                <span id="deployTrend">10%</span> since yesterday
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="dashboard-row">
-                <div class="dashboard-card user-growth-chart">
-                    <div class="card-header">
-                        <h3><i class="fas fa-chart-line"></i> User Growth</h3>
-                        <div class="card-actions">
-                            <button class="btn-icon" onclick="exportChart('userGrowth')"><i class="fas fa-download"></i></button>
-                            <button class="btn-icon" onclick="toggleChartView('userGrowth')"><i class="fas fa-expand"></i></button>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="userGrowthChart"></canvas>
-                    </div>
-                </div>
-
                 <div class="dashboard-card recent-activity">
                     <div class="card-header">
                         <h3><i class="fas fa-history"></i> Recent Activity</h3>
-                        <div class="card-actions">
-                            <button class="btn-icon" onclick="loadVisitData()"><i class="fas fa-sync-alt"></i></button>
-                            <select id="activityFilter" onchange="filterActivityList()">
-                                <option value="all">All Activities</option>
-                                <option value="user_registration">Registrations</option>
-                                <option value="site_creation">Site Creation</option>
-                                <option value="user_login">Logins</option>
-                                <option value="admin_action">Admin Actions</option>
-                            </select>
-                        </div>
                     </div>
                     <div class="card-content">
                         <ul class="activity-list" id="recentActivitiesList">
@@ -272,110 +139,27 @@
                         </ul>
                     </div>
                 </div>
-            </div>
-
-            <div class="dashboard-row">
-                <div class="dashboard-card quick-actions">
-                    <div class="card-header">
-                        <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
-                    </div>
-                    <div class="quick-actions-grid">
-                        <button class="quick-action-btn" onclick="location.href='#users'">
-                            <i class="fas fa-user-plus"></i>
-                            <span>Manage Users</span>
-                        </button>
-                        <button class="quick-action-btn" onclick="backupDatabase()">
-                            <i class="fas fa-database"></i>
-                            <span>Backup Database</span>
-                        </button>
-                        <button class="quick-action-btn" onclick="clearCache()">
-                            <i class="fas fa-broom"></i>
-                            <span>Clear Cache</span>
-                        </button>
-                        <button class="quick-action-btn" onclick="location.href='#security'">
-                            <i class="fas fa-shield-alt"></i>
-                            <span>Security Scan</span>
-                        </button>
-                        <button class="quick-action-btn" onclick="location.href='#maintenance'">
-                            <i class="fas fa-tools"></i>
-                            <span>Maintenance</span>
-                        </button>
-                        <button class="quick-action-btn" onclick="viewSystemLogs()">
-                            <i class="fas fa-file-alt"></i>
-                            <span>System Logs</span>
-                        </button>
-                    </div>
-                </div>
 
                 <div class="dashboard-card system-status">
                     <div class="card-header">
                         <h3><i class="fas fa-server"></i> System Status</h3>
-                        <div class="card-actions">
-                            <button class="btn-icon" onclick="refreshSystemStatus()"><i class="fas fa-sync-alt"></i></button>
-                        </div>
                     </div>
                     <div class="card-content">
-                        <div class="status-grid">
-                            <div class="status-item">
-                                <div class="status-icon">
-                                    <i class="fas fa-server"></i>
-                                </div>
-                                <div class="status-details">
-                                    <span class="status-label">Server Status</span>
-                                    <span id="serverStatus" class="status-value">Checking... <i class="fas fa-spinner fa-spin"></i></span>
-                                </div>
-                                <div class="status-indicator" id="serverIndicator"></div>
-                            </div>
-                            <div class="status-item">
-                                <div class="status-icon">
-                                    <i class="fas fa-database"></i>
-                                </div>
-                                <div class="status-details">
-                                    <span class="status-label">Database</span>
-                                    <span id="databaseStatus" class="status-value">Checking... <i class="fas fa-spinner fa-spin"></i></span>
-                                </div>
-                                <div class="status-indicator" id="databaseIndicator"></div>
-                            </div>
-                            <div class="status-item">
-                                <div class="status-icon">
-                                    <i class="fas fa-save"></i>
-                                </div>
-                                <div class="status-details">
-                                    <span class="status-label">Last Backup</span>
-                                    <span id="lastBackup" class="status-value">Checking... <i class="fas fa-spinner fa-spin"></i></span>
-                                </div>
-                                <div class="status-indicator" id="backupIndicator"></div>
-                            </div>
-                            <div class="status-item">
-                                <div class="status-icon">
-                                    <i class="fas fa-code-branch"></i>
-                                </div>
-                                <div class="status-details">
-                                    <span class="status-label">Version</span>
-                                    <span class="status-value">{{ version }}</span>
-                                </div>
-                                <div class="status-indicator healthy"></div>
-                            </div>
-                            <div class="status-item">
-                                <div class="status-icon">
-                                    <i class="fas fa-memory"></i>
-                                </div>
-                                <div class="status-details">
-                                    <span class="status-label">Memory Usage</span>
-                                    <span id="memoryUsage" class="status-value">Checking... <i class="fas fa-spinner fa-spin"></i></span>
-                                </div>
-                                <div class="status-indicator" id="memoryIndicator"></div>
-                            </div>
-                            <div class="status-item">
-                                <div class="status-icon">
-                                    <i class="fas fa-microchip"></i>
-                                </div>
-                                <div class="status-details">
-                                    <span class="status-label">CPU Load</span>
-                                    <span id="cpuLoad" class="status-value">Checking... <i class="fas fa-spinner fa-spin"></i></span>
-                                </div>
-                                <div class="status-indicator" id="cpuIndicator"></div>
-                            </div>
+                        <div class="status-item">
+                            <span class="status-label">Server Status</span>
+                            <span id="serverStatus" class="status-value">Checking... <i class="fas fa-spinner fa-spin"></i></span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Database</span>
+                            <span id="databaseStatus" class="status-value">Checking... <i class="fas fa-spinner fa-spin"></i></span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Last Backup</span>
+                            <span id="lastBackup" class="status-value">Checking... <i class="fas fa-spinner fa-spin"></i></span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Version</span>
+                            <span class="status-value">{{ version }}</span>
                         </div>
                     </div>
                 </div>
@@ -385,38 +169,8 @@
         <section id="users" class="admin-section">
             <div class="section-header">
                 <h2><i class="fas fa-users"></i> Users Management</h2>
-                <p>View and manage user accounts</p>
-                <div class="section-controls">
-                    <div class="control-group">
-                        <label for="userStatusFilter">Status:</label>
-                        <select id="userStatusFilter" onchange="applyUserFilters()">
-                            <option value="all">All Users</option>
-                            <option value="active">Active</option>
-                            <option value="suspended">Suspended</option>
-                            <option value="club-leaders">Club Leaders</option>
-                            <option value="admins">Admins</option>
-                        </select>
-                    </div>
-                    <div class="control-group">
-                        <label for="userSortOrder">Sort by:</label>
-                        <select id="userSortOrder" onchange="applyUserFilters()">
-                            <option value="newest">Newest First</option>
-                            <option value="oldest">Oldest First</option>
-                            <option value="username">Username (A-Z)</option>
-                            <option value="sites">Most Sites</option>
-                            <option value="logins">Most Active</option>
-                        </select>
-                    </div>
-                    <div class="control-group">
-                        <label for="userPerPage">Show:</label>
-                        <select id="userPerPage" onchange="applyUserFilters()">
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-                    </div>
-                </div>
+                <p>View and manage user accounts (showing first 10 users)</p>
+                <p class="text-muted">Use the search box below to find specific users</p>
             </div>
 
             <div class="section-actions">
@@ -465,12 +219,7 @@
                                 {% endif %}
                             </td>
                             <td>{{ user.id }}</td>
-                            <td class="user-info-cell">
-                                <div class="user-avatar-mini">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                                <span>{{ user.username }}</span>
-                            </td>
+                            <td>{{ user.username }}</td>
                             <td>{{ user.email }}</td>
                             <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                             <td>
@@ -480,37 +229,31 @@
                                 <span class="status-badge club-leader" id="club-leader-badge-{{ user.id }}" style="display: {% if Club.query.filter_by(leader_id=user.id).first() %}inline-block{% else %}none{% endif %}">
                                     Club Leader
                                 </span>
-                                {% if user.is_admin %}
-                                <span class="status-badge admin">
-                                    Admin
-                                </span>
-                                {% endif %}
                             </td>
                             <td class="actions-cell">
-                                <div class="action-buttons">
-                                    <button onclick="viewUserDetails({{ user.id }})" class="btn-icon btn-view" title="View Details">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    
-                                    <button class="btn-icon btn-more" title="More Actions">
+                                <div class="action-dropdown">
+                                    <button class="action-dropdown-btn">
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
-                                    
-                                    <div class="context-menu">
+                                    <div class="action-dropdown-content">
+                                        <button onclick="viewUserDetails({{ user.id }})" class="dropdown-item">
+                                            <i class="fas fa-eye"></i>
+                                            <span>View Details</span>
+                                        </button>
                                         {% if user.id != current_user.id %}
-                                        <button onclick="toggleSuspension({{ user.id }}, '{{ user.username }}', {{ 'false' if user.is_suspended else 'true' }})" class="context-item">
+                                        <button onclick="toggleSuspension({{ user.id }}, '{{ user.username }}', {{ 'false' if user.is_suspended else 'true' }})" class="dropdown-item">
                                             <i class="fas fa-{{ 'user-check' if user.is_suspended else 'user-lock' }}"></i>
                                             <span>{{ 'Unsuspend' if user.is_suspended else 'Suspend' }}</span>
                                         </button>
-                                        <button class="context-item" onclick="toggleClubLeader({{ user.id }}, '{{ user.username }}', {{ 'true' if Club.query.filter_by(leader_id=user.id).first() else 'false' }})">
+                                        <button class="dropdown-item" onclick="toggleClubLeader({{ user.id }}, '{{ user.username }}', {{ 'true' if Club.query.filter_by(leader_id=user.id).first() else 'false' }})">
                                             <i class="fas fa-user-tag"></i>
                                             <span>{{ 'Remove Club Leader Role' if Club.query.filter_by(leader_id=user.id).first() else 'Grant Club Leader Role' }}</span>
                                         </button>
-                                        <button onclick="deleteAllSites({{ user.id }}, '{{ user.username }}')" class="context-item">
+                                        <button onclick="deleteAllSites({{ user.id }}, '{{ user.username }}')" class="dropdown-item">
                                             <i class="fas fa-trash-alt"></i>
                                             <span>Delete All Sites</span>
                                         </button>
-                                        <button onclick="deleteUser({{ user.id }}, '{{ user.username }}')" class="context-item text-danger">
+                                        <button onclick="deleteUser({{ user.id }}, '{{ user.username }}')" class="dropdown-item text-danger">
                                             <i class="fas fa-trash-alt"></i>
                                             <span>Delete User</span>
                                         </button>
@@ -524,57 +267,22 @@
                 </table>
             </div>
 
-            <div class="pagination-controls">
-                <div class="pagination-info">
-                    Showing <span id="userRangeStart">1</span>-<span id="userRangeEnd">10</span> of <span id="userTotal">100</span> users
-                </div>
-                <div class="pagination">
-                    <button class="btn-page" id="prevPage" onclick="changePage('prev')"><i class="fas fa-chevron-left"></i></button>
-                    <div id="pageNumbers" class="page-numbers">
-                        <button class="btn-page active">1</button>
-                        <button class="btn-page">2</button>
-                        <button class="btn-page">3</button>
-                        <span class="pagination-ellipsis">...</span>
-                        <button class="btn-page">10</button>
-                    </div>
-                    <button class="btn-page" id="nextPage" onclick="changePage('next')"><i class="fas fa-chevron-right"></i></button>
-                </div>
+            <div class="pagination">
+                <button class="btn-page"><i class="fas fa-chevron-left"></i></button>
+                <button class="btn-page active">1</button>
+                <button class="btn-page">2</button>
+                <button class="btn-page">3</button>
+                <span class="pagination-ellipsis">...</span>
+                <button class="btn-page">10</button>
+                <button class="btn-page"><i class="fas fa-chevron-right"></i></button>
             </div>
         </section>
 
         <section id="sites" class="admin-section">
             <div class="section-header">
                 <h2><i class="fas fa-globe"></i> Sites Management</h2>
-                <p>Monitor and manage all user sites across the platform</p>
-                <div class="section-controls">
-                    <div class="control-group">
-                        <label for="siteTypeFilter">Type:</label>
-                        <select id="siteTypeFilter" onchange="applySiteFilters()">
-                            <option value="all">All Types</option>
-                            <option value="web">Web</option>
-                            <option value="python">Python</option>
-                        </select>
-                    </div>
-                    <div class="control-group">
-                        <label for="siteSortOrder">Sort by:</label>
-                        <select id="siteSortOrder" onchange="applySiteFilters()">
-                            <option value="newest">Newest First</option>
-                            <option value="oldest">Oldest First</option>
-                            <option value="updated">Recently Updated</option>
-                            <option value="views">Most Viewed</option>
-                            <option value="name">Name (A-Z)</option>
-                        </select>
-                    </div>
-                    <div class="control-group">
-                        <label for="sitePerPage">Show:</label>
-                        <select id="sitePerPage" onchange="applySiteFilters()">
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-                    </div>
-                </div>
+                <p>Monitor sites created by users (showing first 10 sites)</p>
+                <p class="text-muted">Use the search box below to find specific sites</p>
             </div>
 
             <div class="section-actions">
@@ -585,128 +293,74 @@
 
                 <div class="filter-dropdown">
                     <button class="btn-secondary filter-btn">
-                        <i class="fas fa-filter"></i> Advanced Filters
+                        <i class="fas fa-filter"></i> Filter
+                        <i class="fas fa-chevron-down"></i>
                     </button>
                     <div class="filter-menu">
-                        <div class="filter-group">
-                            <h4>Site Type</h4>
-                            <div class="filter-option">
-                                <input type="checkbox" id="filterWeb" checked>
-                                <label for="filterWeb">Web Sites</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="filterPython" checked>
-                                <label for="filterPython">Python Sites</label>
-                            </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="filterWeb" checked>
+                            <label for="filterWeb">Web Sites</label>
                         </div>
-                        <div class="filter-group">
-                            <h4>Activity</h4>
-                            <div class="filter-option">
-                                <input type="checkbox" id="filterRecent">
-                                <label for="filterRecent">Updated in last 7 days</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="filterPopular">
-                                <label for="filterPopular">Popular (>100 views)</label>
-                            </div>
-                            <div class="filter-option">
-                                <input type="checkbox" id="filterFeatured">
-                                <label for="filterFeatured">Featured in gallery</label>
-                            </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="filterPython" checked>
+                            <label for="filterPython">Python Sites</label>
                         </div>
-                        <div class="filter-actions">
-                            <button class="btn-secondary" onclick="resetSiteFilters()">Reset</button>
-                            <button class="btn-primary" onclick="applySiteFilters()">Apply Filters</button>
+                        <div class="filter-option">
+                            <input type="checkbox" id="filterRecent">
+                            <label for="filterRecent">Recently Updated</label>
                         </div>
                     </div>
                 </div>
-                
-                <button class="btn-success" onclick="bulkExportSites()">
-                    <i class="fas fa-file-export"></i> Export Data
-                </button>
             </div>
 
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>
-                                <input type="checkbox" id="selectAllSites" onchange="toggleSelectAllSites()">
-                            </th>
                             <th>ID</th>
                             <th>Name</th>
                             <th>Owner</th>
                             <th>Type</th>
-                            <th>Created</th>
-                            <th>Updated</th>
-                            <th>Views</th>
+                            <th>Created At</th>
+                            <th>Last Updated</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="siteTableBody">
                         {% for site in sites %}
                         <tr>
-                            <td>
-                                <input type="checkbox" class="site-select" data-siteid="{{ site.id }}" data-sitename="{{ site.name }}">
-                            </td>
                             <td>{{ site.id }}</td>
                             <td>
                                 <div class="site-name">
                                     <span class="site-icon">
                                         <i class="fas fa-{{ 'globe' if site.site_type == 'web' else 'code' }}"></i>
                                     </span>
-                                    <a href="/s/{{ site.slug }}" target="_blank" class="site-link">{{ site.name }}</a>
+                                    {{ site.name }}
                                 </div>
                             </td>
-                            <td>
-                                <a href="#" onclick="quickFilterByUser('{{ site.username }}')" class="user-link">{{ site.username }}</a>
-                            </td>
+                            <td>{{ site.username }}</td>
                             <td>
                                 <span class="type-badge {{ site.site_type }}">
                                     {{ site.site_type|capitalize }}
                                 </span>
                             </td>
-                            <td data-date="{{ site.created_at.isoformat() }}">{{ site.created_at.strftime('%Y-%m-%d') }}</td>
-                            <td data-date="{{ site.updated_at.isoformat() }}">{{ site.updated_at.strftime('%Y-%m-%d %H:%M') }}</td>
-                            <td class="view-count">{{ site.view_count if site.view_count else 0 }}</td>
+                            <td>{{ site.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ site.updated_at.strftime('%Y-%m-%d %H:%M') }}</td>
                             <td class="actions-cell">
-                                <div class="action-buttons">
-                                    <a href="/s/{{ site.slug }}" target="_blank" class="btn-icon btn-view" title="View Site">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="/edit/{{ site.id }}" class="btn-icon btn-edit" title="Edit Site">
-                                        <i class="fas fa-pencil-alt"></i>
-                                    </a>
-                                    <button class="btn-icon btn-more" title="More Actions">
+                                <div class="action-dropdown">
+                                    <button class="action-dropdown-btn">
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
-                                    
-                                    <div class="context-menu">
-                                        <a href="/s/{{ site.slug }}" target="_blank" class="context-item">
+                                    <div class="action-dropdown-content">
+                                        <a href="/s/{{ site.slug }}" target="_blank" class="dropdown-item">
                                             <i class="fas fa-eye"></i>
                                             <span>View Site</span>
                                         </a>
-                                        <a href="/edit/{{ site.id }}" class="context-item">
+                                        <a href="/edit/{{ site.id }}" class="dropdown-item">
                                             <i class="fas fa-pencil-alt"></i>
                                             <span>Edit Site</span>
                                         </a>
-                                        <button onclick="featureSiteInGallery({{ site.id }}, '{{ site.name }}')" class="context-item">
-                                            <i class="fas fa-star"></i>
-                                            <span>Feature in Gallery</span>
-                                        </button>
-                                        <button onclick="cloneSite({{ site.id }}, '{{ site.name }}')" class="context-item">
-                                            <i class="fas fa-copy"></i>
-                                            <span>Clone Site</span>
-                                        </button>
-                                        <button onclick="exportSite({{ site.id }}, '{{ site.name }}')" class="context-item">
-                                            <i class="fas fa-file-export"></i>
-                                            <span>Export Site</span>
-                                        </button>
-                                        <button onclick="resetSiteStats({{ site.id }}, '{{ site.name }}')" class="context-item">
-                                            <i class="fas fa-eraser"></i>
-                                            <span>Reset Statistics</span>
-                                        </button>
-                                        <button onclick="deleteSite({{ site.id }}, '{{ site.name }}')" class="context-item text-danger">
+                                        <button onclick="deleteSite({{ site.id }}, '{{ site.name }}')" class="dropdown-item text-danger">
                                             <i class="fas fa-trash-alt"></i>
                                             <span>Delete Site</span>
                                         </button>
@@ -719,708 +373,55 @@
                 </table>
             </div>
 
-            <div class="pagination-controls">
-                <div class="pagination-info">
-                    Showing <span id="siteRangeStart">1</span>-<span id="siteRangeEnd">10</span> of <span id="siteTotal">100</span> sites
-                </div>
-                <div class="pagination">
-                    <button class="btn-page" id="prevSitePage" onclick="changeSitePage('prev')"><i class="fas fa-chevron-left"></i></button>
-                    <div id="sitePageNumbers" class="page-numbers">
-                        <button class="btn-page active">1</button>
-                        <button class="btn-page">2</button>
-                        <button class="btn-page">3</button>
-                        <span class="pagination-ellipsis">...</span>
-                        <button class="btn-page">10</button>
-                    </div>
-                    <button class="btn-page" id="nextSitePage" onclick="changeSitePage('next')"><i class="fas fa-chevron-right"></i></button>
-                </div>
-            </div>
-            
-            <div class="bulk-site-actions">
-                <h3><i class="fas fa-layer-group"></i> Bulk Actions</h3>
-                <div class="bulk-actions-container">
-                    <button class="btn-primary" onclick="bulkFeatureInGallery()" disabled id="bulkFeatureBtn">
-                        <i class="fas fa-star"></i> Feature Selected
-                    </button>
-                    <button class="btn-warning" onclick="bulkResetStats()" disabled id="bulkResetBtn">
-                        <i class="fas fa-eraser"></i> Reset Stats
-                    </button>
-                    <button class="btn-danger" onclick="bulkDeleteSites()" disabled id="bulkDeleteBtn">
-                        <i class="fas fa-trash-alt"></i> Delete Selected
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <section id="security" class="admin-section">
-            <div class="section-header">
-                <h2><i class="fas fa-shield-alt"></i> Security Center</h2>
-                <p>Monitor and manage platform security</p>
-            </div>
-            
-            <div class="security-overview">
-                <div class="security-stats">
-                    <div class="security-stat">
-                        <div class="stat-icon">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="securityScore">92<span>%</span></h3>
-                            <p>Security Score</p>
-                        </div>
-                    </div>
-                    <div class="security-stat">
-                        <div class="stat-icon">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="activeThreats">2</h3>
-                            <p>Active Threats</p>
-                        </div>
-                    </div>
-                    <div class="security-stat">
-                        <div class="stat-icon">
-                            <i class="fas fa-lock"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="securityEvents">124</h3>
-                            <p>Security Events (24h)</p>
-                        </div>
-                    </div>
-                    <div class="security-stat">
-                        <div class="stat-icon">
-                            <i class="fas fa-user-shield"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="lastScan">2 hours ago</h3>
-                            <p>Last Security Scan</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="action-panel">
-                    <h3>Quick Actions</h3>
-                    <div class="action-buttons">
-                        <button class="btn-primary" onclick="runSecurityScan()">
-                            <i class="fas fa-search"></i> Run Security Scan
-                        </button>
-                        <button class="btn-primary" onclick="updateSecuritySettings()">
-                            <i class="fas fa-cogs"></i> Security Settings
-                        </button>
-                        <button class="btn-warning" onclick="viewSecurityLogs()">
-                            <i class="fas fa-list"></i> View Security Logs
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="security-sections">
-                <div class="security-section">
-                    <h3><i class="fas fa-exclamation-triangle"></i> Active Threats</h3>
-                    <div class="threat-list">
-                        <div class="threat-item high">
-                            <div class="threat-header">
-                                <span class="threat-severity">High</span>
-                                <span class="threat-name">Suspicious Login Attempts</span>
-                                <span class="threat-time">1 hour ago</span>
-                            </div>
-                            <div class="threat-details">
-                                <p>Multiple failed login attempts detected from IP address 192.168.1.22</p>
-                                <div class="threat-actions">
-                                    <button class="btn-primary" onclick="blockIP('192.168.1.22')">
-                                        <i class="fas fa-ban"></i> Block IP
-                                    </button>
-                                    <button class="btn-secondary" onclick="investigateThreat(1)">
-                                        <i class="fas fa-search"></i> Investigate
-                                    </button>
-                                    <button class="btn-light" onclick="dismissThreat(1)">
-                                        <i class="fas fa-times"></i> Dismiss
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="threat-item medium">
-                            <div class="threat-header">
-                                <span class="threat-severity">Medium</span>
-                                <span class="threat-name">Unusual File Upload Activity</span>
-                                <span class="threat-time">3 hours ago</span>
-                            </div>
-                            <div class="threat-details">
-                                <p>User "hackerman42" attempted to upload potentially malicious file types</p>
-                                <div class="threat-actions">
-                                    <button class="btn-primary" onclick="reviewUser('hackerman42')">
-                                        <i class="fas fa-user-check"></i> Review User
-                                    </button>
-                                    <button class="btn-secondary" onclick="investigateThreat(2)">
-                                        <i class="fas fa-search"></i> Investigate
-                                    </button>
-                                    <button class="btn-light" onclick="dismissThreat(2)">
-                                        <i class="fas fa-times"></i> Dismiss
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="security-section">
-                    <h3><i class="fas fa-shield-alt"></i> Security Recommendations</h3>
-                    <div class="recommendation-list">
-                        <div class="recommendation-item">
-                            <div class="recommendation-header">
-                                <span class="recommendation-priority high">High Priority</span>
-                                <span class="recommendation-title">Enable Two-Factor Authentication for All Admins</span>
-                            </div>
-                            <div class="recommendation-content">
-                                <p>Requiring 2FA for all administrator accounts will significantly improve security.</p>
-                                <div class="recommendation-actions">
-                                    <button class="btn-primary" onclick="implementRecommendation(1)">
-                                        <i class="fas fa-check"></i> Implement
-                                    </button>
-                                    <button class="btn-light" onclick="snoozeRecommendation(1)">
-                                        <i class="fas fa-clock"></i> Snooze
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="recommendation-item">
-                            <div class="recommendation-header">
-                                <span class="recommendation-priority medium">Medium Priority</span>
-                                <span class="recommendation-title">Update Password Policy</span>
-                            </div>
-                            <div class="recommendation-content">
-                                <p>Current password requirements don't enforce sufficient complexity. Consider updating the requirements.</p>
-                                <div class="recommendation-actions">
-                                    <button class="btn-primary" onclick="implementRecommendation(2)">
-                                        <i class="fas fa-check"></i> Implement
-                                    </button>
-                                    <button class="btn-light" onclick="snoozeRecommendation(2)">
-                                        <i class="fas fa-clock"></i> Snooze
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="security-section">
-                    <h3><i class="fas fa-history"></i> Recent Security Events</h3>
-                    <div class="security-events">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Time</th>
-                                    <th>Event Type</th>
-                                    <th>User</th>
-                                    <th>IP Address</th>
-                                    <th>Details</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="securityEventsTable">
-                                <tr>
-                                    <td>Today, 14:32</td>
-                                    <td>Admin Login</td>
-                                    <td>{{ current_user.username }}</td>
-                                    <td>192.168.1.100</td>
-                                    <td>Successful authentication</td>
-                                    <td>
-                                        <button class="btn-icon" onclick="viewEventDetails(1)">
-                                            <i class="fas fa-info-circle"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Today, 14:05</td>
-                                    <td>Failed Login</td>
-                                    <td>admin</td>
-                                    <td>192.168.1.22</td>
-                                    <td>10 failed login attempts</td>
-                                    <td>
-                                        <button class="btn-icon" onclick="viewEventDetails(2)">
-                                            <i class="fas fa-info-circle"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Today, 13:47</td>
-                                    <td>User Suspended</td>
-                                    <td>hackerman42</td>
-                                    <td>192.168.1.55</td>
-                                    <td>Suspended by admin</td>
-                                    <td>
-                                        <button class="btn-icon" onclick="viewEventDetails(3)">
-                                            <i class="fas fa-info-circle"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Today, 12:19</td>
-                                    <td>File Upload</td>
-                                    <td>hackerman42</td>
-                                    <td>192.168.1.55</td>
-                                    <td>Attempted to upload script.exe</td>
-                                    <td>
-                                        <button class="btn-icon" onclick="viewEventDetails(4)">
-                                            <i class="fas fa-info-circle"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="security-footer">
-                        <button class="btn-secondary" onclick="viewAllSecurityEvents()">
-                            <i class="fas fa-list"></i> View All Events
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="maintenance" class="admin-section">
-            <div class="section-header">
-                <h2><i class="fas fa-tools"></i> System Maintenance</h2>
-                <p>Perform routine maintenance tasks and optimize platform performance</p>
-            </div>
-            
-            <div class="maintenance-overview">
-                <div class="maintenance-stats">
-                    <div class="maintenance-stat">
-                        <div class="stat-icon">
-                            <i class="fas fa-database"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="dbSize">2.8 GB</h3>
-                            <p>Database Size</p>
-                        </div>
-                    </div>
-                    <div class="maintenance-stat">
-                        <div class="stat-icon">
-                            <i class="fas fa-hdd"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="diskUsage">58<span>%</span></h3>
-                            <p>Disk Usage</p>
-                        </div>
-                    </div>
-                    <div class="maintenance-stat">
-                        <div class="stat-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="lastMaintenance">2 days ago</h3>
-                            <p>Last Maintenance</p>
-                        </div>
-                    </div>
-                    <div class="maintenance-stat">
-                        <div class="stat-icon">
-                            <i class="fas fa-calendar-check"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="nextMaintenance">Tomorrow</h3>
-                            <p>Next Scheduled</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="maintenance-panels">
-                <div class="maintenance-panel">
-                    <h3><i class="fas fa-database"></i> Database Maintenance</h3>
-                    <div class="panel-content">
-                        <div class="action-list">
-                            <div class="action-item">
-                                <div class="action-info">
-                                    <h4>Run Database Vacuum</h4>
-                                    <p>Optimize database by reclaiming storage and updating statistics</p>
-                                </div>
-                                <div class="action-buttons">
-                                    <button class="btn-primary" onclick="runDatabaseVacuum()">
-                                        <i class="fas fa-play"></i> Run Now
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="action-item">
-                                <div class="action-info">
-                                    <h4>Database Backup</h4>
-                                    <p>Create a full backup of the database</p>
-                                </div>
-                                <div class="action-buttons">
-                                    <button class="btn-primary" onclick="backupDatabase()">
-                                        <i class="fas fa-download"></i> Backup Now
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="action-item">
-                                <div class="action-info">
-                                    <h4>Cleanup Old Data</h4>
-                                    <p>Remove logs and temporary data older than 90 days</p>
-                                </div>
-                                <div class="action-buttons">
-                                    <button class="btn-primary" onclick="cleanupOldData()">
-                                        <i class="fas fa-broom"></i> Clean Up
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="action-item">
-                                <div class="action-info">
-                                    <h4>Restore Database</h4>
-                                    <p>Restore from a previous backup</p>
-                                </div>
-                                <div class="action-buttons">
-                                    <button class="btn-warning" onclick="showRestoreModal()">
-                                        <i class="fas fa-upload"></i> Restore
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="maintenance-panel">
-                    <h3><i class="fas fa-broom"></i> System Cleanup</h3>
-                    <div class="panel-content">
-                        <div class="action-list">
-                            <div class="action-item">
-                                <div class="action-info">
-                                    <h4>Clear System Cache</h4>
-                                    <p>Remove temporary files and application caches</p>
-                                </div>
-                                <div class="action-buttons">
-                                    <button class="btn-primary" onclick="clearSystemCache()">
-                                        <i class="fas fa-trash-alt"></i> Clear Now
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="action-item">
-                                <div class="action-info">
-                                    <h4>Remove Orphaned Files</h4>
-                                    <p>Clean up files not associated with active sites</p>
-                                </div>
-                                <div class="action-buttons">
-                                    <button class="btn-primary" onclick="removeOrphanedFiles()">
-                                        <i class="fas fa-broom"></i> Clean Up
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="action-item">
-                                <div class="action-info">
-                                    <h4>Remove Inactive Users</h4>
-                                    <p>Delete users inactive for more than 1 year</p>
-                                </div>
-                                <div class="action-buttons">
-                                    <button class="btn-warning" onclick="removeInactiveUsers()">
-                                        <i class="fas fa-user-minus"></i> Clean Up
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="maintenance-panel">
-                    <h3><i class="fas fa-calendar-alt"></i> Scheduled Maintenance</h3>
-                    <div class="panel-content">
-                        <div class="schedule-list">
-                            <div class="schedule-item">
-                                <div class="schedule-info">
-                                    <h4>Database Vacuum</h4>
-                                    <p>Scheduled every Sunday at 2:00 AM</p>
-                                </div>
-                                <div class="schedule-status">
-                                    <span class="status-badge active">Active</span>
-                                </div>
-                                <div class="schedule-actions">
-                                    <button class="btn-icon" onclick="editSchedule(1)">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn-icon" onclick="toggleSchedule(1)">
-                                        <i class="fas fa-pause"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="schedule-item">
-                                <div class="schedule-info">
-                                    <h4>Database Backup</h4>
-                                    <p>Scheduled daily at 1:00 AM</p>
-                                </div>
-                                <div class="schedule-status">
-                                    <span class="status-badge active">Active</span>
-                                </div>
-                                <div class="schedule-actions">
-                                    <button class="btn-icon" onclick="editSchedule(2)">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn-icon" onclick="toggleSchedule(2)">
-                                        <i class="fas fa-pause"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="schedule-item">
-                                <div class="schedule-info">
-                                    <h4>Log Cleanup</h4>
-                                    <p>Scheduled every Monday at 3:00 AM</p>
-                                </div>
-                                <div class="schedule-status">
-                                    <span class="status-badge active">Active</span>
-                                </div>
-                                <div class="schedule-actions">
-                                    <button class="btn-icon" onclick="editSchedule(3)">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn-icon" onclick="toggleSchedule(3)">
-                                        <i class="fas fa-pause"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="schedule-item">
-                                <div class="schedule-info">
-                                    <h4>Cache Cleanup</h4>
-                                    <p>Scheduled every Wednesday at 4:00 AM</p>
-                                </div>
-                                <div class="schedule-status">
-                                    <span class="status-badge suspended">Paused</span>
-                                </div>
-                                <div class="schedule-actions">
-                                    <button class="btn-icon" onclick="editSchedule(4)">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn-icon" onclick="toggleSchedule(4)">
-                                        <i class="fas fa-play"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="schedule-footer">
-                            <button class="btn-primary" onclick="addNewSchedule()">
-                                <i class="fas fa-plus"></i> Add New Schedule
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="maintenance-panel">
-                    <h3><i class="fas fa-file-alt"></i> System Logs</h3>
-                    <div class="logs-header">
-                        <div class="log-filters">
-                            <select id="logTypeFilter" onchange="filterLogs()">
-                                <option value="all">All Logs</option>
-                                <option value="error">Error Logs</option>
-                                <option value="access">Access Logs</option>
-                                <option value="system">System Logs</option>
-                            </select>
-                            <input type="date" id="logDateFilter" onchange="filterLogs()">
-                        </div>
-                        <div class="log-actions">
-                            <button class="btn-secondary" onclick="exportLogs()">
-                                <i class="fas fa-download"></i> Export Logs
-                            </button>
-                        </div>
-                    </div>
-                    <div class="logs-container">
-                        <div class="log-entries">
-                            <div class="log-entry error">
-                                <span class="log-time">2023-04-14 13:42:05</span>
-                                <span class="log-level">ERROR</span>
-                                <span class="log-message">Failed database connection: connection refused</span>
-                                <button class="btn-icon log-details-btn" onclick="showLogDetails(1)">
-                                    <i class="fas fa-chevron-down"></i>
-                                </button>
-                            </div>
-                            <div class="log-entry info">
-                                <span class="log-time">2023-04-14 13:41:02</span>
-                                <span class="log-level">INFO</span>
-                                <span class="log-message">System backup completed successfully</span>
-                                <button class="btn-icon log-details-btn" onclick="showLogDetails(2)">
-                                    <i class="fas fa-chevron-down"></i>
-                                </button>
-                            </div>
-                            <div class="log-entry warning">
-                                <span class="log-time">2023-04-14 13:40:45</span>
-                                <span class="log-level">WARNING</span>
-                                <span class="log-message">High CPU usage detected (85%)</span>
-                                <button class="btn-icon log-details-btn" onclick="showLogDetails(3)">
-                                    <i class="fas fa-chevron-down"></i>
-                                </button>
-                            </div>
-                            <div class="log-entry info">
-                                <span class="log-time">2023-04-14 13:39:17</span>
-                                <span class="log-level">INFO</span>
-                                <span class="log-message">System backup started</span>
-                                <button class="btn-icon log-details-btn" onclick="showLogDetails(4)">
-                                    <i class="fas fa-chevron-down"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="pagination">
+                <button class="btn-page"><i class="fas fa-chevron-left"></i></button>
+                <button class="btn-page active">1</button>
+                <button class="btn-page">2</button>
+                <button class="btn-page">3</button>
+                <span class="pagination-ellipsis">...</span>
+                <button class="btn-page">10</button>
+                <button class="btn-page"><i class="fas fa-chevron-right"></i></button>
             </div>
         </section>
 
         <section id="admins" class="admin-section">
             <div class="section-header">
                 <h2><i class="fas fa-user-shield"></i> Admin Management</h2>
-                <p>Manage administrator accounts and permissions</p>
-                <p class="text-info">Note: Don't remove Ethan's admin privileges! :)</p>
+                <p>Manage administrator accounts and permissions (stop removing Ethan's admin ):<)</p>
             </div>
 
-            <div class="admin-panels">
-                <div class="admin-panel">
-                    <div class="panel-header">
+            <div class="admin-management">
+                <div class="admin-list-container">
+                    <div class="card-header">
                         <h3><i class="fas fa-users-cog"></i> Current Administrators</h3>
-                        <div class="panel-actions">
-                            <div class="search-container">
-                                <input type="text" id="adminSearch" class="search-input" placeholder="Filter admins..." oninput="filterAdmins()">
-                                <i class="fas fa-search"></i>
-                            </div>
-                            <button class="btn-icon refresh-btn" onclick="loadAdminList()">
-                                <i class="fas fa-sync-alt"></i>
-                            </button>
-                        </div>
                     </div>
-                    <div class="panel-content">
-                        <div class="admin-cards" id="adminCards">
-                            <div class="admin-loading">
-                                <div class="loading-spinner"></div>
-                                <span>Loading administrators...</span>
-                            </div>
-                        </div>
-                    </div>
+                    <ul id="adminList" class="admin-list">
+                        <li class="admin-list-loading">
+                            <div class="loading-spinner"></div>
+                            <span>Loading admins...</span>
+                        </li>
+                    </ul>
                 </div>
 
-                <div class="admin-panel">
-                    <div class="panel-header">
+                <div class="add-admin-form">
+                    <div class="card-header">
                         <h3><i class="fas fa-user-plus"></i> Add New Administrator</h3>
                     </div>
-                    <div class="panel-content">
-                        <div class="add-admin-form">
-                            <p>Grant administrator privileges to an existing user account</p>
-                            <div class="form-group">
-                                <label for="newAdminUsername">
-                                    <i class="fas fa-user"></i>
-                                    Username
-                                </label>
-                                <div class="input-with-suggestions">
-                                    <input type="text" id="newAdminUsername" placeholder="Enter username" class="admin-input" autocomplete="off" oninput="searchNonAdminUsers()">
-                                    <div class="suggestions-dropdown" id="userSuggestions"></div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="adminRoleSelect">
-                                    <i class="fas fa-users-cog"></i>
-                                    Admin Role
-                                </label>
-                                <select id="adminRoleSelect" class="admin-input">
-                                    <option value="full">Full Administrator</option>
-                                    <option value="content">Content Manager</option>
-                                    <option value="user">User Manager</option>
-                                    <option value="readonly">Read Only</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Permission Overview</label>
-                                <div class="permissions-grid">
-                                    <div class="permission-item">
-                                        <input type="checkbox" id="perm_users" checked disabled>
-                                        <label for="perm_users">Manage Users</label>
-                                    </div>
-                                    <div class="permission-item">
-                                        <input type="checkbox" id="perm_sites" checked disabled>
-                                        <label for="perm_sites">Manage Sites</label>
-                                    </div>
-                                    <div class="permission-item">
-                                        <input type="checkbox" id="perm_admins" checked disabled>
-                                        <label for="perm_admins">Manage Admins</label>
-                                    </div>
-                                    <div class="permission-item">
-                                        <input type="checkbox" id="perm_security" checked disabled>
-                                        <label for="perm_security">Security Controls</label>
-                                    </div>
-                                    <div class="permission-item">
-                                        <input type="checkbox" id="perm_settings" checked disabled>
-                                        <label for="perm_settings">System Settings</label>
-                                    </div>
-                                    <div class="permission-item">
-                                        <input type="checkbox" id="perm_maintenance" checked disabled>
-                                        <label for="perm_maintenance">Maintenance</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group notes-group">
-                                <label for="adminNotes">
-                                    <i class="fas fa-sticky-note"></i>
-                                    Notes (Optional)
-                                </label>
-                                <textarea id="adminNotes" class="admin-input" placeholder="Why is this user being granted admin access?"></textarea>
-                            </div>
-                            <div class="form-actions">
-                                <button onclick="addAdmin()" class="btn-primary add-admin-btn">
-                                    <i class="fas fa-plus"></i> Add as Administrator
-                                </button>
+                    <div class="form-content">
+                        <p>Grant administrator privileges to an existing user account</p>
+                        <div class="form-group">
+                            <label for="newAdminUsername">
+                                <i class="fas fa-user"></i>
+                                Username
+                            </label>
+                            <div class="input-with-icon">
+                                <input type="text" id="newAdminUsername" placeholder="Enter username" class="admin-input">
+                                <i class="fas fa-search"></i>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="admin-activity">
-                <div class="panel-header">
-                    <h3><i class="fas fa-history"></i> Admin Activity Log</h3>
-                </div>
-                <div class="admin-log-container">
-                    <table class="admin-log-table">
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                <th>Admin</th>
-                                <th>Action</th>
-                                <th>Details</th>
-                                <th>IP Address</th>
-                            </tr>
-                        </thead>
-                        <tbody id="adminLogBody">
-                            <tr>
-                                <td>Today, 15:23</td>
-                                <td>{{ current_user.username }}</td>
-                                <td>Admin Login</td>
-                                <td>Successful authentication</td>
-                                <td>192.168.1.100</td>
-                            </tr>
-                            <tr>
-                                <td>Today, 14:47</td>
-                                <td>ethan</td>
-                                <td>Added Admin</td>
-                                <td>Added 'superadmin' as administrator</td>
-                                <td>192.168.1.101</td>
-                            </tr>
-                            <tr>
-                                <td>Today, 13:15</td>
-                                <td>superadmin</td>
-                                <td>User Suspended</td>
-                                <td>Suspended user 'hackerman42'</td>
-                                <td>192.168.1.102</td>
-                            </tr>
-                            <tr>
-                                <td>Today, 12:32</td>
-                                <td>ethan</td>
-                                <td>Settings Change</td>
-                                <td>Updated max sites per user to 15</td>
-                                <td>192.168.1.101</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="log-pagination">
-                    <button class="btn-secondary">
-                        <i class="fas fa-download"></i> Export Log
-                    </button>
-                    <div class="pagination">
-                        <button class="btn-page"><i class="fas fa-chevron-left"></i></button>
-                        <button class="btn-page active">1</button>
-                        <button class="btn-page">2</button>
-                        <button class="btn-page">3</button>
-                        <button class="btn-page"><i class="fas fa-chevron-right"></i></button>
+                        <button onclick="addAdmin()" class="btn-primary add-admin-btn">
+                            <i class="fas fa-plus"></i> Add as Administrator
+                        </button>
                     </div>
                 </div>
             </div>
