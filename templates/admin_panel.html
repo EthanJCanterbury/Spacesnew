@@ -87,8 +87,7 @@
         <section id="dashboard" class="admin-section active">
             <div class="section-header">
                 <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
-                <p>Overview of Hack Club Space's performance and statistics YAY!!!</p>
-                <p>This is a very early version of this dash since I like just made it. ~ Ethan</p>
+                <p>Overview of Hack Club Space's performance and statistics</p>
             </div>
 
             <div class="dashboard-stats">
@@ -104,7 +103,7 @@
                     </div>
 
                     <div class="stat-card">
-                        <div class="stat-icon user-icon">
+                        <div class="stat-icon site-icon">
                             <i class="fas fa-globe"></i>
                         </div>
                         <div class="stat-info">
@@ -170,7 +169,6 @@
             <div class="section-header">
                 <h2><i class="fas fa-users"></i> Users Management</h2>
                 <p>View and manage user accounts (showing first 10 users)</p>
-                <p class="text-muted">Use the search box below to find specific users</p>
             </div>
 
             <div class="section-actions">
@@ -282,7 +280,6 @@
             <div class="section-header">
                 <h2><i class="fas fa-globe"></i> Sites Management</h2>
                 <p>Monitor sites created by users (showing first 10 sites)</p>
-                <p class="text-muted">Use the search box below to find specific sites</p>
             </div>
 
             <div class="section-actions">
@@ -387,7 +384,7 @@
         <section id="admins" class="admin-section">
             <div class="section-header">
                 <h2><i class="fas fa-user-shield"></i> Admin Management</h2>
-                <p>Manage administrator accounts and permissions (stop removing Ethan's admin ):<)</p>
+                <p>Manage administrator accounts and permissions</p>
             </div>
 
             <div class="admin-management">
@@ -431,7 +428,6 @@
             <div class="section-header">
                 <h2><i class="fas fa-users"></i> Clubs Management</h2>
                 <p>Manage clubs and their members</p>
-                <p class="text-muted">Use the search box below to find specific clubs</p>
             </div>
 
             <div class="section-actions">
@@ -504,7 +500,7 @@
         <section id="analytics" class="admin-section">
             <div class="section-header">
                 <h2><i class="fas fa-chart-line"></i> Analytics</h2>
-                <p>nerdy analytic stuff lol</p>
+                <p>Track platform metrics and user engagement</p>
             </div>
 
             <div class="analytics-timeframe">
@@ -599,7 +595,7 @@
                             <label>User Limits</label>
                             <div class="input-group">
                                 <span class="input-label">Max Sites Per User</span>
-                                <input type="number" id="maxSitesPerUser" value="0.0" min="1" max="100" class="number-input">
+                                <input type="number" id="maxSitesPerUser" value="5" min="1" max="100" class="number-input">
                             </div>
                         </div>
 
@@ -705,8 +701,7 @@
         </div>
     </div>
 
-    <!-- Toast container -->
-<div id="toast-container"></div>
+    <div id="toast-container"></div>
 
 <script>
 function showToast(type, message) {
@@ -727,1121 +722,15 @@ function showToast(type, message) {
 
     toastContainer.appendChild(toast);
 
-    // Force reflow
-    toast.offsetHeight;
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
 
-    // Show the toast
-    toast.classList.add('show');
-
-    // Automatically remove after 3 seconds
     setTimeout(() => {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
-</script>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const navLinks = document.querySelectorAll('.nav-link');
-    const sections = document.querySelectorAll('.admin-section');
-
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-
-            navLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-
-            const sectionId = link.getAttribute('data-section');
-            sections.forEach(section => {
-                section.classList.remove('active');
-                if (section.id === sectionId) {
-                    section.classList.add('active');
-                    section.classList.add('section-entrance');
-                    setTimeout(() => {
-                        section.classList.remove('section-entrance');
-                    }, 500);
-                }
-            });
-
-            window.location.hash = sectionId;
-        });
-    });
-
-    const hash = window.location.hash.substring(1);
-    if (hash) {
-        const activeLink = document.querySelector(`.nav-link[data-section="${hash}"]`);
-        if (activeLink) {
-            activeLink.click();
-        }
-    }
-
-    const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
-    const adminContainer = document.querySelector('.admin-container');
-
-    sidebarCollapseBtn.addEventListener('click', () => {
-        adminContainer.classList.toggle('sidebar-collapsed');
-    });
-
-    loadAdminList();
-});
-
-function filterUsers() {
-    const searchTerm = document.getElementById('userSearch').value.trim();
-
-    if (searchTerm.length < 2) {
-        return; // Require at least 2 characters
-    }
-
-    // Show loading indicator
-    document.getElementById('userTableBody').innerHTML = `
-        <tr>
-            <td colspan="7" class="text-center">
-                <div class="loading-spinner"></div>
-                <p>Searching users...</p>
-            </td>
-        </tr>
-    `;
-
-    // Make API call to search users
-    fetch(`/api/admin/search/users?term=${encodeURIComponent(searchTerm)}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                showToast('error', data.error);
-                return;
-            }
-
-            const userTableBody = document.getElementById('userTableBody');
-            userTableBody.innerHTML = '';
-
-            if (data.users.length === 0) {
-                userTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="text-center">
-                            <p>No users found matching "${searchTerm}"</p>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            data.users.forEach(user => {
-                const row = document.createElement('tr');
-
-                row.innerHTML = `
-                    <td>
-                        ${user.id !== {{ current_user.id }} ? 
-                        `<input type="checkbox" class="user-select" data-userid="${user.id}" data-username="${user.username}" onchange="updateBulkActions()">` : 
-                        ''}
-                    </td>
-                    <td>${user.id}</td>
-                    <td>${user.username}</td>
-                    <td>${user.email}</td>
-                    <td>${user.created_at}</td>
-                    <td>
-                        <span class="status-badge ${user.is_suspended ? 'suspended' : 'active'}">
-                            ${user.is_suspended ? 'Suspended' : 'Active'}
-                        </span>
-                        ${user.is_club_leader ? 
-                        `<span class="status-badge club-leader">
-                            Club Leader
-                        </span>` : ''}
-                    </td>
-                    <td class="actions-cell">
-                        <div class="action-dropdown">
-                            <button class="action-dropdown-btn">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                            <div class="action-dropdown-content">
-                                <button onclick="viewUserDetails(${user.id})" class="dropdown-item">
-                                    <i class="fas fa-eye"></i>
-                                    <span>View Details</span>
-                                </button>
-                                ${user.id !== {{ current_user.id }} ? `
-                                <button onclick="toggleSuspension(${user.id}, '${user.username}', ${!user.is_suspended})" class="dropdown-item">
-                                    <i class="fas fa-${user.is_suspended ? 'user-check' : 'user-lock'}"></i>
-                                    <span>${user.is_suspended ? 'Unsuspend' : 'Suspend'}</span>
-                                </button>
-                                <button onclick="toggleClubLeader(${user.id}, '${user.username}', ${user.is_club_leader})" class="dropdown-item">
-                                    <i class="fas fa-user-tag"></i>
-                                    <span>${user.is_club_leader ? 'Remove Club Leader Role' : 'Grant Club Leader Role'}</span>
-                                </button>
-                                <button onclick="deleteAllSites(${user.id}, '${user.username}')" class="dropdown-item">
-                                    <i class="fas fa-trash-alt"></i>
-                                    <span>Delete All Sites</span>
-                                </button>
-                                <button onclick="deleteUser(${user.id}, '${user.username}')" class="dropdown-item text-danger">
-                                    <i class="fas fa-trash-alt"></i>
-                                    <span>Delete User</span>
-                                </button>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </td>
-                `;
-
-                userTableBody.appendChild(row);
-                row.classList.add('fade-in');
-                setTimeout(() => {
-                    row.classList.remove('fade-in');
-                }, 300);
-            });
-        })
-        .catch(error => {
-            console.error('Error searching users:', error);
-            showToast('error', 'Failed to search users');
-        });
-}
-
-function filterSites() {
-    const searchTerm = document.getElementById('siteSearch').value.trim();
-
-    if (searchTerm.length < 2) {
-        return; // Require at least 2 characters
-    }
-
-    document.getElementById('siteTableBody').innerHTML = `
-        <tr>
-            <td colspan="7" class="text-center">
-                <div class="loading-spinner"></div>
-                <p>Searching sites...</p>
-            </td>
-        </tr>
-    `;
-
-    // Make API call to search sites
-    fetch(`/api/admin/search/sites?term=${encodeURIComponent(searchTerm)}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                showToast('error', data.error);
-                return;
-            }
-
-            const siteTableBody = document.getElementById('siteTableBody');
-            siteTableBody.innerHTML = '';
-
-            if (data.sites.length === 0) {
-                siteTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="text-center">
-                            <p>No sites found matching "${searchTerm}"</p>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            data.sites.forEach(site => {
-                const row = document.createElement('tr');
-
-                row.innerHTML = `
-                    <td>${site.id}</td>
-                    <td>
-                        <div class="site-name">
-                            <span class="site-icon">
-                                <i class="fas fa-${site.site_type === 'web' ? 'globe' : 'code'}"></i>
-                            </span>
-                            ${site.name}
-                        </div>
-                    </td>
-                    <td>${site.username}</td>
-                    <td>
-                        <span class="type-badge ${site.site_type}">
-                            ${site.site_type.charAt(0).toUpperCase() + site.site_type.slice(1)}
-                        </span>
-                    </td>
-                    <td>${site.created_at}</td>
-                    <td>${site.updated_at}</td>
-                    <td class="actions-cell">
-                        <div class="action-dropdown">
-                            <button class="action-dropdown-btn">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                            <div class="action-dropdown-content">
-                                <a href="/s/${site.slug}" target="_blank" class="dropdown-item">
-                                    <i class="fas fa-eye"></i>
-                                    <span>View Site</span>
-                                </a>
-                                <a href="/edit/${site.id}" class="dropdown-item">
-                                    <i class="fas fa-pencil-alt"></i>
-                                    <span>Edit Site</span>
-                                </a>
-                                <button onclick="deleteSite(${site.id}, '${site.name}')" class="dropdown-item text-danger">
-                                    <i class="fas fa-trash-alt"></i>
-                                    <span>Delete Site</span>
-                                </button>
-                            </div>
-                        </div>
-                    </td>
-                `;
-
-                siteTableBody.appendChild(row);
-                row.classList.add('fade-in');
-                setTimeout(() => {
-                    row.classList.remove('fade-in');
-                }, 300);
-            });
-        })
-        .catch(error => {
-            console.error('Errorsearching sites:', error);
-            showToast('error', 'Failed to search sites');
-        });
-}
-
-function toggleSelectAll() {
-    const selectAll = document.getElementById('selectAll');
-    const checkboxes = document.querySelectorAll('.user-select');
-
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = selectAll.checked;
-    });
-
-    updateBulkActions();
-}
-
-function updateBulkActions() {
-    const selectedUsers = document.querySelectorAll('.user-select:checked');
-    const bulkActions = document.querySelectorAll('.bulk-action');
-
-    bulkActions.forEach(button => {
-        button.disabled = selectedUsers.length === 0;
-    });
-}
-
-// Fetch total counts for dashboard stats
-function fetchTotalCounts() {
-    // Fetch total users count
-    fetch('/api/admin/stats/counts')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('totalUsers').textContent = data.totalUsers;
-            document.getElementById('totalSites').textContent = data.totalSites;
-        })
-        .catch(error => {
-            console.error('Error fetching total counts:', error);
-            document.getElementById('totalUsers').textContent = 'Error';
-            document.getElementById('totalSites').textContent = 'Error';
-        });
-}
-
-// Call this when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    fetchTotalCounts();
-});
-
-function emailAllUsers() {
-    const rows = document.getElementById('userTableBody').getElementsByTagName('tr');
-    const emails = [];
-
-    for (let row of rows) {
-        const emailCell = row.cells[3]; 
-        if (emailCell) {
-            emails.push(emailCell.textContent.trim());
-        }
-    }
-
-    if (emails.length > 0) {
-        showToast('info', `Preparing email to ${emails.length} users`);
-        window.location.href = `mailto:${emails.join(',')}`;
-    } else {
-        showToast('error', 'No email addresses found');
-    }
-}
-
-async function toggleSuspension(userId, username, suspend) {
-    if (!confirm(`Are you sure you want to ${suspend ? 'suspend' : 'unsuspend'} user "${username}"?`)) return;
-
-    try {
-        showToast('info', `Processing ${suspend ? 'suspension' : 'unsuspension'}...`);
-
-        const response = await fetch(`/api/admin/users/${userId}/suspend`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ suspend })
-        });
-
-        if (response.ok) {
-            showToast('success', `User ${suspend ? 'suspended' : 'unsuspended'} successfully`);
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            const data = await response.json();
-            showToast('error', data.message || 'Failed to update user suspension status');
-        }
-    } catch (error) {
-        showToast('error', 'Failed to update user suspension status');
-    }
-}
-
-async function toggleClubLeader(userId, username, isClubLeader) {
-    // Toggle based on current status - if currently a leader, remove; if not a leader, make one
-    const makeLeader = !isClubLeader;
-    if (!confirm(`Are you sure you want to ${makeLeader ? 'make' : 'remove'} "${username}" ${makeLeader ? 'as a' : 'from being a'} club leader?`)) return;
-
-    try {
-        showToast('info', `${makeLeader ? 'Adding' : 'Removing'} club leader status...`);
-
-        const response = await fetch(`/api/admin/users/${userId}/club-leader`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ is_club_leader: makeLeader })
-        });
-
-        if (response.ok) {
-            showToast('success', `User ${makeLeader ? 'is now' : 'is no longer'} a club leader`);
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            const data = await response.json();
-            showToast('error', data.message || 'Failed to update club leader status');
-        }
-    } catch (error) {
-        showToast('error', 'Failed to update club leader status');
-    }
-}
-
-async function deleteAllSites(userId, username) {
-    if (!confirm(`Are you sure you want to delete ALL sites for user "${username}"? This action cannot be undone.`)) return;
-
-    try {
-        showToast('info', 'Deleting sites...');
-
-        const response = await fetch(`/api/admin/users/${userId}/sites`, {
-            method: 'DELETE'
-        });
-
-        if (response.ok) {
-            showToast('success', `All sites for user "${username}" deleted successfully`);
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            const data = await response.json();
-            showToast('error', data.message || 'Failed to delete user sites');
-        }
-    } catch (error) {
-        showToast('error', 'Failed to delete user sites');
-    }
-}
-
-async function deleteUser(userId, username) {
-    if (!confirm(`Are you sure you wantto delete user "${username}"? This action cannot be undone.`)) return;
-
-    try {
-        showToast('info', 'Deleting user...');
-
-        const response = await fetch(`/api/admin/users/${userId}`, {
-            method: 'DELETE'
-        });
-
-        if (response.ok) {
-            showToast('success', `User "${username}" deleted successfully`);
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        } else {
-            const data= await response.json();
-            showToast('error', data.message || 'Failed to delete user');
-        }
-    } catch (error) {
-        showToast('error', 'Failed to delete user');
-    }
-}
-
-async function deleteSite(siteId, siteName) {
-    if (!confirm(`Are you sure you want to delete site "${siteName}"? Thisaction cannot be undone.`)) return;
-
-    try {
-        showToast('info', 'Deleting site...');
-
-        const response = await fetch(`/api/admin/sites/${siteId}`, {
-            method: 'DELETE'
-        });
-
-        if (response.ok) {
-            showToast('success', `Site "${siteName}" deleted successfully`);
-            setTimeout(() => {
-                                location.reload();
-            }, 1000);
-        } else {
-            const data = await response.json();
-            showToast('error', data.message || 'Failed to delete site');
-        }
-    } catch (error) {
-        showToast('error', 'Failed to delete site');
-    }
-}
-
-async function handleBulkAction(action) {
-    const selectedUsers = Array.from(document.querySelectorAll('.user-select:checked')).map(checkbox => ({
-        id: checkbox.dataset.userid,
-        username: checkbox.dataset.username
-    }));
-
-    if (!selectedUsers.length) return;
-
-    const actionMessages = {
-        suspend: 'suspend',
-        unsuspend: 'unsuspend',
-        deleteSites: 'delete all sites for',
-        deleteUsers: 'delete'
-    };
-
-    const usernames = selectedUsers.map(user => user.username).join(', ');
-    if (!confirm(`Are you sure you want to ${actionMessages[action]} the following users: ${usernames}?`)) return;
-
-    showToast('info', `Processing bulk action: ${action}...`);
-
-    try {
-        for (const user of selectedUsers) {
-            let endpoint;
-            let method = 'POST';
-
-            switch(action) {
-                case 'suspend':
-                    endpoint = `/api/admin/users/${user.id}/suspend`;
-                    break;
-                case 'unsuspend':
-                    endpoint = `/api/admin/users/${user.id}/suspend`;
-                    break;
-                case 'deleteSites':
-                    endpoint = `/api/admin/users/${user.id}/sites`;
-                    method = 'DELETE';
-                    break;
-                case 'deleteUsers':
-                    endpoint = `/api/admin/users/${user.id}`;
-                    method = 'DELETE';
-                    break;
-            }
-
-            const response = await fetch(endpoint, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: action === 'suspend' ? JSON.stringify({ suspend: true }) :
-                      action === 'unsuspend' ? JSON.stringify({ suspend: false }) :
-                      null
-            });
-
-            if (!response.ok) throw new Error(`Failed to ${action} user ${user.username}`);
-        }
-
-        showToast('success', `Successfully performed ${action} on selected users`);
-        setTimeout(() => location.reload(), 1000);
-    } catch (error) {
-        showToast('error', error.message);
-    }
-}
-
-async function loadAdminList() {
-    try {
-        const response = await fetch('/api/admin/admins');
-        if (response.ok) {
-            const data = await response.json();
-            const adminList = document.getElementById('adminList');
-            adminList.innerHTML = '';
-
-            const adminCount = document.getElementById('adminCount');
-            if (adminCount) {
-                adminCount.textContent = data.admins.length;
-            }
-
-            data.admins.forEach(admin => {
-                const li = document.createElement('li');
-                li.className = 'admin-item';
-
-                const adminName = document.createElement('span');
-                adminName.textContent = admin;
-                adminName.className = 'admin-name';
-
-                const adminEmail = document.createElement('span');
-                adminEmail.textContent = '';
-                adminEmail.className = 'admin-email';
-
-                                const adminInfo = document.createElement('div');
-                adminInfo.className = 'admin-info';
-                adminInfo.appendChild(adminName);
-                adminInfo.appendChild(adminEmail);
-
-                const removeButton = document.createElement('button');
-                removeButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
-                removeButton.className = 'btn-icon remove-admin';
-                removeButton.onclick = () => removeAdmin(admin);
-
-                if (admin === '{{ current_user.username }}') {
-                    removeButton.disabled = true;
-                    removeButton.title = 'Cannot remove yourself';
-                }
-
-                li.appendChild(adminInfo);
-                li.appendChild(removeButton);
-
-                li.classList.add('fade-in');
-                setTimeout(() => {
-                    li.classList.remove('fade-in');
-                }, 300);
-
-                adminList.appendChild(li);
-            });
-        } else {
-            showToast('error', 'Failed to load admin list');
-        }
-    } catch (error) {
-        showToast('error', 'Failed to load admin list');
-    }
-}
-
-async function addAdmin() {
-    const username = document.getElementById('newAdminUsername').value.trim();
-    if (!username) {
-        showToast('error', 'Please enter a username');
-        return;
-    }
-
-    try {
-        showToast('info', 'Adding administrator...');
-
-        const response = await fetch('/api/admin/admins/add', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username })
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-            showToast('success', data.message);
-            document.getElementById('newAdminUsername').value = '';
-            loadAdminList();
-        } else {
-            showToast('error', data.error || 'Failed to add admin');
-        }
-    } catch (error) {
-        showToast('error', 'Failed to add admin');
-    }
-}
-
-async function removeAdmin(username) {
-    if (!confirm(`Are you sure you want to remove ${username} as an administrator?`)) {
-        return;
-    }
-
-    try {
-        showToast('info', 'Removing administrator...');
-
-        const response = await fetch('/api/admin/admins/remove', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username })
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-            showToast('success', data.message);
-            loadAdminList();
-        } else {
-            showToast('error', data.error || 'Failed to remove admin');
-        }
-    } catch (error) {
-        showToast('error', 'Failed to remove admin');
-    }
-}
-
-function viewUserDetails(userId) {
-    const modal = document.getElementById('userDetailModal');
-    const userDetailContent = document.getElementById('userDetailContent');
-    const editUserForm = document.getElementById('editUserForm');
-
-    userDetailContent.innerHTML = `
-        <div class="user-detail-loading">
-            <div class="loading-spinner"></div>
-            <p>Loading user details...</p>
-        </div>
-    `;
-
-    modal.style.display = 'flex';
-
-    setTimeout(async () => {
-        const response = await fetch(`/api/users/${userId}`);
-        if (response.ok) {
-            const userData = await response.json();
-            userDetailContent.innerHTML = `
-                <h3>${userData.username}</h3>
-                <div class="user-meta">
-                    <p><i class="fas fa-envelope"></i> ${userData.email}</p>
-                    <p><i class="fas fa-calendar-alt"></i> Joined: ${userData.created_at}</p>
-                    <p><i class="fas fa-circle"></i> Status: ${userData.is_suspended ? 'Suspended' : 'Active'}</p>
-                </div>
-                <div class="user-stats">
-                    <div class="stat-item">
-                        <span class="stat-value">${userData.sites_count}</span>
-                        <span class="stat-label">Sites</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value">${userData.logins_count}</span>
-                        <span class="stat-label">Logins</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value">${userData.last_active}</span>
-                        <span class="stat-label">Last Active</span>
-                    </div>
-                </div>
-            `;
-            editUserForm.querySelector('#editUserId').value = userId;
-            editUserForm.querySelector('#editUsername').value = userData.username;
-            editUserForm.querySelector('#editEmail').value = userData.email;
-        } else {
-            userDetailContent.innerHTML = `
-                <div class="error-message">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>User not found</p>
-                </div>
-            `;
-        }
-    }, 1000);
-}
-
-
-function closeUserDetailModal() {
-    document.getElementById('userDetailModal').style.display = 'none';
-}
-
-function refreshData() {
-    showToast('info', 'Refreshing data...');
-    setTimeout(() => {
-        location.reload();
-    }, 1000);
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    loadSystemStatus();
-    loadRecentActivities();
-    updateAnalytics('day');
-});
-
-async function loadSystemStatus() {
-    try {
-        const response = await fetch('/api/admin/system-status');
-        const data = await response.json();
-
-        const serverStatusEl = document.getElementById('serverStatus');
-        serverStatusEl.innerHTML = data.server.status === 'healthy' 
-            ? `Healthy <i class="fas fa-check-circle"></i>` 
-            : `Unhealthy <i class="fas fa-exclamation-circle"></i>`;
-        serverStatusEl.className = `status-value ${data.server.status}`;
-
-        const dbStatusEl = document.getElementById('databaseStatus');
-        dbStatusEl.innerHTML = data.database.status === 'healthy' 
-            ? `Connected <i class="fas fa-check-circle"></i>` 
-            : `Disconnected <i class="fas fa-exclamation-circle"></i>`;
-        dbStatusEl.className = `status-value ${data.database.status}`;
-
-        const lastBackupEl = document.getElementById('lastBackup');
-        lastBackupEl.textContent = data.backup.last_backup || 'Not available';
-    } catch (error) {
-        console.error('Error loading system status:', error);
-        document.getElementById('serverStatus').innerHTML = `Unknown <i class="fas fa-question-circle"></i>`;
-        document.getElementById('databaseStatus').innerHTML = `Unknown <i class="fas fa-question-circle"></i>`;
-        document.getElementById('lastBackup').textContent = 'Not available';
-    }
-}
-
-function loadVisitData() {
-    loadRecentActivities(true);
-}
-
-function loadRecentActivities(replaceAll = true) {
-    fetch('/api/admin/recent-activities')
-        .then(response => response.json())
-        .then(data => {
-            const activitiesList = document.getElementById('recentActivitiesList');
-            if (replaceAll) {
-                activitiesList.innerHTML = '';
-            }
-
-            if (data.activities && data.activities.length > 0) {
-                data.activities.forEach(activity => {
-                    const li = document.createElement('li');
-                    li.className = 'activity-item';
-
-                    const activityIcon = document.createElement('div');
-                    activityIcon.className = 'activity-icon';
-
-                    let iconClass = 'fa-info-circle';
-                    switch (activity.type) {
-                        case 'user_registration':
-                            iconClass = 'fa-user-plus';
-                            break;
-                        case 'site_creation':
-                            iconClass = 'fa-globe';
-                            break;
-                        case 'admin_change':
-                            iconClass = 'fa-user-shield';
-                            break;
-                        case 'site_deletion':
-                            iconClass = 'fa-trash-alt';
-                            break;
-                        case 'user_login':
-                            iconClass = 'fa-sign-in-alt';
-                            break;
-                    }
-
-                    activityIcon.innerHTML = `<i class="fas ${iconClass}"></i>`;
-
-                    const activityDetails = document.createElement('div');
-                    activityDetails.className = 'activity-details';
-
-                    let message = activity.message;
-                    if (activity.username) {
-                        message = message.replace('{username}', `<strong>${activity.username}</strong>`);
-                    }
-
-                    activityDetails.innerHTML = `
-                        <p>${message}</p>
-                        <span class="activity-time">${formatTimeAgo(activity.timestamp)}</span>
-                    `;
-
-                    li.appendChild(activityIcon);
-                    li.appendChild(activityDetails);
-                    activitiesList.appendChild(li);
-
-                    setTimeout(() => {
-                        li.classList.add('fade-in');
-                    }, 100 * activitiesList.children.length);
-                });
-            } else {
-                activitiesList.innerHTML = `
-                    <li class="activity-item">
-                        <div class="activity-details">
-                            <p>No recent activities found</p>
-                        </div>
-                    </li>
-                `;
-            }
-        })
-        .catch(error => {
-            console.error('Error loading recent activities:', error);
-            document.getElementById('recentActivitiesList').innerHTML = `
-                <li class="activity-item">
-                    <div class="activity-details">
-                        <p>Failed to load recent activities</p>
-                    </div>
-                </li>
-            `;
-        });
-}
-
-function formatTimeAgo(timestamp) {
-    const now = new Date();
-    const activityTime = new Date(timestamp);
-    const diffInSeconds = Math.floor((now - activityTime) / 1000);
-
-    if (diffInSeconds < 60) {
-        return 'just now';
-    } else if (diffInSeconds < 3600) {
-        const minutes = Math.floor(diffInSeconds / 60);
-        return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    } else if (diffInSeconds < 86400) {
-        const hours = Math.floor(diffInSeconds / 3600);
-        return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    } else if (diffInSeconds < 604800) {
-        const days = Math.floor(diffInSeconds / 86400);
-        return `${days} day${days > 1 ? 's' : ''} ago`;
-    } else {
-        return activityTime.toLocaleDateString();
-    }
-}
-
-async function updateAnalytics(period) {
-    document.querySelectorAll('.time-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    document.querySelector(`.time-btn[data-period="${period}"]`).classList.add('active');
-
-    try {
-        showLoadingState();
-        const response = await fetch(`/api/admin/analytics?period=${period}`);
-        const data = await response.json();
-
-        renderUserRegistrationsChart(data.user_registrations);
-        renderSiteTypesChart(data.site_types);
-        renderTrafficSourcesChart(data.traffic_sources);
-        renderPlatformUsageChart(data.platform_usage);
-    } catch (error) {
-        console.error('Error loading analytics data:', error);
-        showErrorState();
-    }
-}
-
-function showLoadingState() {
-    document.getElementById('userRegistrationsChart').innerHTML = `
-        <div class="loading-spinner"></div>
-        <p>Loading chart data...</p>
-    `;
-    document.getElementById('siteTypesChart').innerHTML = `
-        <div class="loading-spinner"></div>
-        <p>Loading chart data...</p>
-    `;
-    document.getElementById('trafficSourcesChart').innerHTML = `
-        <div class="loading-spinner"></div>
-        <p>Loading chart data...</p>
-    `;
-    document.getElementById('platformUsageChart').innerHTML = `
-        <div class="loading-spinner"></div>
-        <p>Loading chart data...</p>
-    `;
-}
-
-function showErrorState() {
-    const errorMessage = `
-        <div class="error-message">
-            <i class="fas fa-exclamation-triangle"></i>
-            <p>Failed to load analytics data</p>
-        </div>
-    `;
-
-    document.getElementById('userRegistrationsChart').innerHTML = errorMessage;
-    document.getElementById('siteTypesChart').innerHTML = errorMessage;
-    document.getElementById('trafficSourcesChart').innerHTML = errorMessage;
-    document.getElementById('platformUsageChart').innerHTML = errorMessage;
-}
-
-function renderUserRegistrationsChart(data) {
-    const chartContainer = document.getElementById('userRegistrationsChart');
-    chartContainer.innerHTML = '';
-
-    const chartBars = document.createElement('div');
-    chartBars.className = 'chart-bars';
-
-    const maxValue = Math.max(...data.values, 1);
-
-    data.values.forEach((value, index) => {
-        const height = (value / maxValue) * 100;
-        const bar = document.createElement('div');
-        bar.className = 'chart-bar';
-        bar.style.height = `${height}%`;
-
-        bar.setAttribute('title', `${data.labels[index]}: ${value} registrations`);
-
-        chartBars.appendChild(bar);
-
-        setTimeout(() => {
-            bar.style.height = `${height}%`;
-        }, 100 * index);
-    });
-
-    chartContainer.appendChild(chartBars);
-}
-
-function renderSiteTypesChart(data) {
-    const chartContainer = document.getElementById('siteTypesChart');
-    chartContainer.innerHTML = '';
-
-    const webPercentage = data.web;
-    const pythonPercentage = data.python;
-
-    const pieChart = document.createElement('div');
-    pieChart.className = 'pie-chart';
-
-    const webSegment = document.createElement('div');
-    webSegment.className = 'pie-segment';
-    webSegment.style.transform = 'rotate(0deg)';
-    webSegment.style.backgroundColor = 'var(--primary)';
-
-    const pythonSegment = document.createElement('div');
-    pythonSegment.className = 'pie-segment';
-    pythonSegment.style.transform = `rotate(${webPercentage * 3.6}deg)`;
-    pythonSegment.style.backgroundColor = 'var(--accent)';
-
-    const pieCenter = document.createElement('div');
-    pieCenter.className = 'pie-center';
-    pieCenter.textContent = `${webPercentage}%`;
-
-    pieChart.appendChild(webSegment);
-    pieChart.appendChild(pythonSegment);
-    pieChart.appendChild(pieCenter);
-
-    const chartLegend = document.createElement('div');
-    chartLegend.className = 'chart-legend';
-
-    chartLegend.innerHTML = `
-        <div class="legend-item">
-            <span class="legend-color" style="background-color: var(--primary);"></span>
-            <span>Web Sites (${webPercentage}%)</span>
-        </div>
-        <div class="legend-item">
-            <span class="legend-color" style="background-color: var(--accent);"></span>
-            <span>Python Sites (${pythonPercentage}%)</span>
-        </div>
-    `;
-
-    chartContainer.appendChild(pieChart);
-    chartContainer.appendChild(chartLegend);
-
-    setTimeout(() => {
-        pieCenter.textContent = `${webPercentage}%`;
-        pythonSegment.style.transform = `rotate(${webPercentage * 3.6}deg)`;
-    }, 300);
-}
-
-function renderTrafficSourcesChart(data) {
-    const chartContainer = document.getElementById('trafficSourcesChart');
-    chartContainer.innerHTML = '';
-
-    const horizontalBars = document.createElement('div');
-    horizontalBars.className = 'horizontal-bars';
-
-    Object.entries(data).forEach(([source, percentage]) => {
-        const barItem = document.createElement('div');
-        barItem.className = 'horizontal-bar-item';
-
-        barItem.innerHTML = `
-            <span class="bar-label">${source}</span>
-            <div class="bar-container">
-                <div class="horizontal-bar" style="width: 0%"></div>
-            </div>
-            <span class="bar-value">${percentage}%</span>
-        `;
-
-        horizontalBars.appendChild(barItem);
-
-        setTimeout(() => {
-            barItem.querySelector('.horizontal-bar').style.width = `${percentage}%`;
-        }, 300);
-    });
-
-    chartContainer.appendChild(horizontalBars);
-}
-
-function renderPlatformUsageChart(data) {
-    const chartContainer = document.getElementById('platformUsageChart');
-    chartContainer.innerHTML = '';
-
-    const lineChart = document.createElement('div');
-    lineChart.className = 'line-chart';
-
-    const maxValue = Math.max(...data.values, 1);
-    const points = data.values.map((value, index) => {
-        const x = (index / (data.values.length - 1)) * 500;
-        const y = 200 - ((value / maxValue) * 180);
-        return `${x},${y}`;
-    }).join(' ');
-
-    lineChart.innerHTML = `
-        <svg viewBox="0 0 500 200" class="chart">
-            <polyline
-                fill="none"
-                stroke="var(--primary)"
-                stroke-width="3"
-                points="${points}"
-            />
-        </svg>
-    `;
-
-    chartContainer.appendChild(lineChart);
-}
-
-function exportChart(chartId) {
-    showToast('info', `Exporting ${chartId} data...`);
-
-    fetch(`/api/admin/analytics/export?chart=${chartId}`)
-        .then(response => {
-            if (response.ok) {
-                return response.blob();
-            }
-            throw new Error('Export failed');
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = `${chartId}_export.csv`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            showToast('success', 'Export successful');
-        })
-        .catch(error => {
-            console.error('Export error:', error);
-            showToast('error', 'Failed to export data');
-        });
-}
-
-function saveMaxSitesPerUser() {
-    const maxSites = document.getElementById('maxSitesPerUser').value;
-
-    if (maxSites < 1 || maxSites > 10) {
-        showToast('error', 'Max sites must be between 1 and 10');
-        return;
-    }
-
-    fetch('/api/admin/settings/max-sites', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ maxSites: parseInt(maxSites) })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message) {
-            showToast('success', data.message);
-        } else {
-            showToast('error', data.error || 'Failed to update max sites setting');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('error', 'Failed to update max sites setting');
-    });
-}
-
-function toggleClubLeader(userId, username, isClubLeader) {
-    if (!confirm(`Are you sure you want to ${isClubLeader ? 'make' : 'remove'} ${username} ${isClubLeader ? 'a Club Leader' : 'as Club Leader'}?`)) {
-        return;
-    }
-
-    showToast('info', `${isClubLeader ? 'Making' : 'Removing'} ${username} as club leader...`);
-
-    fetch(`/api/admin/users/${userId}/club-leader`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ is_club_leader: isClubLeader })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        showToast('success', data.message || `Successfully ${isClubLeader ? 'made' : 'removed'} ${username} ${isClubLeader ? 'a' : 'as'} club leader`);
-        // Force reload after a short delay to ensure the UI updates
-        setTimeout(() => {
-            window.location.href = window.location.pathname + '?updated=' + new Date().getTime();
-        }, 1500);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('error', 'Failed to update club leader status: ' + error.message);
-    });
-}
-
 </script>
 
 <style>
@@ -2165,7 +1054,7 @@ function toggleClubLeader(userId, username, isClubLeader) {
     margin: 0 0 5px;
 }
 
-.statinfo p {
+.stat-info p {
     margin: 0;
     color: var(--text-secondary);
     font-size: 0.9rem;
@@ -2266,7 +1155,7 @@ function toggleClubLeader(userId, username, isClubLeader) {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right:1rem;
+    margin-right: 1rem;
 }
 
 .activity-icon i {
@@ -2456,61 +1345,6 @@ tbody tr:hover {
     background-color: #27ae60;
 }
 
-.btn-view {
-    background-color: #17a2b8;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-}
-
-.btn-view:hover {
-    background-color: #138496;
-    color: white;
-}
-
-.btn-edit {
-    background-color: #ffc107;
-    color: #212529;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-}
-
-.btn-edit:hover {
-    background-color: #e0a800;
-    color: #212529;
-}
-
-.btn-danger {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-}
-
-.btn-danger:hover {
-    background-color: #c82333;
-}
-
 .btn-warning {
     background-color: #ffc107;
     color: black;
@@ -2529,6 +1363,23 @@ tbody tr:hover {
 
 .btn-warning:hover {
     background-color: #e0a800;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
 }
 
 .bulk-actions {
@@ -2686,7 +1537,6 @@ tbody tr:hover {
     margin-right: 8px;
 }
 
-/* Pagination */
 .pagination {
     display: flex;
     justify-content: center;
@@ -2918,7 +1768,8 @@ tbody tr:hover {
 .date-picker {
     display: flex;
     align-items: center;
-    padding: 0.5rem 1rem;background-color: transparent;
+    padding: 0.5rem 1rem;
+    background-color: transparent;
     border-radius: 6px;
     cursor: pointer;
     margin-left: 10px;
@@ -3077,12 +1928,6 @@ tbody tr:hover {
     font-weight: 500;
 }
 
-.settings-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-    gap: 1.5rem;
-}
-
 .settings-container {
     max-width: 600px;
     margin: 0 auto 1.5rem;
@@ -3097,98 +1942,6 @@ tbody tr:hover {
 
 .settings-form {
     padding: 1.5rem;
-}
-
-.toggle-option {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.toggle-option:last-child {
-    margin-bottom: 0;
-}
-
-.toggle-label {
-    font-weight: 500;
-}
-
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 48px;
-    height: 24px;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 16px;
-    width: 16px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    transition: .4s;
-}
-
-input:checked + .slider {
-    background-color: var(--primary);
-}
-
-input:focus + .slider {
-    box-shadow: 0 0 1px var(--primary);
-}
-
-input:checked + .slider:before {
-    transform: translateX(24px);
-}
-
-.slider.round {
-    border-radius: 34px;
-}
-
-.slider.round:before {
-    border-radius: 50%;
-}
-
-.settings-select {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--border-primary);
-    border-radius: 8px;
-    background-color: var(--surface-primary);
-    color: var(--text-primary);
-    appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23718096" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-}
-
-.settings-input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--border-primary);
-    border-radius: 8px;
-    background-color: var(--surface-primary);
-    color: var(--text-primary);
 }
 
 .input-group {
@@ -3212,12 +1965,6 @@ input:checked + .slider:before {
     background-color: var(--surface-primary);
     color: var(--text-primary);
     text-align: center;
-}
-
-.form-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 1rem;
 }
 
 .modal {
@@ -3289,21 +2036,6 @@ input:checked + .slider:before {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-}
-
-.modal {
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-.modal-content {
-    background-color: white;
-    border-radius: 12px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-    animation: slideUp 0.3s ease;
 }
 
 .user-info-container {
@@ -3380,33 +2112,37 @@ input:checked + .slider:before {
     color: var(--text-secondary);
 }
 
-.user-actions {
-    display: flex;
-    gap: 10px;
+.user-edit-container {
+    margin-top: 2rem;
+    border-top: 1px solid var(--border-primary);
+    padding-top: 1.5rem;
 }
 
-.user-detail-loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
+.password-input-group {
+    position: relative;
 }
 
-.error-message {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: var(--danger);
-    padding: 2rem;
+.toggle-password {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
 }
 
-.error-message i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
+.settings-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    background-color: var(--surface-primary);
+    color: var(--text-primary);
 }
 
-.toast-container {
+#toast-container {
     position: fixed;
     bottom: 20px;
     right: 20px;
@@ -3417,17 +2153,17 @@ input:checked + .slider:before {
 }
 
 .toast {
-    background-color: var(--surface-primary);
+    padding: 1rem 1.5rem;
     border-radius: 8px;
-    padding: 1rem;
-    min-width: 300px;
-    max-width: 400px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transform: translateX(120%);
     opacity: 0;
     transition: transform 0.3s ease, opacity 0.3s ease;
+    border-left: 4px solid var(--primary);
 }
 
 .toast.show {
@@ -3447,9 +2183,18 @@ input:checked + .slider:before {
     border-left: 4px solid #3498db;
 }
 
-.toast i {
-    font-size: 1.25rem;
-    margin-right: 10px;
+.toast.warning {
+    border-left: 4px solid #f39c12;
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toast-content i {
+    font-size: 20px;
 }
 
 .toast.success i {
@@ -3464,21 +2209,8 @@ input:checked + .slider:before {
     color: #3498db;
 }
 
-.toast span {
-    flex: 1;
-}
-
-.toast-close {
-    background: none;
-    border: none;
-    font-size: 1.25rem;
-    cursor: pointer;
-    color: var(--text-secondary);
-    transition: color 0.2s ease;
-}
-
-.toast-close:hover {
-    color: var(--danger);
+.toast.warning i {
+    color: #f39c12;
 }
 
 .sidebar-collapsed .admin-sidebar {
@@ -3553,7 +2285,6 @@ input:checked + .slider:before {
     animation: slideUp 0.5s ease;
 }
 
-/* Action Dropdown Styling */
 .action-dropdown {
     position: relative;
     display: inline-block;
@@ -3649,345 +2380,6 @@ tr:not(:nth-last-child(-n+3)) .action-dropdown .action-dropdown-content {
     background-color: rgba(255, 77, 109, 0.1);
 }
 
-/* Table Styling Improvements */
-.table-container {
-    box-shadow: var(--shadow-md);
-    margin-bottom: 2rem;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-}
-
-table {
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
-th {
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    padding: 1.25rem 1rem;
-    background-color: var(--surface-primary);
-    border-bottom: 2px solid var(--border-primary);
-}
-
-td {
-    vertical-align: middle;
-    padding: 1rem;
-    border-bottom: 1px solid var(--border-primary);
-}
-
-tbody tr:last-child td {
-    border-bottom: none;
-}
-
-tbody tr {
-    transition: all 0.2s ease;
-}
-
-tbody tr:hover {
-    background-color: rgba(var(--primary-rgb), 0.05);
-}
-
-/* Status Badge Enhancements */
-.status-badge {
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 5px 10px;
-    border-radius: 30px;
-    display: inline-flex;
-    align-items: center;
-    line-height: 1;
-}
-
-.status-badge.active {
-    background-color: rgba(46, 204, 113, 0.15);
-    color: var(--success);
-    border: 1px solid rgba(46, 204, 113, 0.3);
-}
-
-.status-badge.suspended {
-    background-color: rgba(255, 77, 109, 0.15);
-    color: var(--danger);
-    border: 1px solid rgba(255, 77, 109, 0.3);
-}
-
-.status-badge.club-leader {
-    background-color: rgba(138, 100, 235, 0.15);
-    color: var(--accent);
-    border: 1px solid rgba(138, 100, 235, 0.3);
-}
-
-/* Card Improvements */
-.dashboard-card, .analytics-card, .settings-card {
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-    overflow: hidden;
-    background-color: var(--surface-primary);
-    transition: all 0.3s ease;
-}
-
-.dashboard-card:hover, .analytics-card:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
-}
-
-.card-header {
-    padding: 1.25rem;
-    border-bottom: 1px solid var(--border-primary);
-    background-color: var(--surface-primary);
-}
-
-.card-content {
-    padding: 1.5rem;
-}
-
-/* Stats Card Improvements */
-.stat-card {
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-md);
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    background: var(--surface-primary);
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
-}
-
-.stat-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: var(--radius-md);
-    margin-right: 1.25rem;
-}
-
-.user-icon {
-    background: linear-gradient(135deg, var(--info), #2574a9);
-}
-
-.site-icon {
-    background: linear-gradient(135deg, var(--success), #27ae60);
-}
-
-.admin-icon {
-    background: linear-gradient(135deg, var(--accent), #6c5ce7);
-}
-
-/* Button Enhancements */
-.btn-primary, .btn-secondary, .btn-danger, .btn-success, .btn-warning {
-    border-radius: var(--radius-md);
-    padding: 0.75rem 1.25rem;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    border: none;
-    cursor: pointer;
-    gap: 8px;
-    font-size: 0.95rem;
-}
-
-.btn-primary {
-    background-color: var(--primary);
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.btn-secondary {
-    background-color: var(--surface-secondary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-primary);
-}
-
-.btn-secondary:hover {
-    background-color: var(--background-primary);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-}
-
-.btn-danger {
-    background-color: var(--danger);
-    color: white;
-}
-
-.btn-danger:hover {
-    background-color: #ff3358;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.btn-success {
-    background-color: var(--success);
-    color: white;
-}
-
-.btn-success:hover {
-    background-color: #27ae60;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-/* Admin Sidebar Improvements */
-.admin-sidebar {
-    background: linear-gradient(to bottom, var(--surface-primary), #f5f7fa);
-    border-right: 1px solid var(--border-primary);
-    box-shadow: var(--shadow-md);
-    width: 280px;
-}
-
-.profile-avatar {
-    width: 55px;
-    height: 55px;
-    background: linear-gradient(135deg, var(--primary), var(--accent));
-    border-radius: var(--radius-md);
-}
-
-.admin-nav .nav-link {
-    border-radius: var(--radius-md);
-    margin: 0 1rem;
-    padding: 12px 1rem;
-}
-
-.admin-nav .nav-link.active {
-    background-color: rgba(var(--primary-rgb), 0.1);
-    color: var(--primary);
-    font-weight: 600;
-}
-
-.admin-nav .nav-link:hover {
-    background-color: var(--background-primary);
-}
-
-/* Pagination Improvements */
-.pagination {
-    margin-top: 2rem;
-    gap: 8px;
-}
-
-.btn-page {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-md);
-    background-color: var(--surface-primary);
-    border: 1px solid var(--border-primary);
-    transition: all 0.2s ease;
-}
-
-.btn-page.active, .btn-page:hover {
-    background-color: var(--primary);
-    color: white;
-    border-color: var(--primary);
-    box-shadow: var(--shadow-sm);
-}
-
-/* Form Element Improvements */
-.search-input, .admin-input, .form-input, .form-textarea {
-    border-radius: var(--radius-md);
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--border-primary);
-    transition: all 0.2s ease;
-    background-color: var(--surface-primary);
-}
-
-.search-input:focus, .admin-input:focus, .form-input:focus, .form-textarea:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
-    outline: none;
-}
-
-/* Toast Improvements */
-.toast-container {
-    z-index: 9999;
-}
-
-.toast {
-    box-shadow: var(--shadow-lg);
-    border-radius: var(--radius-md);
-    min-width: 300px;
-}
-
-.toast.success {
-    border-left: 4px solid var(--success);
-}
-
-.toast.error {
-    border-left: 4px solid var(--danger);
-}
-
-.toast.info {
-    border-left: 4px solid var(--info);
-}
-
-.toast.warning {
-    border-left: 4px solid var(--warning);
-}
-
-/* Modal Improvements */
-.modal {
-    backdrop-filter: blur(5px);
-}
-
-.modal-content {
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    border: none;
-}
-
-.modal-header {
-    background-color: var(--surface-primary);
-}
-
-.modal-actions {
-    background-color: var(--surface-secondary);
-}
-
-/* Custom animations */
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.5);
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(var(--primary-rgb), 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0);
-    }
-}
-
-.user-edit-container {
-    margin-top: 2rem;
-    border-top: 1px solid var(--border-primary);
-    padding-top: 1.5rem;
-}
-
-.password-input-group {
-    position: relative;
-}
-
-.toggle-password {
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-}
-
-/* Media Queries */
 @media (max-width: 992px) {
     .admin-container {
         flex-direction: column;
@@ -4033,10 +2425,6 @@ tbody tr:hover {
 
     .analytics-card.wide {
         grid-column: auto;
-    }
-
-    .settings-grid {
-        grid-template-columns: 1fr;
     }
 }
 
@@ -4101,5 +2489,736 @@ tbody tr:hover {
         max-width: 300px;
     }
 }
+
 </style>
+
+<script>
+function emailAllUsers() {
+    const rows = document.getElementById('userTableBody').getElementsByTagName('tr');
+    const emails = [];
+
+    for (let row of rows) {
+        const emailCell = row.cells[3]; 
+        if (emailCell) {
+            emails.push(emailCell.textContent.trim());
+        }
+    }
+
+    if (emails.length > 0) {
+        showToast('info', `Preparing email to ${emails.length} users`);
+        window.location.href = `mailto:${emails.join(',')}`;
+    } else {
+        showToast('error', 'No email addresses found');
+    }
+}
+
+async function toggleSuspension(userId, username, suspend) {
+    if (!confirm(`Are you sure you want to ${suspend ? 'suspend' : 'unsuspend'} user "${username}"?`)) return;
+
+    try {
+        showToast('info', `Processing ${suspend ? 'suspension' : 'unsuspension'}...`);
+
+        const response = await fetch(`/api/admin/users/${userId}/suspend`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ suspend })
+        });
+
+        if (response.ok) {
+            showToast('success', `User ${suspend ? 'suspended' : 'unsuspended'} successfully`);
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            const data = await response.json();
+            showToast('error', data.message || 'Failed to update user suspension status');
+        }
+    } catch (error) {
+        showToast('error', 'Failed to update user suspension status');
+    }
+}
+
+async function toggleClubLeader(userId, username, isClubLeader) {
+    // Toggle based on current status - if currently a leader, remove; if not a leader, make one
+    const makeLeader = !isClubLeader;
+    if (!confirm(`Are you sure you want to ${makeLeader ? 'make' : 'remove'} "${username}" ${makeLeader ? 'as a' : 'from being a'} club leader?`)) return;
+
+    try {
+        showToast('info', `${makeLeader ? 'Adding' : 'Removing'} club leader status...`);
+
+        const response = await fetch(`/api/admin/users/${userId}/club-leader`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ is_club_leader: makeLeader })
+        });
+
+        if (response.ok) {
+            showToast('success', `User ${makeLeader ? 'is now' : 'is no longer'} a club leader`);
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            const data = await response.json();
+            showToast('error', data.message || 'Failed to update club leader status');
+        }
+    } catch (error) {
+        showToast('error', 'Failed to update club leader status');
+    }
+}
+
+async function deleteAllSites(userId, username) {
+    if (!confirm(`Are you sure you want to delete ALL sites for user "${username}"? This action cannot be undone.`)) return;
+
+    try {
+        showToast('info', 'Deleting sites...');
+
+        const response = await fetch(`/api/admin/users/${userId}/sites`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            showToast('success', `All sites for user "${username}" deleted successfully`);
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            const data = await response.json();
+            showToast('error', data.message || 'Failed to delete user sites');
+        }
+    } catch (error) {
+        showToast('error', 'Failed to delete user sites');
+    }
+}
+
+async function deleteUser(userId, username) {
+    if (!confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`)) return;
+
+    try {
+        showToast('info', 'Deleting user...');
+
+        const response = await fetch(`/api/admin/users/${userId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            showToast('success', `User "${username}" deleted successfully`);
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            const data = await response.json();
+            showToast('error', data.message || 'Failed to delete user');
+        }
+    } catch (error) {
+        showToast('error', 'Failed to delete user');
+    }
+}
+
+async function deleteSite(siteId, siteName) {
+    if (!confirm(`Are you sure you want to delete site "${siteName}"? This action cannot be undone.`)) return;
+
+    try {
+        showToast('info', 'Deleting site...');
+
+        const response = await fetch(`/api/admin/sites/${siteId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            showToast('success', `Site "${siteName}" deleted successfully`);
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            const data = await response.json();
+            showToast('error', data.message || 'Failed to delete site');
+        }
+    } catch (error) {
+        showToast('error', 'Failed to delete site');
+    }
+}
+
+async function handleBulkAction(action) {
+    const selectedUsers = Array.from(document.querySelectorAll('.user-select:checked')).map(checkbox => ({
+        id: checkbox.dataset.userid,
+        username: checkbox.dataset.username
+    }));
+
+    if (!selectedUsers.length) return;
+
+    const actionMessages = {
+        suspend: 'suspend',
+        unsuspend: 'unsuspend',
+        deleteSites: 'delete all sites for',
+        deleteUsers: 'delete'
+    };
+
+    const usernames = selectedUsers.map(user => user.username).join(', ');
+    if (!confirm(`Are you sure you want to ${actionMessages[action]} the following users: ${usernames}?`)) return;
+
+    showToast('info', `Processing bulk action: ${action}...`);
+
+    try {
+        for (const user of selectedUsers) {
+            let endpoint;
+            let method = 'POST';
+
+            switch(action) {
+                case 'suspend':
+                    endpoint = `/api/admin/users/${user.id}/suspend`;
+                    break;
+                case 'unsuspend':
+                    endpoint = `/api/admin/users/${user.id}/suspend`;
+                    break;
+                case 'deleteSites':
+                    endpoint = `/api/admin/users/${user.id}/sites`;
+                    method = 'DELETE';
+                    break;
+                case 'deleteUsers':
+                    endpoint = `/api/admin/users/${user.id}`;
+                    method = 'DELETE';
+                    break;
+            }
+
+            const response = await fetch(endpoint, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: action === 'suspend' ? JSON.stringify({ suspend: true }) :
+                      action === 'unsuspend' ? JSON.stringify({ suspend: false }) :
+                      null
+            });
+
+            if (!response.ok) throw new Error(`Failed to ${action} user ${user.username}`);
+        }
+
+        showToast('success', `Successfully performed ${action} on selected users`);
+        setTimeout(() => location.reload(), 1000);
+    } catch (error) {
+        showToast('error', error.message);
+    }
+}
+
+async function loadAdminList() {
+    try {
+        const response = await fetch('/api/admin/admins');
+        if (response.ok) {
+            const data = await response.json();
+            const adminList = document.getElementById('adminList');
+            adminList.innerHTML = '';
+
+            const adminCount = document.getElementById('adminCount');
+            if (adminCount) {
+                adminCount.textContent = data.admins.length;
+            }
+
+            data.admins.forEach(admin => {
+                const li = document.createElement('li');
+                li.className = 'admin-item';
+
+                const adminName = document.createElement('span');
+                adminName.textContent = admin;
+                adminName.className = 'admin-name';
+
+                const adminEmail = document.createElement('span');
+                adminEmail.textContent = '';
+                adminEmail.className = 'admin-email';
+
+                const adminInfo = document.createElement('div');
+                adminInfo.className = 'admin-info';
+                adminInfo.appendChild(adminName);
+                adminInfo.appendChild(adminEmail);
+
+                const removeButton = document.createElement('button');
+                removeButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                removeButton.className = 'btn-icon remove-admin';
+                removeButton.onclick = () => removeAdmin(admin);
+
+                if (admin === '{{ current_user.username }}') {
+                    removeButton.disabled = true;
+                    removeButton.title = 'Cannot remove yourself';
+                }
+
+                li.appendChild(adminInfo);
+                li.appendChild(removeButton);
+
+                li.classList.add('fade-in');
+                setTimeout(() => {
+                    li.classList.remove('fade-in');
+                }, 300);
+
+                adminList.appendChild(li);
+            });
+        } else {
+            showToast('error', 'Failed to load admin list');
+        }
+    } catch (error) {
+        showToast('error', 'Failed to load admin list');
+    }
+}
+
+async function addAdmin() {
+    const username = document.getElementById('newAdminUsername').value.trim();
+    if (!username) {
+        showToast('error', 'Please enter a username');
+        return;
+    }
+
+    try {
+        showToast('info', 'Adding administrator...');
+
+        const response = await fetch('/api/admin/admins/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            showToast('success', data.message);
+            document.getElementById('newAdminUsername').value = '';
+            loadAdminList();
+        } else {
+            showToast('error', data.error || 'Failed to add admin');
+        }
+    } catch (error) {
+        showToast('error', 'Failed to add admin');
+    }
+}
+
+async function removeAdmin(username) {
+    if (!confirm(`Are you sure you want to remove ${username} as an administrator?`)) {
+        return;
+    }
+
+    try {
+        showToast('info', 'Removing administrator...');
+
+        const response = await fetch('/api/admin/admins/remove', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            showToast('success', data.message);
+            loadAdminList();
+        } else {
+            showToast('error', data.error || 'Failed to remove admin');
+        }
+    } catch (error) {
+        showToast('error', 'Failed to remove admin');
+    }
+}
+
+function viewUserDetails(userId) {
+    const modal = document.getElementById('userDetailModal');
+    const userDetailContent = document.getElementById('userDetailContent');
+    const editUserForm = document.getElementById('editUserForm');
+
+    userDetailContent.innerHTML = `
+        <div class="user-detail-loading">
+            <div class="loading-spinner"></div>
+            <p>Loading user details...</p>
+        </div>
+    `;
+
+    modal.style.display = 'flex';
+
+    setTimeout(async () => {
+        const response = await fetch(`/api/users/${userId}`);
+        if (response.ok) {
+            const userData = await response.json();
+            userDetailContent.innerHTML = `
+                <h3>${userData.username}</h3>
+                <div class="user-meta">
+                    <p><i class="fas fa-envelope"></i> ${userData.email}</p>
+                    <p><i class="fas fa-calendar-alt"></i> Joined: ${userData.created_at}</p>
+                    <p><i class="fas fa-circle"></i> Status: ${userData.is_suspended ? 'Suspended' : 'Active'}</p>
+                </div>
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">${userData.sites_count}</span>
+                        <span class="stat-label">Sites</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">${userData.logins_count}</span>
+                        <span class="stat-label">Logins</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">${userData.last_active}</span>
+                        <span class="stat-label">Last Active</span>
+                    </div>
+                </div>
+            `;
+            editUserForm.querySelector('#editUserId').value = userId;
+            editUserForm.querySelector('#editUsername').value = userData.username;
+            editUserForm.querySelector('#editEmail').value = userData.email;
+        } else {
+            userDetailContent.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>User not found</p>
+                </div>
+            `;
+        }
+    }, 1000);
+}
+
+function closeUserDetailModal() {
+    document.getElementById('userDetailModal').style.display = 'none';
+}
+
+function refreshData() {
+    showToast('info', 'Refreshing data...');
+    setTimeout(() => {
+        location.reload();
+    }, 1000);
+}
+
+function loadSystemStatus() {
+    try {
+        const response = fetch('/api/admin/system-status');
+        response.then(res => res.json())
+        .then(data => {
+            const serverStatusEl = document.getElementById('serverStatus');
+            serverStatusEl.innerHTML = data.server.status === 'healthy' 
+                ? `Healthy <i class="fas fa-check-circle"></i>` 
+                : `Unhealthy <i class="fas fa-exclamation-circle"></i>`;
+            serverStatusEl.className = `status-value ${data.server.status}`;
+
+            const dbStatusEl = document.getElementById('databaseStatus');
+            dbStatusEl.innerHTML = data.database.status === 'healthy' 
+                ? `Connected <i class="fas fa-check-circle"></i>` 
+                : `Disconnected <i class="fas fa-exclamation-circle"></i>`;
+            dbStatusEl.className = `status-value ${data.database.status}`;
+
+            const lastBackupEl = document.getElementById('lastBackup');
+            lastBackupEl.textContent = data.backup.last_backup || 'Not available';
+        });
+    } catch (error) {
+        console.error('Error loading system status:', error);
+        document.getElementById('serverStatus').innerHTML = `Unknown <i class="fas fa-question-circle"></i>`;
+        document.getElementById('databaseStatus').innerHTML = `Unknown <i class="fas fa-question-circle"></i>`;
+        document.getElementById('lastBackup').textContent = 'Not available';
+    }
+}
+
+function loadRecentActivities() {
+    fetch('/api/admin/recent-activities')
+        .then(response => response.json())
+        .then(data => {
+            const activitiesList = document.getElementById('recentActivitiesList');
+            activitiesList.innerHTML = '';
+
+            if (data.activities && data.activities.length > 0) {
+                data.activities.forEach(activity => {
+                    const li = document.createElement('li');
+                    li.className = 'activity-item';
+
+                    const activityIcon = document.createElement('div');
+                    activityIcon.className = 'activity-icon';
+
+                    let iconClass = 'fa-info-circle';
+                    switch (activity.type) {
+                        case 'user_registration':
+                            iconClass = 'fa-user-plus';
+                            break;
+                        case 'site_creation':
+                            iconClass = 'fa-globe';
+                            break;
+                        case 'admin_change':
+                            iconClass = 'fa-user-shield';
+                            break;
+                        case 'site_deletion':
+                            iconClass = 'fa-trash-alt';
+                            break;
+                        case 'user_login':
+                            iconClass = 'fa-sign-in-alt';
+                            break;
+                    }
+
+                    activityIcon.innerHTML = `<i class="fas ${iconClass}"></i>`;
+
+                    const activityDetails = document.createElement('div');
+                    activityDetails.className = 'activity-details';
+
+                    let message = activity.message;
+                    if (activity.username) {
+                        message = message.replace('{username}', `<strong>${activity.username}</strong>`);
+                    }
+
+                    activityDetails.innerHTML = `
+                        <p>${message}</p>
+                        <span class="activity-time">${formatTimeAgo(activity.timestamp)}</span>
+                    `;
+
+                    li.appendChild(activityIcon);
+                    li.appendChild(activityDetails);
+                    activitiesList.appendChild(li);
+
+                    setTimeout(() => {
+                        li.classList.add('fade-in');
+                    }, 100 * activitiesList.children.length);
+                });
+            } else {
+                activitiesList.innerHTML = `
+                    <li class="activity-item">
+                        <div class="activity-details">
+                            <p>No recent activities found</p>
+                        </div>
+                    </li>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading recent activities:', error);
+            document.getElementById('recentActivitiesList').innerHTML = `
+                <li class="activity-item">
+                    <div class="activity-details">
+                        <p>Failed to load recent activities</p>
+                    </div>
+                </li>
+            `;
+        });
+}
+
+function formatTimeAgo(timestamp) {
+    const now = new Date();
+    const activityTime = new Date(timestamp);
+    const diffInSeconds = Math.floor((now - activityTime) / 1000);
+
+    if (diffInSeconds < 60) {
+        return 'just now';
+    } else if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else if (diffInSeconds < 604800) {
+        const days = Math.floor(diffInSeconds / 86400);
+        return `${days} day${days > 1 ? 's' : ''} ago`;
+    } else {
+        return activityTime.toLocaleDateString();
+    }
+}
+
+function updateAnalytics(period) {
+    document.querySelectorAll('.time-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`.time-btn[data-period="${period}"]`).classList.add('active');
+
+    // Demo chart rendering
+    renderUserRegistrationsChart();
+    renderSiteTypesChart();
+    renderTrafficSourcesChart();
+    renderPlatformUsageChart();
+}
+
+function renderUserRegistrationsChart() {
+    const chartContainer = document.getElementById('userRegistrationsChart');
+    chartContainer.innerHTML = '';
+
+    const chartBars = document.createElement('div');
+    chartBars.className = 'chart-bars';
+
+    // Demo data
+    const data = {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        values: [8, 12, 7, 15, 19, 10, 5]
+    };
+
+    const maxValue = Math.max(...data.values);
+
+    data.values.forEach((value, index) => {
+        const height = (value / maxValue) * 100;
+        const bar = document.createElement('div');
+        bar.className = 'chart-bar';
+        bar.style.height = '0%';
+
+        bar.setAttribute('title', `${data.labels[index]}: ${value} registrations`);
+
+        chartBars.appendChild(bar);
+
+        setTimeout(() => {
+            bar.style.height = `${height}%`;
+        }, 100 * index);
+    });
+
+    chartContainer.appendChild(chartBars);
+}
+
+function renderSiteTypesChart() {
+    const chartContainer = document.getElementById('siteTypesChart');
+    chartContainer.innerHTML = '';
+
+    // Demo data
+    const webPercentage = 68;
+    const pythonPercentage = 32;
+
+    const pieChart = document.createElement('div');
+    pieChart.className = 'pie-chart';
+
+    const webSegment = document.createElement('div');
+    webSegment.className = 'pie-segment';
+    webSegment.style.transform = 'rotate(0deg)';
+    webSegment.style.backgroundColor = 'var(--primary)';
+
+    const pythonSegment = document.createElement('div');
+    pythonSegment.className = 'pie-segment';
+    pythonSegment.style.transform = `rotate(0deg)`;
+    pythonSegment.style.backgroundColor = 'var(--accent)';
+
+    const pieCenter = document.createElement('div');
+    pieCenter.className = 'pie-center';
+    pieCenter.textContent = `0%`;
+
+    pieChart.appendChild(webSegment);
+    pieChart.appendChild(pythonSegment);
+    pieChart.appendChild(pieCenter);
+
+    const chartLegend = document.createElement('div');
+    chartLegend.className = 'chart-legend';
+
+    chartLegend.innerHTML = `
+        <div class="legend-item">
+            <span class="legend-color" style="background-color: var(--primary);"></span>
+            <span>Web Sites (${webPercentage}%)</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color" style="background-color: var(--accent);"></span>
+            <span>Python Sites (${pythonPercentage}%)</span>
+        </div>
+    `;
+
+    const chartWrapper = document.createElement('div');
+    chartWrapper.style.display = 'flex';
+    chartWrapper.style.alignItems = 'center';
+    chartWrapper.style.justifyContent = 'center';
+    chartWrapper.style.height = '100%';
+    chartWrapper.style.gap = '2rem';
+
+    chartWrapper.appendChild(pieChart);
+    chartWrapper.appendChild(chartLegend);
+
+    chartContainer.appendChild(chartWrapper);
+
+    setTimeout(() => {
+        pieCenter.textContent = `${webPercentage}%`;
+        pythonSegment.style.transform = `rotate(${webPercentage * 3.6}deg)`;
+    }, 300);
+}
+
+function renderTrafficSourcesChart() {
+    const chartContainer = document.getElementById('trafficSourcesChart');
+    chartContainer.innerHTML = '';
+
+    // Demo data
+    const data = {
+        'Direct': 45,
+        'Search': 25,
+        'Social': 20,
+        'Other': 10
+    };
+
+    const horizontalBars = document.createElement('div');
+    horizontalBars.className = 'horizontal-bars';
+
+    Object.entries(data).forEach(([source, percentage], index) => {
+        const barItem = document.createElement('div');
+        barItem.className = 'horizontal-bar-item';
+
+        barItem.innerHTML = `
+            <span class="bar-label">${source}</span>
+            <div class="bar-container">
+                <div class="horizontal-bar" style="width: 0%"></div>
+            </div>
+            <span class="bar-value">${percentage}%</span>
+        `;
+
+        horizontalBars.appendChild(barItem);
+
+        setTimeout(() => {
+            barItem.querySelector('.horizontal-bar').style.width = `${percentage}%`;
+        }, 300 + (index * 100));
+    });
+
+    chartContainer.appendChild(horizontalBars);
+}
+
+function renderPlatformUsageChart() {
+    const chartContainer = document.getElementById('platformUsageChart');
+    chartContainer.innerHTML = '';
+
+    // Demo data
+    const data = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        values: [120, 150, 180, 250, 300, 280, 350]
+    };
+
+    const lineChart = document.createElement('div');
+    lineChart.className = 'line-chart';
+
+    const maxValue = Math.max(...data.values);
+    const points = data.values.map((value, index) => {
+        const x = (index / (data.values.length - 1)) * 500;
+        const y = 200 - ((value / maxValue) * 180);
+        return `${x},${y}`;
+    }).join(' ');
+
+    lineChart.innerHTML = `
+        <svg viewBox="0 0 500 200" class="chart">
+            <polyline
+                fill="none"
+                stroke="var(--primary)"
+                stroke-width="3"
+                points="${points}"
+            />
+        </svg>
+    `;
+
+    chartContainer.appendChild(lineChart);
+}
+
+function exportChart(chartId) {
+    showToast('info', `Exporting ${chartId} data...`);
+
+    setTimeout(() => {
+        showToast('success', 'Export successful');
+    }, 1500);
+}
+
+function saveMaxSitesPerUser() {
+    const maxSites = document.getElementById('maxSitesPerUser').value;
+
+    if (maxSites < 1 || maxSites > 100) {
+        showToast('error', 'Max sites must be between 1 and 100');
+        return;
+    }
+
+    showToast('info', 'Saving settings...');
+
+    setTimeout(() => {
+        showToast('success', 'Site limit updated successfully');
+    }, 1500);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadSystemStatus();
+    loadRecentActivities();
+    updateAnalytics('day');
+});
+</script>
+
+</div>
 {% endblock %}
