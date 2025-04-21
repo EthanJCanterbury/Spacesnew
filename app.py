@@ -1634,51 +1634,6 @@ def edit_user(user_id):
         app.logger.error(f'Error updating user: {str(e)}')
         return jsonify({'message': 'Failed to update user details'}), 500
 
-@app.route('/api/admin/users/<int:user_id>/profile', methods=['PUT'])
-@login_required
-@admin_required
-def update_user_profile_admin(user_id):
-    """Update user profile as admin."""
-    try:
-        user = User.query.get_or_404(user_id)
-        data = request.get_json()
-        
-        # Update user profile fields
-        if 'bio' in data:
-            user.bio = data['bio']
-        if 'avatar' in data:
-            user.avatar = data['avatar']
-        if 'profile_banner' in data:
-            user.profile_banner = data['profile_banner']
-        if 'is_profile_public' in data:
-            user.is_profile_public = data['is_profile_public']
-        if 'social_links' in data:
-            user.social_links = data['social_links']
-        
-        db.session.commit()
-        
-        # Record admin activity
-        activity = UserActivity(
-            activity_type="admin_action",
-            message=f"Admin {{username}} updated {user.username}'s profile",
-            username=current_user.username,
-            user_id=current_user.id
-        )
-        db.session.add(activity)
-        db.session.commit()
-        
-        return jsonify({
-            'success': True,
-            'message': f'Profile for {user.username} updated successfully'
-        })
-    except Exception as e:
-        db.session.rollback()
-        app.logger.error(f'Error updating user profile: {str(e)}')
-        return jsonify({
-            'success': False,
-            'message': f'Failed to update user profile: {str(e)}'
-        }), 500
-
 
 @app.route('/api/admin/users/<int:user_id>/club-leader', methods=['POST'])
 @login_required
