@@ -2453,6 +2453,376 @@ def clear_site_analytics(site_id):
 
 
 @app.route('/api/sites/<int:site_id>/files', methods=['GET', 'POST'])
+
+@app.route('/api/admin/users-stats', methods=['GET'])
+@login_required
+@admin_required
+def get_admin_user_stats():
+    """Get user statistics for admin dashboard."""
+    try:
+        # Get count of new users in the last 7 days
+        from datetime import datetime, timedelta
+        seven_days_ago = datetime.utcnow() - timedelta(days=7)
+        
+        new_users_count = User.query.filter(User.created_at >= seven_days_ago).count()
+        active_users_count = User.query.filter_by(is_suspended=False).count()
+        suspended_users_count = User.query.filter_by(is_suspended=True).count()
+        
+        return jsonify({
+            'success': True,
+            'newUsers': new_users_count,
+            'activeUsers': active_users_count,
+            'suspendedUsers': suspended_users_count
+        })
+    except Exception as e:
+        app.logger.error(f'Error getting user stats: {str(e)}')
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/users/<int:user_id>/profile', methods=['GET'])
+@login_required
+def get_user_profile(user_id):
+    """Get detailed user profile information."""
+    try:
+        # Only allow admin or the user themselves to access their profile
+        if current_user.id != user_id and not current_user.is_admin:
+            return jsonify({
+                'success': False,
+                'message': 'Unauthorized'
+            }), 403
+        
+        user = User.query.get_or_404(user_id)
+        
+        profile_data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'bio': user.bio,
+            'avatar': user.avatar,
+            'profile_banner': user.profile_banner,
+            'is_profile_public': user.is_profile_public,
+            'social_links': user.social_links or {},
+            'created_at': user.created_at.isoformat() if user.created_at else None,
+            'last_login': user.last_login.isoformat() if user.last_login else None
+        }
+        
+        return jsonify(profile_data)
+    except Exception as e:
+        app.logger.error(f'Error retrieving user profile: {str(e)}')
+        return jsonify({
+            'success': False,
+            'message': f'Failed to retrieve user profile: {str(e)}'
+        }), 500
+
+@app.route('/api/admin/users/<int:user_id>/profile', methods=['PUT'])
+@login_required
+@admin_required
+def update_user_profile_admin(user_id):
+    """Update user profile as admin."""
+    try:
+        user = User.query.get_or_404(user_id)
+        data = request.get_json()
+        
+        # Update user profile fields
+        if 'bio' in data:
+            user.bio = data['bio']
+        if 'avatar' in data:
+            user.avatar = data['avatar']
+        if 'profile_banner' in data:
+            user.profile_banner = data['profile_banner']
+        if 'is_profile_public' in data:
+            user.is_profile_public = data['is_profile_public']
+        if 'social_links' in data:
+            user.social_links = data['social_links']
+        
+        db.session.commit()
+        
+        # Record admin activity
+        activity = UserActivity(
+            activity_type="admin_action",
+            message=f"Admin {{username}} updated {user.username}'s profile",
+            username=current_user.username,
+            user_id=current_user.id
+        )
+        db.session.add(activity)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Profile for {user.username} updated successfully'
+        })
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error updating user profile: {str(e)}')
+        return jsonify({
+            'success': False,
+            'message': f'Failed to update user profile: {str(e)}'
+        }), 500
+
+@app.route('/api/admin/users/<int:user_id>/reset-password', methods=['POST'])
+@login_required
+@admin_required
+def admin_reset_password(user_id):
+    """Reset a user's password as admin."""
+    try:
+        user = User.query.get_or_404(user_id)
+        
+        if user.id == current_user.id:
+            return jsonify({
+                'success': False,
+                'message': 'Please use account settings to change your own password'
+            }), 400
+        
+        data = request.get_json()
+        new_password = data.get('password')
+        
+        if not new_password:
+            return jsonify({
+                'success': False,
+                'message': 'New password is required'
+            }), 400
+        
+        user.set_password(new_password)
+        db.session.commit()
+        
+        # Record admin activity
+        activity = UserActivity(
+            activity_type="admin_action",
+            message=f"Admin {{username}} reset password for {user.username}",
+            username=current_user.username,
+            user_id=current_user.id
+        )
+        db.session.add(activity)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Password for {user.username} has been reset'
+        })
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error resetting password: {str(e)}')
+        return jsonify({
+            'success': False,
+            'message': f'Failed to reset password: {str(e)}'
+        }), 500
+
+@app.route('/api/admin/users/<int:user_id>/admin-status', methods=['POST'])
+@login_required
+@admin_required
+def toggle_admin_status(user_id):
+    """Toggle a user's admin status."""
+    try:
+        user = User.query.get_or_404(user_id)
+        
+        if user.id == current_user.id:
+            return jsonify({
+                'success': False,
+                'message': 'You cannot change your own admin status'
+            }), 400
+        
+        data = request.get_json()
+        make_admin = data.get('is_admin', False)
+        
+        user.is_admin = make_admin
+        db.session.commit()
+        
+        # Record admin activity
+        activity = UserActivity(
+            activity_type="admin_action",
+            message=f"Admin {{username}} {'made' if make_admin else 'removed'} {user.username} {'as an' if make_admin else 'from being an'} admin",
+            username=current_user.username,
+            user_id=current_user.id
+        )
+        db.session.add(activity)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Admin status for {user.username} has been {"granted" if make_admin else "revoked"}'
+        })
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error updating admin status: {str(e)}')
+        return jsonify({
+            'success': False,
+            'message': f'Failed to update admin status: {str(e)}'
+        }), 500
+
+@app.route('/api/admin/impersonate/<int:user_id>', methods=['POST'])
+@login_required
+@admin_required
+def impersonate_user(user_id):
+    """Impersonate a user (admin only)."""
+    try:
+        if user_id == current_user.id:
+            return jsonify({
+                'success': False,
+                'message': 'You cannot impersonate yourself'
+            }), 400
+        
+        user = User.query.get_or_404(user_id)
+        
+        # Store original admin ID in session
+        session['admin_impersonator_id'] = current_user.id
+        
+        # Record admin activity
+        activity = UserActivity(
+            activity_type="admin_impersonation",
+            message=f"Admin {{username}} started impersonating {user.username}",
+            username=current_user.username,
+            user_id=current_user.id
+        )
+        db.session.add(activity)
+        db.session.commit()
+        
+        # Login as the target user
+        logout_user()
+        login_user(user)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Now impersonating {user.username}',
+            'redirect': '/welcome'
+        })
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error impersonating user: {str(e)}')
+        return jsonify({
+            'success': False,
+            'message': f'Failed to impersonate user: {str(e)}'
+        }), 500
+
+@app.route('/api/admin/stop-impersonation', methods=['POST'])
+@login_required
+def stop_impersonation():
+    """Stop impersonating a user and return to admin account."""
+    try:
+        if 'admin_impersonator_id' not in session:
+            return jsonify({
+                'success': False,
+                'message': 'Not currently impersonating'
+            }), 400
+        
+        admin_id = session.pop('admin_impersonator_id')
+        impersonated_username = current_user.username
+        
+        admin = User.query.get(admin_id)
+        if not admin:
+            return jsonify({
+                'success': False,
+                'message': 'Original admin account not found'
+            }), 404
+        
+        # Record activity
+        activity = UserActivity(
+            activity_type="admin_impersonation",
+            message=f"Admin {admin.username} stopped impersonating {impersonated_username}",
+            username=admin.username,
+            user_id=admin.id
+        )
+        db.session.add(activity)
+        db.session.commit()
+        
+        # Login as the admin again
+        logout_user()
+        login_user(admin)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Returned to admin account',
+            'redirect': '/admin'
+        })
+    except Exception as e:
+        app.logger.error(f'Error stopping impersonation: {str(e)}')
+        return jsonify({
+            'success': False,
+            'message': f'Failed to stop impersonation: {str(e)}'
+        }), 500
+
+@app.route('/api/admin/export-users', methods=['POST'])
+@login_required
+@admin_required
+def export_users():
+    """Export selected users data to CSV."""
+    try:
+        data = request.get_json()
+        user_ids = data.get('user_ids', [])
+        
+        if not user_ids:
+            return jsonify({
+                'success': False,
+                'message': 'No users selected for export'
+            }), 400
+        
+        # Query users
+        users = User.query.filter(User.id.in_(user_ids)).all()
+        
+        # Create CSV content
+        import csv
+        import io
+        
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Write header
+        writer.writerow([
+            'ID', 'Username', 'Email', 'Created At', 'Last Login',
+            'Is Active', 'Is Suspended', 'Is Admin', 'Is Club Leader',
+            'Sites Count', 'Public Profile', 'Has Avatar', 'Has Bio'
+        ])
+        
+        # Write data rows
+        for user in users:
+            # Get sites count
+            sites_count = Site.query.filter_by(user_id=user.id).count()
+            
+            # Check if user is a club leader
+            is_club_leader = Club.query.filter_by(leader_id=user.id).first() is not None
+            
+            writer.writerow([
+                user.id,
+                user.username,
+                user.email,
+                user.created_at.strftime('%Y-%m-%d %H:%M:%S') if user.created_at else '',
+                user.last_login.strftime('%Y-%m-%d %H:%M:%S') if user.last_login else '',
+                user.is_active,
+                user.is_suspended,
+                user.is_admin,
+                is_club_leader,
+                sites_count,
+                user.is_profile_public,
+                bool(user.avatar),
+                bool(user.bio)
+            ])
+        
+        # Record admin activity
+        activity = UserActivity(
+            activity_type="admin_export",
+            message=f"Admin {{username}} exported {len(users)} users' data",
+            username=current_user.username,
+            user_id=current_user.id
+        )
+        db.session.add(activity)
+        db.session.commit()
+        
+        # Prepare response
+        output.seek(0)
+        return Response(
+            output.getvalue(),
+            mimetype="text/csv",
+            headers={"Content-Disposition": "attachment;filename=users_export.csv"}
+        )
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error exporting users: {str(e)}')
+        return jsonify({
+            'success': False,
+            'message': f'Failed to export users: {str(e)}'
+        }), 500
+
 @login_required
 def site_files(site_id):
     try:
