@@ -1015,6 +1015,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Initialize action dropdowns
+    initializeActionDropdowns();
+    
     loadAdminList();
 });
 
@@ -1119,6 +1122,9 @@ function filterUsers() {
                     row.classList.remove('fade-in');
                 }, 300);
             });
+            
+            // Initialize action dropdowns for the new search results
+            initializeActionDropdowns();
         })
         .catch(error => {
             console.error('Error searching users:', error);
@@ -1215,6 +1221,9 @@ function filterSites() {
                     row.classList.remove('fade-in');
                 }, 300);
             });
+            
+            // Initialize action dropdowns for the new search results
+            initializeActionDropdowns();
         })
         .catch(error => {
             console.error('Error searching sites:', error);
@@ -1729,6 +1738,38 @@ function toggleActionDropdown(button) {
     const dropdownContent = button.nextElementSibling;
     dropdownContent.classList.toggle('show');
     
+    if (dropdownContent.classList.contains('show')) {
+        // Position the dropdown
+        const buttonRect = button.getBoundingClientRect();
+        const tableContainer = document.querySelector('.table-container');
+        const tableContainerRect = tableContainer.getBoundingClientRect();
+        
+        // Calculate the available space
+        const spaceBelow = window.innerHeight - buttonRect.bottom;
+        const spaceAbove = buttonRect.top;
+        
+        // Position the dropdown
+        if (spaceBelow >= 200 || spaceBelow > spaceAbove) {
+            // Position below
+            dropdownContent.style.top = `${buttonRect.bottom + window.scrollY}px`;
+            dropdownContent.style.bottom = 'auto';
+        } else {
+            // Position above
+            dropdownContent.style.bottom = `${window.innerHeight - buttonRect.top + window.scrollY}px`;
+            dropdownContent.style.top = 'auto';
+        }
+        
+        dropdownContent.style.left = `${buttonRect.left}px`;
+        
+        // Make sure it's not positioned outside the viewport on the right
+        setTimeout(() => {
+            const dropdownRect = dropdownContent.getBoundingClientRect();
+            if (dropdownRect.right > window.innerWidth) {
+                dropdownContent.style.left = `${buttonRect.right - dropdownRect.width}px`;
+            }
+        }, 0);
+    }
+    
     // Add click outside to close
     setTimeout(() => {
         document.addEventListener('click', function closeDropdown(e) {
@@ -1738,6 +1779,21 @@ function toggleActionDropdown(button) {
             }
         });
     }, 10);
+}
+
+function initializeActionDropdowns() {
+    // Add event listeners to all dropdown buttons
+    document.querySelectorAll('.action-dropdown-btn').forEach(button => {
+        // Remove existing event listeners by cloning and replacing
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        // Add the event listener
+        newButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleActionDropdown(this);
+        });
+    });
 }
 
 // Create a custom modal for context menu actions
@@ -4703,13 +4759,12 @@ input:checked + .slider:before {
 }
 
 .action-dropdown-content {
-    position: absolute;
-    right: 0;
+    position: fixed;
     background-color: var(--surface-primary);
     min-width: 180px;
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-lg);
-    z-index: 100;
+    z-index: 1000;
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px);
@@ -4718,18 +4773,6 @@ input:checked + .slider:before {
 
 .action-dropdown {
     position: relative;
-}
-
-/* Position dropdown above for items near bottom of page */
-tr:nth-last-child(-n+3) .action-dropdown .action-dropdown-content {
-    bottom: calc(100% + 5px);
-    top: auto;
-}
-
-/* Position dropdown below for other items */
-tr:not(:nth-last-child(-n+3)) .action-dropdown .action-dropdown-content {
-    top: calc(100% + 5px);
-    bottom: auto;
 }
 
 /* Action dropdown now works on click instead of hover */
