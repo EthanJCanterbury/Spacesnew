@@ -39,37 +39,6 @@ function startLoading() {
             }, 200);
         }
     }, 50);
-
-    // Random loading facts
-    const facts = [
-        "Python was named after Monty Python, not the snake!",
-        "Python is one of the official languages at Google.",
-        "Python was first released in 1991 by Guido van Rossum.",
-        "Python uses indentation for code blocks, not braces.",
-        "The Zen of Python has 19 guiding principles.",
-        "Python's design philosophy emphasizes code readability.",
-        "Python has a built-in package manager called pip.",
-        "In Python, functions are first-class objects.",
-        "Python supports multiple programming paradigms."
-    ];
-
-    const factContainer = document.querySelector('.loading-fact');
-    let factIndex = 0;
-
-    factContainer.textContent = facts[factIndex];
-
-    const factInterval = setInterval(() => {
-        factIndex = (factIndex + 1) % facts.length;
-        factContainer.classList.add('fade-out');
-
-        setTimeout(() => {
-            factContainer.textContent = facts[factIndex];
-            factContainer.classList.remove('fade-out');
-        }, 500);
-    }, 3000);
-
-    // Store the interval so we can clear it later
-    window.factInterval = factInterval;
 }
 
 function endLoading() {

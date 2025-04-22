@@ -986,25 +986,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const loadingFacts = [
-        "Building your digital canvas...",
-        "Preparing your creative space...",
-        "Loading coding environment...",
-        "Initializing web tools...",
-        "Setting up your workspace...",
-        "Connecting to the code universe...",
-        "Gathering design elements...",
-        "Preparing your digital playground..."
-    ];
-
-    let factIndex = 0;
-    const factAnimation = setInterval(() => {
-        if (document.querySelector('.loading-fact')) {
-            document.querySelector('.loading-fact').textContent = loadingFacts[factIndex];
-            factIndex = (factIndex + 1) % loadingFacts.length;
-        }
-    }, 2000);
-
+    // Simple loading animation
     setTimeout(() => {
         if (document.querySelector('.loading-progress-fill')) {
             document.querySelector('.loading-progress-fill').style.width = '100%';
@@ -1014,7 +996,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         const loadingOverlay = document.getElementById('loading-overlay');
         if (loadingOverlay) {
-            clearInterval(factAnimation);
             loadingOverlay.style.opacity = '0';
             setTimeout(() => {
                 loadingOverlay.style.display = 'none';

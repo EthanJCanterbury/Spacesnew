@@ -247,27 +247,37 @@ li.CodeMirror-hint-active {
   perspective: 800px;
 }
 
-.loading-spinner {
-  width: 100px;
-  height: 100px;
-  border: 5px solid rgba(237, 102, 99, 0.1);
-  border-radius: 50%;
-  border-top-color: var(--primary);
-  border-left-color: var(--primary);
-  animation: spin 1s linear infinite;
-  transform-style: preserve-3d;
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease;
 }
 
-.loading-spinner-shadow {
-  position: absolute;
-  top: 110px;
-  left: 25px;
-  width: 50px;
-  height: 10px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 50%;
-  filter: blur(5px);
-  animation: spinner-shadow 3s ease-in-out infinite;
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 500px;
+  padding: 20px;
+}
+
+.loading-image-container {
+  margin-bottom: 20px;
+}
+
+.loading-dino {
+  width: 250px;
+  height: auto;
+  border-radius: 8px;
 }
 
 .loading-text-container {
@@ -275,32 +285,32 @@ li.CodeMirror-hint-active {
   text-align: center;
 }
 
-.loading-text {
-  font-size: 22px;
-  font-weight: 600;
+.loading-title {
+  font-size: 28px;
+  font-weight: 700;
   color: #333;
-  text-shadow: 0 0 10px rgba(237, 102, 99, 0.3);
-  letter-spacing: 0.5px;
-  animation: text-glow 2s ease-in-out infinite alternate;
+  margin-bottom: 8px;
 }
 
-.dot-pulse {
-  display: inline-block;
-  position: relative;
-  animation: dot-pulse 1.5s infinite ease-in-out;
+.loading-text {
+  font-size: 18px;
+  font-weight: 400;
+  color: #666;
+  margin-top: 0;
 }
 
 .loading-progress-container {
-  width: 80%;
+  width: 300px;
   margin: 20px 0;
 }
 
 .loading-progress-bar {
-  height: 8px;
-  background: rgba(200, 200, 200, 0.3);
-  border-radius: 10px;
+  height: 6px;
+  background: #f0f0f0;
+  border-radius: 8px;
   overflow: hidden;
   position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .loading-progress-fill {
@@ -309,10 +319,9 @@ li.CodeMirror-hint-active {
   left: 0;
   height: 100%;
   width: 0;
-  background: linear-gradient(90deg, var(--primary), #ff9a8b);
-  border-radius: 10px;
+  background: var(--primary);
+  border-radius: 8px;
   animation: progress 2s ease-in-out forwards;
-  box-shadow: 0 0 10px rgba(237, 102, 99, 0.7);
 }
 
 
