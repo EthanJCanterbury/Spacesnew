@@ -1579,6 +1579,11 @@ function viewUserDetails(userId) {
     const userDetailContent = document.getElementById('userDetailContent');
     const editUserForm = document.getElementById('editUserForm');
 
+    if (!modal || !userDetailContent) {
+        showToast('error', 'Could not find modal elements');
+        return;
+    }
+
     userDetailContent.innerHTML = `
         <div class="user-detail-loading">
             <div class="loading-spinner"></div>
@@ -1589,59 +1594,80 @@ function viewUserDetails(userId) {
     modal.style.display = 'flex';
 
     setTimeout(async () => {
-        const response = await fetch(`/api/users/${userId}`);
-        const userData = await response.json();
-        
-        if (userData) {
-            // Load and display user avatar
-            const avatarPreview = document.getElementById('userAvatarPreview');
-            if (userData.avatar_url) {
-                avatarPreview.src = userData.avatar_url;
-            } else {
-                avatarPreview.src = '';
-                avatarPreview.onerror();
+        try {
+            const response = await fetch(`/api/users/${userId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch user data');
             }
             
-            userDetailContent.innerHTML = `
-                <h3>${userData.username}</h3>
-                <div class="user-meta">
-                    <p><i class="fas fa-envelope"></i> ${userData.email}</p>
-                    <p><i class="fas fa-calendar-alt"></i> Joined: ${new Date(userData.created_at).toLocaleDateString()}</p>
-                    <p><i class="fas fa-clock"></i> Last active: ${new Date(userData.last_login).toLocaleDateString()}</p>
-                    <p><i class="fas fa-globe"></i> Status: ${userData.is_suspended ? '<span class="badge badge-danger">Suspended</span>' : '<span class="badge badge-success">Active</span>'}</p>
-                </div>
-                
-                <div class="user-stats">
-                    <div class="stat-item">
-                        <span class="stat-value">${userData.site_count || 0}</span>
-                        <span class="stat-label">Sites</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value">${userData.deploy_count || 0}</span>
-                        <span class="stat-label">Deploys</span>
-                    </div>
-                </div>
-                
-                <div class="user-actions">
-                    <button onclick="editUserProfile(${userData.id})" class="btn-primary">
-                        <i class="fas fa-user-edit"></i> Edit Profile
-                    </button>
-                    ${userData.is_profile_public ? 
-                    `<a href="/p/${userData.username}" target="_blank" class="btn-secondary">
-                        <i class="fas fa-external-link-alt"></i> View Public Profile
-                    </a>` : ''}
-                </div>
-            `;
+            const userData = await response.json();
             
-            // Prepopulate edit form for convenience
-            editUserForm.querySelector('#editUserId').value = userData.id;
-            editUserForm.querySelector('#editUsername').value = userData.username;
-            editUserForm.querySelector('#editEmail').value = userData.email;
-        } else {
+            if (userData) {
+                // Load and display user avatar
+                const avatarPreview = document.getElementById('userAvatarPreview');
+                if (avatarPreview) {
+                    if (userData.avatar_url) {
+                        avatarPreview.src = userData.avatar_url;
+                    } else {
+                        avatarPreview.innerHTML = '<i class="fas fa-user-circle"></i>';
+                    }
+                }
+                
+                userDetailContent.innerHTML = `
+                    <h3>${userData.username}</h3>
+                    <div class="user-meta">
+                        <p><i class="fas fa-envelope"></i> ${userData.email}</p>
+                        <p><i class="fas fa-calendar-alt"></i> Joined: ${new Date(userData.created_at).toLocaleDateString()}</p>
+                        <p><i class="fas fa-clock"></i> Last active: ${userData.last_login ? new Date(userData.last_login).toLocaleDateString() : 'Never'}</p>
+                        <p><i class="fas fa-globe"></i> Status: ${userData.is_suspended ? '<span class="badge badge-danger">Suspended</span>' : '<span class="badge badge-success">Active</span>'}</p>
+                    </div>
+                    
+                    <div class="user-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">${userData.site_count || 0}</span>
+                            <span class="stat-label">Sites</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">${userData.deploy_count || 0}</span>
+                            <span class="stat-label">Deploys</span>
+                        </div>
+                    </div>
+                    
+                    <div class="user-actions">
+                        <button onclick="editUserProfile(${userData.id})" class="btn-primary">
+                            <i class="fas fa-user-edit"></i> Edit Profile
+                        </button>
+                        ${userData.is_profile_public ? 
+                        `<a href="/p/${userData.username}" target="_blank" class="btn-secondary">
+                            <i class="fas fa-external-link-alt"></i> View Public Profile
+                        </a>` : ''}
+                    </div>
+                `;
+                
+                // Prepopulate edit form for convenience
+                if (editUserForm) {
+                    const editUserIdField = editUserForm.querySelector('#editUserId');
+                    const editUsernameField = editUserForm.querySelector('#editUsername');
+                    const editEmailField = editUserForm.querySelector('#editEmail');
+                    
+                    if (editUserIdField) editUserIdField.value = userData.id;
+                    if (editUsernameField) editUsernameField.value = userData.username;
+                    if (editEmailField) editEmailField.value = userData.email;
+                }
+            } else {
+                userDetailContent.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>User not found</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error fetching user details:', error);
             userDetailContent.innerHTML = `
                 <div class="error-message">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <p>User not found</p>
+                    <p>Error loading user details: ${error.message}</p>
                 </div>
             `;
         }
@@ -1791,66 +1817,119 @@ function togglePasswordVisibility(inputId) {
 }
 
 function editUserProfile(userId) {
+    // Find necessary elements
+    const profileForm = document.getElementById('profileEditForm');
+    const socialLinksContainer = document.getElementById('socialLinksContainer');
+    const userProfileModal = document.getElementById('userProfileModal');
+    
+    if (!profileForm || !socialLinksContainer || !userProfileModal) {
+        showToast('error', 'Could not find necessary elements for profile editing');
+        return;
+    }
+    
     // Reset form
-    document.getElementById('profileEditForm').reset();
-    document.getElementById('socialLinksContainer').innerHTML = '';
-    document.getElementById('profileUserId').value = userId;
+    profileForm.reset();
+    socialLinksContainer.innerHTML = '';
+    
+    const profileUserIdField = document.getElementById('profileUserId');
+    if (profileUserIdField) {
+        profileUserIdField.value = userId;
+    }
     
     // Fetch user details
     fetch(`/api/users/${userId}/profile`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch user profile');
+            }
+            return response.json();
+        })
         .then(data => {
             // Fill form with user data
-            document.getElementById('profileUsername').value = data.username;
-            document.getElementById('profileEmail').value = data.email;
-            document.getElementById('profileBio').value = data.bio || '';
-            document.getElementById('profileAvatar').value = data.avatar_url || '';
-            document.getElementById('profileBanner').value = data.banner_url || '';
-            document.getElementById('profileIsPublic').checked = data.is_profile_public;
+            const fields = {
+                'profileUsername': data.username,
+                'profileEmail': data.email,
+                'profileBio': data.bio || '',
+                'profileAvatar': data.avatar_url || '',
+                'profileBanner': data.banner_url || ''
+            };
             
-            // Update preview
-            document.getElementById('previewUsername').textContent = data.username;
-            document.getElementById('previewBio').textContent = data.bio || 'No bio provided...';
+            // Safely update each field
+            Object.keys(fields).forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.value = fields[fieldId];
+                }
+            });
+            
+            // Handle checkbox separately
+            const isPublicCheckbox = document.getElementById('profileIsPublic');
+            if (isPublicCheckbox) {
+                isPublicCheckbox.checked = data.is_profile_public;
+            }
+            
+            // Update preview - safely
+            const previewUsername = document.getElementById('previewUsername');
+            const previewBio = document.getElementById('previewBio');
+            const previewAvatar = document.getElementById('previewAvatar');
+            const previewBanner = document.getElementById('previewBanner');
+            
+            if (previewUsername) previewUsername.textContent = data.username;
+            if (previewBio) previewBio.textContent = data.bio || 'No bio provided...';
             
             // If avatar URL exists, update the preview
-            const previewAvatar = document.getElementById('previewAvatar');
-            if (data.avatar_url) {
-                previewAvatar.innerHTML = `<img src="${data.avatar_url}" alt="${data.username}'s avatar" onerror="this.onerror=null; this.parentNode.innerHTML = '<i class=\'fas fa-user\'></i>'">`;
-            } else {
-                previewAvatar.innerHTML = '<i class="fas fa-user"></i>';
+            if (previewAvatar) {
+                if (data.avatar_url) {
+                    previewAvatar.innerHTML = `<img src="${data.avatar_url}" alt="${data.username}'s avatar" onerror="this.onerror=null; this.parentNode.innerHTML = '<i class=\'fas fa-user\'></i>'">`;
+                } else {
+                    previewAvatar.innerHTML = '<i class="fas fa-user"></i>';
+                }
             }
             
             // If banner URL exists, update the preview
-            const previewBanner = document.getElementById('previewBanner');
-            if (data.banner_url) {
-                previewBanner.style.backgroundImage = `url(${data.banner_url})`;
-                previewBanner.style.backgroundSize = 'cover';
-                previewBanner.style.backgroundPosition = 'center';
-            } else {
-                previewBanner.style.backgroundImage = 'none';
-                previewBanner.style.backgroundColor = 'var(--primary)';
+            if (previewBanner) {
+                if (data.banner_url) {
+                    previewBanner.style.backgroundImage = `url(${data.banner_url})`;
+                    previewBanner.style.backgroundSize = 'cover';
+                    previewBanner.style.backgroundPosition = 'center';
+                } else {
+                    previewBanner.style.backgroundImage = 'none';
+                    previewBanner.style.backgroundColor = 'var(--primary)';
+                }
             }
             
             // Add social links
-            if (data.social_links && data.social_links.length > 0) {
-                document.getElementById('socialLinksContainer').innerHTML = '';
+            if (data.social_links && Array.isArray(data.social_links) && data.social_links.length > 0) {
+                socialLinksContainer.innerHTML = '';
                 data.social_links.forEach(link => {
-                    addSocialLinkWithData(link.platform, link.url);
+                    if (typeof addSocialLinkWithData === 'function') {
+                        addSocialLinkWithData(link.platform, link.url);
+                    } else if (typeof addSocialLink === 'function') {
+                        addSocialLink();
+                        // Try to populate the last added link
+                        const lastLink = socialLinksContainer.lastElementChild;
+                        if (lastLink) {
+                            const platformSelect = lastLink.querySelector('.social-platform');
+                            const urlInput = lastLink.querySelector('.social-url');
+                            if (platformSelect) platformSelect.value = link.platform;
+                            if (urlInput) urlInput.value = link.url;
+                        }
+                    }
                 });
             }
             
             // If no social links were added, add an empty one
-            if (document.getElementById('socialLinksContainer').children.length === 0) {
+            if (socialLinksContainer.children.length === 0 && typeof addSocialLink === 'function') {
                 addSocialLink();
             }
         })
         .catch(error => {
             console.error('Error fetching user profile:', error);
-            showToast('error', 'Failed to load user profile');
+            showToast('error', 'Failed to load user profile: ' + error.message);
         });
     
     // Show modal
-    document.getElementById('userProfileModal').style.display = 'flex';
+    userProfileModal.style.display = 'flex';
 }
 
 function updateProfilePreview() {
@@ -1921,6 +2000,11 @@ function addSocialLinkWithValues(platform, url) {
     // Set the selected platform
     const select = socialLinkItem.querySelector('.social-platform');
     select.value = platform;
+}
+
+// Add the missing function
+function addSocialLinkWithData(platform, url) {
+    addSocialLinkWithValues(platform, url);
 }
 
 function removeSocialLink(button) {
