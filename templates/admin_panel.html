@@ -999,6 +999,21 @@ document.addEventListener('DOMContentLoaded', function() {
     sidebarCollapseBtn.addEventListener('click', () => {
         adminContainer.classList.toggle('sidebar-collapsed');
     });
+    
+    // Initialize all modal close buttons
+    document.querySelectorAll('.close-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const modal = this.closest('.modal');
+            if (modal) {
+                modal.style.opacity = '0';
+                modal.style.visibility = 'hidden';
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = '';
+                }, 300);
+            }
+        });
+    });
 
     loadAdminList();
 });
@@ -1591,7 +1606,10 @@ function viewUserDetails(userId) {
         </div>
     `;
 
+    // Explicitly set display style to make modal visible
     modal.style.display = 'flex';
+    modal.style.opacity = '1';
+    modal.style.visibility = 'visible';
     document.body.style.overflow = 'hidden';
 
     fetchUserDetails(userId, userDetailContent, editUserForm);
@@ -1680,6 +1698,7 @@ async function fetchUserDetails(userId, userDetailContent, editUserForm) {
 function closeUserDetailModal() {
     const modal = document.getElementById('userDetailModal');
     modal.style.opacity = '0';
+    modal.style.visibility = 'hidden';
     setTimeout(() => {
         modal.style.display = 'none';
         document.body.style.overflow = '';
@@ -1689,6 +1708,7 @@ function closeUserDetailModal() {
 function closeUserProfileModal() {
     const modal = document.getElementById('userProfileModal');
     modal.style.opacity = '0';
+    modal.style.visibility = 'hidden';
     setTimeout(() => {
         modal.style.display = 'none';
         document.body.style.overflow = '';
@@ -1849,8 +1869,10 @@ function editUserProfile(userId) {
         profileUserIdField.value = userId;
     }
     
-    // Show modal first so it appears immediately
+    // Show modal with explicit visibility settings
     userProfileModal.style.display = 'flex';
+    userProfileModal.style.opacity = '1';
+    userProfileModal.style.visibility = 'visible';
     document.body.style.overflow = 'hidden';
     
     // Fetch user details
@@ -4105,11 +4127,18 @@ input:checked + .slider:before {
     z-index: 1000;
     align-items: center;
     justify-content: center;
-    opacity: 1;
-    transition: opacity 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
     animation: fadeIn 0.3s ease;
     overflow-y: auto;
     padding: 20px;
+}
+
+.modal.show,
+.modal[style*="display: flex"] {
+    opacity: 1;
+    visibility: visible;
 }
 
 .modal-content {
