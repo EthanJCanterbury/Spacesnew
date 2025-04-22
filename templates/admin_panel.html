@@ -288,7 +288,7 @@
                             </td>
                             <td class="actions-cell">
                                 <div class="action-dropdown">
-                                    <button class="action-dropdown-btn">
+                                    <button class="action-dropdown-btn" onclick="toggleActionDropdown(this)">
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
                                     <div class="action-dropdown-content">
@@ -426,7 +426,7 @@
                             <td>{{ site.updated_at.strftime('%Y-%m-%d %H:%M') }}</td>
                             <td class="actions-cell">
                                 <div class="action-dropdown">
-                                    <button class="action-dropdown-btn">
+                                    <button class="action-dropdown-btn" onclick="toggleActionDropdown(this)">
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
                                     <div class="action-dropdown-content">
@@ -543,7 +543,7 @@
                             <td>{{ club.join_code }}</td>
                             <td class="actions-cell">
                                 <div class="action-dropdown">
-                                    <button class="action-dropdown-btn">
+                                    <button class="action-dropdown-btn" onclick="toggleActionDropdown(this)">
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
                                     <div class="action-dropdown-content">
@@ -1202,7 +1202,7 @@ function filterSites() {
             });
         })
         .catch(error => {
-            console.error('Errorsearching sites:', error);
+            console.error('Error searching sites:', error);
             showToast('error', 'Failed to search sites');
         });
 }
@@ -1350,7 +1350,7 @@ async function deleteAllSites(userId, username) {
 }
 
 async function deleteUser(userId, username) {
-    if (!confirm(`Are you sure you wantto delete user "${username}"? This action cannot be undone.`)) return;
+    if (!confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`)) return;
 
     try {
         showToast('info', 'Deleting user...');
@@ -1365,7 +1365,7 @@ async function deleteUser(userId, username) {
                 location.reload();
             }, 1000);
         } else {
-            const data= await response.json();
+            const data = await response.json();
             showToast('error', data.message || 'Failed to delete user');
         }
     } catch (error) {
@@ -1374,7 +1374,7 @@ async function deleteUser(userId, username) {
 }
 
 async function deleteSite(siteId, siteName) {
-    if (!confirm(`Are you sure you want to delete site "${siteName}"? Thisaction cannot be undone.`)) return;
+    if (!confirm(`Are you sure you want to delete site "${siteName}"? This action cannot be undone.`)) return;
 
     try {
         showToast('info', 'Deleting site...');
@@ -1386,7 +1386,7 @@ async function deleteSite(siteId, siteName) {
         if (response.ok) {
             showToast('success', `Site "${siteName}" deleted successfully`);
             setTimeout(() => {
-                                location.reload();
+                location.reload();
             }, 1000);
         } else {
             const data = await response.json();
@@ -1482,7 +1482,7 @@ async function loadAdminList() {
                 adminEmail.textContent = '';
                 adminEmail.className = 'admin-email';
 
-                                const adminInfo = document.createElement('div');
+                const adminInfo = document.createElement('div');
                 adminInfo.className = 'admin-info';
                 adminInfo.appendChild(adminName);
                 adminInfo.appendChild(adminEmail);
@@ -1590,31 +1590,51 @@ function viewUserDetails(userId) {
 
     setTimeout(async () => {
         const response = await fetch(`/api/users/${userId}`);
-        if (response.ok) {
-            const userData = await response.json();
+        const userData = await response.json();
+        
+        if (userData) {
+            // Load and display user avatar
+            const avatarPreview = document.getElementById('userAvatarPreview');
+            if (userData.avatar_url) {
+                avatarPreview.src = userData.avatar_url;
+            } else {
+                avatarPreview.src = '';
+                avatarPreview.onerror();
+            }
+            
             userDetailContent.innerHTML = `
                 <h3>${userData.username}</h3>
                 <div class="user-meta">
                     <p><i class="fas fa-envelope"></i> ${userData.email}</p>
-                    <p><i class="fas fa-calendar-alt"></i> Joined: ${userData.created_at}</p>
-                    <p><i class="fas fa-circle"></i> Status: ${userData.is_suspended ? 'Suspended' : 'Active'}</p>
+                    <p><i class="fas fa-calendar-alt"></i> Joined: ${new Date(userData.created_at).toLocaleDateString()}</p>
+                    <p><i class="fas fa-clock"></i> Last active: ${new Date(userData.last_login).toLocaleDateString()}</p>
+                    <p><i class="fas fa-globe"></i> Status: ${userData.is_suspended ? '<span class="badge badge-danger">Suspended</span>' : '<span class="badge badge-success">Active</span>'}</p>
                 </div>
+                
                 <div class="user-stats">
                     <div class="stat-item">
-                        <span class="stat-value">${userData.sites_count}</span>
+                        <span class="stat-value">${userData.site_count || 0}</span>
                         <span class="stat-label">Sites</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">${userData.logins_count}</span>
-                        <span class="stat-label">Logins</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value">${userData.last_active}</span>
-                        <span class="stat-label">Last Active</span>
+                        <span class="stat-value">${userData.deploy_count || 0}</span>
+                        <span class="stat-label">Deploys</span>
                     </div>
                 </div>
+                
+                <div class="user-actions">
+                    <button onclick="editUserProfile(${userData.id})" class="btn-primary">
+                        <i class="fas fa-user-edit"></i> Edit Profile
+                    </button>
+                    ${userData.is_profile_public ? 
+                    `<a href="/p/${userData.username}" target="_blank" class="btn-secondary">
+                        <i class="fas fa-external-link-alt"></i> View Public Profile
+                    </a>` : ''}
+                </div>
             `;
-            editUserForm.querySelector('#editUserId').value = userId;
+            
+            // Prepopulate edit form for convenience
+            editUserForm.querySelector('#editUserId').value = userData.id;
             editUserForm.querySelector('#editUsername').value = userData.username;
             editUserForm.querySelector('#editEmail').value = userData.email;
         } else {
@@ -1628,13 +1648,105 @@ function viewUserDetails(userId) {
     }, 1000);
 }
 
-
 function closeUserDetailModal() {
     document.getElementById('userDetailModal').style.display = 'none';
 }
 
 function closeUserProfileModal() {
     document.getElementById('userProfileModal').style.display = 'none';
+}
+
+// Function to toggle action dropdown visibility
+function toggleActionDropdown(button) {
+    // Close all other open dropdowns first
+    const allDropdowns = document.querySelectorAll('.action-dropdown-content');
+    allDropdowns.forEach(dropdown => {
+        if (dropdown !== button.nextElementSibling) {
+            dropdown.classList.remove('show');
+        }
+    });
+    
+    // Toggle the clicked dropdown
+    const dropdownContent = button.nextElementSibling;
+    dropdownContent.classList.toggle('show');
+    
+    // Add click outside to close
+    setTimeout(() => {
+        document.addEventListener('click', function closeDropdown(e) {
+            if (!button.contains(e.target) && !dropdownContent.contains(e.target)) {
+                dropdownContent.classList.remove('show');
+                document.removeEventListener('click', closeDropdown);
+            }
+        });
+    }, 10);
+}
+
+// Create a custom modal for context menu actions
+function openActionModal(userId, username) {
+    // Close any open dropdowns
+    const allDropdowns = document.querySelectorAll('.action-dropdown-content');
+    allDropdowns.forEach(dropdown => {
+        dropdown.classList.remove('show');
+    });
+    
+    // Get user data
+    fetch(`/api/users/${userId}`)
+        .then(response => response.json())
+        .then(userData => {
+            // Create modal HTML
+            const modalHTML = `
+                <div id="actionModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2><i class="fas fa-user-cog"></i> ${username} - Actions</h2>
+                            <button class="close-btn" onclick="document.getElementById('actionModal').remove()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="action-grid">
+                                <button onclick="viewUserDetails(${userId}); document.getElementById('actionModal').remove();" class="action-btn">
+                                    <i class="fas fa-eye"></i>
+                                    <span>View Details</span>
+                                </button>
+                                <button onclick="editUserProfile(${userId}); document.getElementById('actionModal').remove();" class="action-btn">
+                                    <i class="fas fa-user-edit"></i>
+                                    <span>Edit Profile</span>
+                                </button>
+                                ${userData.is_profile_public ? 
+                                `<a href="/p/${username}" target="_blank" class="action-btn">
+                                    <i class="fas fa-external-link-alt"></i>
+                                    <span>View Public Profile</span>
+                                </a>` : 
+                                `<button class="action-btn disabled">
+                                    <i class="fas fa-external-link-alt"></i>
+                                    <span>Profile Not Public</span>
+                                </button>`}
+                                ${userId !== parseInt(currentUserId) ? 
+                                `<button onclick="impersonateUser(${userId}, '${username}'); document.getElementById('actionModal').remove();" class="action-btn">
+                                    <i class="fas fa-user-secret"></i>
+                                    <span>Impersonate User</span>
+                                </button>
+                                <button onclick="toggleSuspension(${userId}, '${username}', ${!userData.is_suspended}); document.getElementById('actionModal').remove();" class="action-btn ${userData.is_suspended ? 'success-action' : 'danger-action'}">
+                                    <i class="fas fa-${userData.is_suspended ? 'user-check' : 'user-lock'}"></i>
+                                    <span>${userData.is_suspended ? 'Unsuspend' : 'Suspend'}</span>
+                                </button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal to body
+            const modalContainer = document.createElement('div');
+            modalContainer.innerHTML = modalHTML;
+            document.body.appendChild(modalContainer.firstElementChild);
+            
+            // Show modal
+            document.getElementById('actionModal').style.display = 'flex';
+        })
+        .catch(error => {
+            console.error('Error fetching user data:', error);
+            showToast('error', 'Failed to load user data');
+        });
 }
 
 function closeResetPasswordModal() {
@@ -1692,18 +1804,39 @@ function editUserProfile(userId) {
             document.getElementById('profileUsername').value = data.username;
             document.getElementById('profileEmail').value = data.email;
             document.getElementById('profileBio').value = data.bio || '';
-            document.getElementById('profileAvatar').value = data.avatar || '';
-            document.getElementById('profileBanner').value = data.profile_banner || '';
+            document.getElementById('profileAvatar').value = data.avatar_url || '';
+            document.getElementById('profileBanner').value = data.banner_url || '';
             document.getElementById('profileIsPublic').checked = data.is_profile_public;
             
             // Update preview
-            updateProfilePreview();
+            document.getElementById('previewUsername').textContent = data.username;
+            document.getElementById('previewBio').textContent = data.bio || 'No bio provided...';
+            
+            // If avatar URL exists, update the preview
+            const previewAvatar = document.getElementById('previewAvatar');
+            if (data.avatar_url) {
+                previewAvatar.innerHTML = `<img src="${data.avatar_url}" alt="${data.username}'s avatar" onerror="this.onerror=null; this.parentNode.innerHTML = '<i class=\'fas fa-user\'></i>'">`;
+            } else {
+                previewAvatar.innerHTML = '<i class="fas fa-user"></i>';
+            }
+            
+            // If banner URL exists, update the preview
+            const previewBanner = document.getElementById('previewBanner');
+            if (data.banner_url) {
+                previewBanner.style.backgroundImage = `url(${data.banner_url})`;
+                previewBanner.style.backgroundSize = 'cover';
+                previewBanner.style.backgroundPosition = 'center';
+            } else {
+                previewBanner.style.backgroundImage = 'none';
+                previewBanner.style.backgroundColor = 'var(--primary)';
+            }
             
             // Add social links
-            if (data.social_links) {
-                for (const [platform, url] of Object.entries(data.social_links)) {
-                    addSocialLinkWithValues(platform, url);
-                }
+            if (data.social_links && data.social_links.length > 0) {
+                document.getElementById('socialLinksContainer').innerHTML = '';
+                data.social_links.forEach(link => {
+                    addSocialLinkWithData(link.platform, link.url);
+                });
             }
             
             // If no social links were added, add an empty one
@@ -3998,6 +4131,12 @@ input:checked + .slider:before {
 
 .user-details {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 0 auto;
 }
 
 .user-details h3 {
@@ -4488,8 +4627,8 @@ tr:not(:nth-last-child(-n+3)) .action-dropdown .action-dropdown-content {
     bottom: auto;
 }
 
-.action-dropdown:hover .action-dropdown-content,
-.action-dropdown:focus-within .action-dropdown-content {
+/* Action dropdown now works on click instead of hover */
+.action-dropdown-content.show {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
@@ -4979,6 +5118,156 @@ tbody tr:hover {
         min-width: auto;
         max-width: 300px;
     }
+}
+/* User detail card improvements */
+.user-info-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin: 0 auto;
+    max-width: 500px;
+    padding: 1.5rem;
+    background-color: var(--surface-secondary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.user-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--surface-primary);
+    border: 5px solid var(--primary);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-avatar i {
+    font-size: 60px !important;
+    color: var(--primary);
+}
+
+.user-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+.user-meta p {
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+}
+
+.user-stats {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+.stat-item {
+    flex: 1;
+    min-width: 120px;
+    background-color: var(--surface-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+}
+
+.user-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 1rem;
+    justify-content: center;
+}
+
+/* Action modal styles */
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    width: 100%;
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background-color: var(--surface-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.action-btn i {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    background-color: var(--surface-tertiary);
+    border-color: var(--primary);
+}
+
+.action-btn.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.action-btn.disabled:hover {
+    transform: none;
+    box-shadow: none;
+    background-color: var(--surface-secondary);
+    border-color: var(--border-primary);
+}
+
+.success-action i {
+    color: var(--success);
+}
+
+.danger-action i {
+    color: var(--danger);
+}
+
+.success-action:hover {
+    border-color: var(--success);
+}
+
+.danger-action:hover {
+    border-color: var(--danger);
 }
 </style>
 {% endblock %}
