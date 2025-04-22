@@ -1787,73 +1787,49 @@ function toggleActionDropdown(button) {
         return;
     }
     
-    // Toggle show class
+    dropdownContent.classList.toggle('show');
+    
     if (dropdownContent.classList.contains('show')) {
-        dropdownContent.classList.remove('show');
+        // Make the dropdown position absolute and visible outside of container
+        dropdownContent.style.position = 'fixed';
+        document.body.appendChild(dropdownContent);
         
-        // If the dropdown is currently a child of the body, move it back
-        if (dropdownContent.parentElement === document.body) {
-            const parentButton = document.getElementById(dropdownContent.dataset.parentButton);
-            if (parentButton) {
-                parentButton.after(dropdownContent);
-            }
+        // Position the dropdown
+        const buttonRect = button.getBoundingClientRect();
+        
+        // Calculate the available space
+        const spaceBelow = window.innerHeight - buttonRect.bottom;
+        const spaceAbove = buttonRect.top;
+        
+        // Store reference to the button for later restoration
+        dropdownContent.dataset.parentButton = button.id || Math.random().toString(36).substring(2);
+        if (!button.id) button.id = dropdownContent.dataset.parentButton;
+        
+        // Position the dropdown
+        if (spaceBelow >= 200 || spaceBelow > spaceAbove) {
+            // Position below
+            dropdownContent.style.top = `${buttonRect.bottom}px`;
+            dropdownContent.style.bottom = 'auto';
+        } else {
+            // Position above
+            dropdownContent.style.bottom = `${window.innerHeight - buttonRect.top}px`;
+            dropdownContent.style.top = 'auto';
         }
-    } else {
-        dropdownContent.classList.add('show');
         
-        // Save original position before moving
-        if (dropdownContent.parentElement !== document.body) {
-            // Make the dropdown position fixed and visible outside of container
-            dropdownContent.style.position = 'fixed';
-            
-            // Store reference to the button for later restoration
-            dropdownContent.dataset.parentButton = button.id || Math.random().toString(36).substring(2);
-            if (!button.id) button.id = dropdownContent.dataset.parentButton;
-            
-            // Temporarily store the dropdown in the body to break out of any overflow constraints
-            document.body.appendChild(dropdownContent);
-            
-            // Position the dropdown
-            const buttonRect = button.getBoundingClientRect();
-            
-            // Calculate the available space
-            const spaceBelow = window.innerHeight - buttonRect.bottom;
-            const spaceAbove = buttonRect.top;
-            
-            // Position the dropdown
-            if (spaceBelow >= 200 || spaceBelow > spaceAbove) {
-                // Position below
-                dropdownContent.style.top = `${buttonRect.bottom}px`;
-                dropdownContent.style.bottom = 'auto';
-            } else {
-                // Position above
-                dropdownContent.style.bottom = `${window.innerHeight - buttonRect.top}px`;
-                dropdownContent.style.top = 'auto';
+        dropdownContent.style.left = `${buttonRect.left}px`;
+        
+        // Make sure it's not positioned outside the viewport on the right
+        setTimeout(() => {
+            const dropdownRect = dropdownContent.getBoundingClientRect();
+            if (dropdownRect.right > window.innerWidth) {
+                dropdownContent.style.left = `${buttonRect.right - dropdownRect.width}px`;
             }
-            
-            dropdownContent.style.left = `${buttonRect.left}px`;
-            
-            // Make sure it's not positioned outside the viewport on the right
-            setTimeout(() => {
-                const dropdownRect = dropdownContent.getBoundingClientRect();
-                if (dropdownRect.right > window.innerWidth) {
-                    dropdownContent.style.left = `${buttonRect.right - dropdownRect.width}px`;
-                }
-            }, 0);
-            
-            // Stop event propagation to prevent immediate closing
-            dropdownContent.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-            
-            // Add click outside to close
-            setTimeout(() => {
-                function closeDropdown(e) {
-                    // Don't close if clicking the button or inside the dropdown
-                    if (button.contains(e.target) || dropdownContent.contains(e.target)) {
-                        return;
-                    }
-                    
+        }, 0);
+        
+        // Add click outside to close
+        setTimeout(() => {
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!button.contains(e.target) && !dropdownContent.contains(e.target)) {
                     dropdownContent.classList.remove('show');
                     
                     // Return the dropdown to its original position in the DOM
@@ -1864,10 +1840,8 @@ function toggleActionDropdown(button) {
                     
                     document.removeEventListener('click', closeDropdown);
                 }
-                
-                document.addEventListener('click', closeDropdown);
-            }, 50);
-        }
+            });
+        }, 10);
     }
 }
 
@@ -1880,7 +1854,6 @@ function initializeActionDropdowns() {
         
         // Add the event listener
         newButton.addEventListener('click', function(e) {
-            e.preventDefault();
             e.stopPropagation();
             toggleActionDropdown(this);
         });
@@ -1890,13 +1863,6 @@ function initializeActionDropdowns() {
         if (dropdownContent && dropdownContent.classList.contains('action-dropdown-content')) {
             dropdownContent.style.position = 'absolute';
             dropdownContent.style.zIndex = '1000';
-            
-            // Prevent dropdown item clicks from closing immediately
-            dropdownContent.querySelectorAll('.dropdown-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            });
         }
     });
     
