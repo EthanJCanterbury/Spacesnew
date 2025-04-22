@@ -1031,7 +1031,7 @@ function filterUsers() {
     // Show loading indicator
     document.getElementById('userTableBody').innerHTML = `
         <tr>
-            <td colspan="7" class="text-center">
+            <td colspan="8" class="text-center">
                 <div class="loading-spinner"></div>
                 <p>Searching users...</p>
             </td>
@@ -1053,7 +1053,7 @@ function filterUsers() {
             if (data.users.length === 0) {
                 userTableBody.innerHTML = `
                     <tr>
-                        <td colspan="7" class="text-center">
+                        <td colspan="8" class="text-center">
                             <p>No users found matching "${searchTerm}"</p>
                         </td>
                     </tr>
@@ -1063,17 +1063,26 @@ function filterUsers() {
 
             data.users.forEach(user => {
                 const row = document.createElement('tr');
-
+                const currentUserId = {{ current_user.id }};
+                
                 row.innerHTML = `
                     <td>
-                        ${user.id !== {{ current_user.id }} ? 
+                        ${user.id !== currentUserId ? 
                         `<input type="checkbox" class="user-select" data-userid="${user.id}" data-username="${user.username}" onchange="updateBulkActions()">` : 
                         ''}
                     </td>
                     <td>${user.id}</td>
-                    <td>${user.username}</td>
+                    <td>
+                        <div class="user-table-info">
+                            <div class="user-avatar-small">
+                                ${user.avatar ? `<img src="${user.avatar}" alt="${user.username}">` : `<i class="fas fa-user"></i>`}
+                            </div>
+                            ${user.username}
+                        </div>
+                    </td>
                     <td>${user.email}</td>
                     <td>${user.created_at}</td>
+                    <td>${user.last_login || 'Never'}</td>
                     <td>
                         <span class="status-badge ${user.is_suspended ? 'suspended' : 'active'}">
                             ${user.is_suspended ? 'Suspended' : 'Active'}
@@ -1082,10 +1091,18 @@ function filterUsers() {
                         `<span class="status-badge club-leader">
                             Club Leader
                         </span>` : ''}
+                        ${user.is_admin ? 
+                        `<span class="status-badge admin">
+                            Admin
+                        </span>` : ''}
+                        ${user.is_profile_public ? 
+                        `<span class="status-badge public-profile">
+                            Public Profile
+                        </span>` : ''}
                     </td>
                     <td class="actions-cell">
                         <div class="action-dropdown">
-                            <button class="action-dropdown-btn" onclick="toggleActionDropdown(this)">
+                            <button class="action-dropdown-btn">
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
                             <div class="action-dropdown-content">
@@ -1093,7 +1110,20 @@ function filterUsers() {
                                     <i class="fas fa-eye"></i>
                                     <span>View Details</span>
                                 </button>
-                                ${user.id !== {{ current_user.id }} ? `
+                                <button onclick="editUserProfile(${user.id})" class="dropdown-item">
+                                    <i class="fas fa-user-edit"></i>
+                                    <span>Edit Profile</span>
+                                </button>
+                                ${user.is_profile_public ? 
+                                `<a href="/p/${user.username}" target="_blank" class="dropdown-item">
+                                    <i class="fas fa-external-link-alt"></i>
+                                    <span>View Public Profile</span>
+                                </a>` : ''}
+                                ${user.id !== currentUserId ? `
+                                <button onclick="impersonateUser(${user.id}, '${user.username}')" class="dropdown-item">
+                                    <i class="fas fa-user-secret"></i>
+                                    <span>Impersonate User</span>
+                                </button>
                                 <button onclick="toggleSuspension(${user.id}, '${user.username}', ${!user.is_suspended})" class="dropdown-item">
                                     <i class="fas fa-${user.is_suspended ? 'user-check' : 'user-lock'}"></i>
                                     <span>${user.is_suspended ? 'Unsuspend' : 'Suspend'}</span>
@@ -1101,6 +1131,14 @@ function filterUsers() {
                                 <button onclick="toggleClubLeader(${user.id}, '${user.username}', ${user.is_club_leader})" class="dropdown-item">
                                     <i class="fas fa-user-tag"></i>
                                     <span>${user.is_club_leader ? 'Remove Club Leader Role' : 'Grant Club Leader Role'}</span>
+                                </button>
+                                <button onclick="toggleAdminStatus(${user.id}, '${user.username}', ${!user.is_admin})" class="dropdown-item">
+                                    <i class="fas fa-${user.is_admin ? 'user-minus' : 'user-shield'}"></i>
+                                    <span>${user.is_admin ? 'Remove Admin' : 'Make Admin'}</span>
+                                </button>
+                                <button onclick="resetUserPassword(${user.id}, '${user.username}')" class="dropdown-item">
+                                    <i class="fas fa-key"></i>
+                                    <span>Reset Password</span>
                                 </button>
                                 <button onclick="deleteAllSites(${user.id}, '${user.username}')" class="dropdown-item">
                                     <i class="fas fa-trash-alt"></i>
@@ -1123,14 +1161,8 @@ function filterUsers() {
                 }, 300);
             });
             
-            // Initialize action dropdowns for the new search results
+            // Initialize action dropdowns for the new search results properly
             initializeActionDropdowns();
-            
-            // Make sure dropdowns are positioned properly when opened
-            document.querySelectorAll('.action-dropdown-content').forEach(dropdown => {
-                dropdown.style.position = 'absolute';
-                dropdown.style.zIndex = '1000';
-            });
         })
         .catch(error => {
             console.error('Error searching users:', error);
@@ -1732,6 +1764,12 @@ function closeUserProfileModal() {
 
 // Function to toggle action dropdown visibility
 function toggleActionDropdown(button) {
+    // Safety check for the button
+    if (!button) {
+        console.error("Toggle action dropdown called with null button");
+        return;
+    }
+
     // Close all other open dropdowns first
     const allDropdowns = document.querySelectorAll('.action-dropdown-content');
     allDropdowns.forEach(dropdown => {
@@ -1742,6 +1780,13 @@ function toggleActionDropdown(button) {
     
     // Toggle the clicked dropdown
     const dropdownContent = button.nextElementSibling;
+    
+    // Safety check for dropdown content
+    if (!dropdownContent) {
+        console.error("Dropdown content not found for button", button);
+        return;
+    }
+    
     dropdownContent.classList.toggle('show');
     
     if (dropdownContent.classList.contains('show')) {
@@ -1820,7 +1865,26 @@ function initializeActionDropdowns() {
             dropdownContent.style.zIndex = '1000';
         }
     });
+    
+    // Ensure dropdowns are properly positioned
+    window.addEventListener('resize', function() {
+        const visibleDropdown = document.querySelector('.action-dropdown-content.show');
+        if (visibleDropdown) {
+            const parentButton = document.getElementById(visibleDropdown.dataset.parentButton);
+            if (parentButton) {
+                toggleActionDropdown(parentButton); // Close
+                toggleActionDropdown(parentButton); // Reopen with proper positioning
+            } else {
+                visibleDropdown.classList.remove('show'); // Just close if we can't find the button
+            }
+        }
+    });
 }
+
+// Call this function when the DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initializeActionDropdowns();
+});
 
 // Create a custom modal for context menu actions
 function openActionModal(userId, username) {
