@@ -1125,6 +1125,12 @@ function filterUsers() {
             
             // Initialize action dropdowns for the new search results
             initializeActionDropdowns();
+            
+            // Make sure dropdowns are positioned properly when opened
+            document.querySelectorAll('.action-dropdown-content').forEach(dropdown => {
+                dropdown.style.position = 'absolute';
+                dropdown.style.zIndex = '1000';
+            });
         })
         .catch(error => {
             console.error('Error searching users:', error);
@@ -1739,23 +1745,29 @@ function toggleActionDropdown(button) {
     dropdownContent.classList.toggle('show');
     
     if (dropdownContent.classList.contains('show')) {
+        // Make the dropdown position absolute and visible outside of container
+        dropdownContent.style.position = 'fixed';
+        document.body.appendChild(dropdownContent);
+        
         // Position the dropdown
         const buttonRect = button.getBoundingClientRect();
-        const tableContainer = document.querySelector('.table-container');
-        const tableContainerRect = tableContainer.getBoundingClientRect();
         
         // Calculate the available space
         const spaceBelow = window.innerHeight - buttonRect.bottom;
         const spaceAbove = buttonRect.top;
         
+        // Store reference to the button for later restoration
+        dropdownContent.dataset.parentButton = button.id || Math.random().toString(36).substring(2);
+        if (!button.id) button.id = dropdownContent.dataset.parentButton;
+        
         // Position the dropdown
         if (spaceBelow >= 200 || spaceBelow > spaceAbove) {
             // Position below
-            dropdownContent.style.top = `${buttonRect.bottom + window.scrollY}px`;
+            dropdownContent.style.top = `${buttonRect.bottom}px`;
             dropdownContent.style.bottom = 'auto';
         } else {
             // Position above
-            dropdownContent.style.bottom = `${window.innerHeight - buttonRect.top + window.scrollY}px`;
+            dropdownContent.style.bottom = `${window.innerHeight - buttonRect.top}px`;
             dropdownContent.style.top = 'auto';
         }
         
@@ -1768,17 +1780,24 @@ function toggleActionDropdown(button) {
                 dropdownContent.style.left = `${buttonRect.right - dropdownRect.width}px`;
             }
         }, 0);
+        
+        // Add click outside to close
+        setTimeout(() => {
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!button.contains(e.target) && !dropdownContent.contains(e.target)) {
+                    dropdownContent.classList.remove('show');
+                    
+                    // Return the dropdown to its original position in the DOM
+                    const parentButton = document.getElementById(dropdownContent.dataset.parentButton);
+                    if (parentButton) {
+                        parentButton.after(dropdownContent);
+                    }
+                    
+                    document.removeEventListener('click', closeDropdown);
+                }
+            });
+        }, 10);
     }
-    
-    // Add click outside to close
-    setTimeout(() => {
-        document.addEventListener('click', function closeDropdown(e) {
-            if (!button.contains(e.target) && !dropdownContent.contains(e.target)) {
-                dropdownContent.classList.remove('show');
-                document.removeEventListener('click', closeDropdown);
-            }
-        });
-    }, 10);
 }
 
 function initializeActionDropdowns() {
@@ -1793,6 +1812,13 @@ function initializeActionDropdowns() {
             e.stopPropagation();
             toggleActionDropdown(this);
         });
+        
+        // Ensure the dropdown can appear outside the table container
+        const dropdownContent = newButton.nextElementSibling;
+        if (dropdownContent && dropdownContent.classList.contains('action-dropdown-content')) {
+            dropdownContent.style.position = 'absolute';
+            dropdownContent.style.zIndex = '1000';
+        }
     });
 }
 
