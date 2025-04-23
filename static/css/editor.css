@@ -1,4 +1,3 @@
-
 /* VS Code-like styles for CodeMirror */
 .CodeMirror {
   height: 100%;
@@ -2135,4 +2134,127 @@ iframe {
   font-size: 14px;
   color: #4a5568;
   font-weight: 500;
+}
+
+.btn-icon#theme-toggle-btn {
+    position: relative;
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.btn-icon#theme-toggle-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(145deg, #f5f7fa, #c3cfe2);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    border-radius: 50%;
+    z-index: -1;
+}
+
+[data-theme='dark'] .btn-icon#theme-toggle-btn::before {
+    background: linear-gradient(145deg, #2d3748, #1a202c);
+}
+
+.btn-icon#theme-toggle-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-icon#theme-toggle-btn:active {
+    transform: translateY(0px);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.btn-icon#theme-toggle-btn i {
+    font-size: 18px;
+    color: #f39c12;
+    transition: all 0.3s ease;
+}
+
+.btn-icon#theme-toggle-btn i.fa-moon {
+    color: #6a89cc;
+}
+
+/* Dark theme overrides for the editor */
+[data-theme='dark'] .editor-container {
+    background-color: var(--background-primary);
+}
+
+[data-theme='dark'] .editor-topbar {
+    background-color: var(--surface-primary);
+    border-color: var(--border-color);
+}
+
+[data-theme='dark'] .file-tabs {
+    background-color: var(--surface-secondary);
+}
+
+[data-theme='dark'] .file-tab {
+    background-color: var(--surface-secondary);
+    color: var(--text-secondary);
+}
+
+[data-theme='dark'] .file-tab.active {
+    background-color: var(--surface-primary);
+    color: var(--text-primary);
+}
+
+[data-theme='dark'] .editor-statusbar {
+    background-color: var(--surface-primary);
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+}
+
+[data-theme='dark'] .preview-pane,
+[data-theme='dark'] .browser-frame {
+    background-color: var(--surface-primary);
+}
+
+[data-theme='dark'] .browser-header {
+    background-color: var(--surface-secondary);
+    border-color: var(--border-color);
+}
+
+[data-theme='dark'] .browser-address {
+    background-color: var(--background-primary);
+    color: var(--text-secondary);
+}
+
+[data-theme='dark'] .modal-content {
+    background-color: var(--surface-primary);
+    color: var(--text-primary);
+}
+
+[data-theme='dark'] .modal-header,
+[data-theme='dark'] .modal-actions {
+    border-color: var(--border-color);
+}
+
+[data-theme='dark'] input,
+[data-theme='dark'] select,
+[data-theme='dark'] textarea {
+    background-color: var(--background-primary);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+[data-theme='dark'] .btn-secondary {
+    background-color: var(--surface-secondary);
+    color: var(--text-primary);
+    border-color: var(--border-color);
 }

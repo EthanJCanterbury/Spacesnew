@@ -95,11 +95,22 @@
                             Lint Code
                         </label>
                     </div>
+                    <div class="dropdown-section">
+                        <label for="themeSelector">Theme:</label>
+                        <select id="themeSelector" onchange="changeEditorTheme(this.value)">
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
             <button id="searchBtn" class="btn-icon" title="Search (Ctrl+F)" onclick="focusSearch()">
                 <i class="fas fa-search"></i>
+            </button>
+
+            <button id="theme-toggle-btn" class="btn-icon" title="Toggle Light/Dark Theme" onclick="toggleTheme()">
+                <i id="theme-toggle-icon" class="fas fa-sun"></i>
             </button>
 
             {% if site.site_type == 'web' %}
@@ -1072,6 +1083,10 @@ window.makeDraggable = function(element, dragHandle) {
 
 // Initialize the modals when the document is ready
 document.addEventListener('DOMContentLoaded', function() {
+    // Apply saved theme from local storage when page loads
+    applyThemeFromStorage();
+    
+    // Rest of initialization code
     // Initialize YSWS widget
     const yswsWidget = document.getElementById('ysws-widget');
     if (yswsWidget) {

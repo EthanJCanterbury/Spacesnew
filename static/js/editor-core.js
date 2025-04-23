@@ -856,6 +856,45 @@ function initializeTabs() {
     }
 }
 
+// Added these theme toggle functions
+function toggleTheme() {
+    const root = document.documentElement;
+    const isDark = root.getAttribute('data-theme') === 'dark';
+    
+    if (isDark) {
+        root.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+        updateThemeIcon(false);
+        editor.setOption('theme', 'eclipse');
+    } else {
+        root.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+        updateThemeIcon(true);
+        editor.setOption('theme', 'dracula');
+    }
+}
+
+function updateThemeIcon(isDark) {
+    const themeIcon = document.getElementById('theme-toggle-icon');
+    if (themeIcon) {
+        themeIcon.className = isDark ? 'fas fa-moon' : 'fas fa-sun';
+    }
+}
+
+function applyThemeFromStorage() {
+    const savedTheme = localStorage.getItem('theme');
+    const root = document.documentElement;
+    
+    if (savedTheme === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+        editor.setOption('theme', 'dracula');
+        updateThemeIcon(true);
+    } else {
+        root.removeAttribute('data-theme');
+        editor.setOption('theme', 'eclipse');
+        updateThemeIcon(false);
+    }
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     const siteContent = document.getElementById('editor').value;
@@ -1035,6 +1074,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 3000);
     initializeTabs();
+    applyThemeFromStorage();
 });
 
 function openNewFileModal() {
