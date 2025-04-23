@@ -159,9 +159,14 @@
             <div class="members-container">
                 <div class="members-header">
                     <h3>Club Members</h3>
-                    <button class="btn-primary" onclick="openAddMemberModal()">
-                        <i class="fas fa-user-plus"></i> Add Member
-                    </button>
+                    <div class="member-actions">
+                        <button class="btn-secondary" onclick="emailAllMembers()">
+                            <i class="fas fa-envelope"></i> Email All
+                        </button>
+                        <button class="btn-primary" onclick="openAddMemberModal()">
+                            <i class="fas fa-user-plus"></i> Add Member
+                        </button>
+                    </div>
                 </div>
 
                 <div class="members-list">
@@ -1454,6 +1459,11 @@
     font-size: 1.25rem;
     font-weight: 600;
     color: var(--text-primary);
+}
+
+.member-actions {
+    display: flex;
+    gap: 0.5rem;
 }
 
 .members-table {
@@ -4165,6 +4175,25 @@ function showToast(type, message) {
 // View a specific club for members with multiple clubs
 function viewClub(clubId) {
     window.location.href = `/club-dashboard?club_id=${clubId}`;
+}
+
+// Email all club members
+function emailAllMembers() {
+    // Get all members email addresses from the table
+    const emailCells = document.querySelectorAll('#membersTableBody tr td:nth-child(2)');
+    if (emailCells.length === 0) {
+        showToast('error', 'No members to email');
+        return;
+    }
+    
+    // Extract email addresses
+    const emails = Array.from(emailCells).map(cell => cell.textContent.trim());
+    
+    // Create mailto link with all emails in BCC
+    const mailtoLink = `mailto:?bcc=${emails.join(',')}`;
+    
+    // Open the default email client
+    window.location.href = mailtoLink;
 }
 
 // Initialize when document is loaded
