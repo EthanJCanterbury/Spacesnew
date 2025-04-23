@@ -3283,10 +3283,19 @@ function loadMeetings(filter = 'upcoming') {
         .then(data => {
             if (data.error) {
                 showToast('error', data.error);
+                meetingsContainer.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>${data.error}</p>
+                    </div>
+                `;
                 return;
             }
 
-            if (!data.meetings || data.meetings.length === 0) {
+            // Store meetings globally for other functions to use
+            allMeetings = data.meetings || [];
+            
+            if (allMeetings.length === 0) {
                 meetingsContainer.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-calendar-times"></i>
@@ -3302,7 +3311,7 @@ function loadMeetings(filter = 'upcoming') {
             const isLeader = data.is_leader === true;
             const now = new Date();
 
-            data.meetings.forEach(meeting => {
+            allMeetings.forEach(meeting => {
                 const meetingDate = new Date(meeting.meeting_date);
                 const isPast = meetingDate < now;
                 const formattedDate = meetingDate.toLocaleDateString('en-US', { 
@@ -3390,6 +3399,7 @@ function loadMeetings(filter = 'upcoming') {
                 <div class="error-state">
                     <i class="fas fa-exclamation-circle"></i>
                     <p>Failed to load meetings. Please try again.</p>
+                    <small>${error.message}</small>
                 </div>
             `;
         });
@@ -3402,8 +3412,28 @@ function filterMeetings(filter) {
         btn.classList.remove('active');
     });
     
-    document.querySelector(`.filter-btn[data-filter="${filter}"]`).classList.add('active');
-    loadMeetings(filter);
+    const activeFilterBtn = document.querySelector(`.filter-btn[data-filter="${filter}"]`);
+    if (activeFilterBtn) {
+        activeFilterBtn.classList.add('active');
+    } else {
+        console.error(`Filter button for "${filter}" not found`);
+    }
+    
+    try {
+        loadMeetings(filter);
+    } catch (error) {
+        console.error("Error in filterMeetings:", error);
+        const meetingsContainer = document.getElementById('meetings-container');
+        if (meetingsContainer) {
+            meetingsContainer.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>An error occurred while loading meetings.</p>
+                    <small>${error.message}</small>
+                </div>
+            `;
+        }
+    }
 }
 
 // Search meetings
