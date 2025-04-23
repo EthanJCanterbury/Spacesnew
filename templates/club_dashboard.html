@@ -3563,6 +3563,23 @@ function closeMeetingAttendanceModal() {
     closeModal('meetingAttendanceModal');
 }
 
+// Document ready function to initialize tab content
+document.addEventListener('DOMContentLoaded', function() {
+    // If we're on the meetings tab initially or if meetings tab is clicked
+    const urlParams = new URLSearchParams(window.location.search);
+    const activeTab = urlParams.get('tab');
+    
+    if (activeTab === 'meetings') {
+        openTab('meetings');
+        loadMeetings('upcoming');
+    }
+    
+    // Add event listeners to tab buttons for content loading
+    document.querySelector('.tab-btn[onclick="openTab(\'meetings\')"]').addEventListener('click', function() {
+        loadMeetings('upcoming');
+    });
+});
+
 // Update attendance status
 function updateAttendance(status) {
     const meetingId = document.getElementById('attendanceMeetingId').value;
