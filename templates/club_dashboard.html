@@ -163,7 +163,7 @@
                         <button class="btn-secondary" onclick="emailAllMembers()">
                             <i class="fas fa-envelope"></i> Email All
                         </button>
-                        <button class="btn-primary" onclick="openAddMemberModal()">
+                        <button class="btn-primary btn-add-member" onclick="openAddMemberModal()">
                             <i class="fas fa-user-plus"></i> Add Member
                         </button>
                     </div>
@@ -1464,6 +1464,20 @@
 .member-actions {
     display: flex;
     gap: 0.5rem;
+    align-items: center;
+}
+
+.btn-secondary, .btn-primary {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-add-member {
+    min-width: auto;
+    padding: 10px 16px;
+    width: auto;
 }
 
 .members-table {
@@ -4190,10 +4204,11 @@ function emailAllMembers() {
     const emails = Array.from(emailCells).map(cell => cell.textContent.trim());
     
     // Create mailto link with all emails in BCC
-    const mailtoLink = `mailto:?bcc=${emails.join(',')}`;
+    // Use encodeURIComponent to properly handle special characters
+    const mailtoLink = `mailto:?bcc=${encodeURIComponent(emails.join(','))}`;
     
     // Open the default email client
-    window.location.href = mailtoLink;
+    window.open(mailtoLink, '_blank');
 }
 
 // Initialize when document is loaded
