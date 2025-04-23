@@ -5627,3 +5627,350 @@ if __name__ == '__main__':
 
     app.logger.info("Server running on http://0.0.0.0:3000")
     app.run(host='0.0.0.0', port=3000, debug=True)
+@app.route('/api/clubs/<int:club_id>/meetings', methods=['GET'])
+@login_required
+def get_meetings(club_id):
+    try:
+        club = Club.query.get_or_404(club_id)
+        
+        # Check if user is a member or leader of the club
+        is_member = current_user.id == club.leader_id or ClubMembership.query.filter_by(
+            club_id=club_id, user_id=current_user.id).first() is not None
+            
+        if not is_member:
+            return jsonify({'error': 'You are not a member of this club'}), 403
+            
+        # Get filter parameter (upcoming, past, or all)
+        filter_type = request.args.get('filter', 'upcoming')
+        
+        # Construct base query
+        query = ClubMeeting.query.filter_by(club_id=club_id)
+        
+        # Apply filter
+        now = datetime.now().date()
+        if filter_type == 'upcoming':
+            query = query.filter(ClubMeeting.meeting_date >= now)
+        elif filter_type == 'past':
+            query = query.filter(ClubMeeting.meeting_date < now)
+        
+        # Order by date
+        meetings = query.order_by(ClubMeeting.meeting_date).all()
+        
+        # Convert to JSON serializable format
+        result = []
+        for meeting in meetings:
+            creator = User.query.get(meeting.created_by)
+            
+            # Get attendance counts
+            attending_count = ClubMeetingAttendance.query.filter_by(
+                meeting_id=meeting.id, status='attending').count()
+                
+            meeting_data = {
+                'id': meeting.id,
+                'title': meeting.title,
+                'description': meeting.description,
+                'meeting_date': meeting.meeting_date.isoformat(),
+                'start_time': meeting.start_time.strftime('%H:%M') if meeting.start_time else None,
+                'end_time': meeting.end_time.strftime('%H:%M') if meeting.end_time else None,
+                'location': meeting.location,
+                'meeting_link': meeting.meeting_link,
+                'creator': {
+                    'id': creator.id,
+                    'username': creator.username
+                },
+                'attending_count': attending_count
+            }
+            result.append(meeting_data)
+            
+        return jsonify({
+            'meetings': result,
+            'is_leader': current_user.id == club.leader_id or ClubMembership.query.filter_by(
+                club_id=club_id, user_id=current_user.id, role='co-leader').first() is not None
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error getting meetings: {str(e)}')
+        return jsonify({'error': f'Failed to get meetings: {str(e)}'}), 500
+
+@app.route('/api/clubs/<int:club_id>/meetings', methods=['POST'])
+@login_required
+def create_meeting(club_id):
+    try:
+        club = Club.query.get_or_404(club_id)
+        
+        # Check if user is club leader or co-leader
+        is_leader = current_user.id == club.leader_id or ClubMembership.query.filter_by(
+            club_id=club_id, user_id=current_user.id, role='co-leader').first() is not None
+            
+        if not is_leader:
+            return jsonify({'error': 'Only club leaders can create meetings'}), 403
+            
+        # Get meeting data from request
+        data = request.get_json()
+        
+        # Validate required fields
+        if not data.get('title') or not data.get('meeting_date') or not data.get('start_time'):
+            return jsonify({'error': 'Title, date, and start time are required'}), 400
+            
+        # Parse date and times
+        meeting_date = datetime.strptime(data.get('meeting_date'), '%Y-%m-%d').date()
+        start_time = datetime.strptime(data.get('start_time'), '%H:%M').time()
+        end_time = datetime.strptime(data.get('end_time'), '%H:%M').time() if data.get('end_time') else None
+        
+        # Create new meeting
+        meeting = ClubMeeting(
+            club_id=club_id,
+            title=data.get('title'),
+            description=data.get('description'),
+            meeting_date=meeting_date,
+            start_time=start_time,
+            end_time=end_time,
+            location=data.get('location'),
+            meeting_link=data.get('meeting_link'),
+            created_by=current_user.id
+        )
+        
+        db.session.add(meeting)
+        db.session.commit()
+        
+        # Return the created meeting
+        return jsonify({
+            'message': 'Meeting created successfully',
+            'meeting': {
+                'id': meeting.id,
+                'title': meeting.title,
+                'meeting_date': meeting.meeting_date.isoformat()
+            }
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error creating meeting: {str(e)}')
+        return jsonify({'error': f'Failed to create meeting: {str(e)}'}), 500
+
+@app.route('/api/clubs/<int:club_id>/meetings/<int:meeting_id>', methods=['GET'])
+@login_required
+def get_meeting(club_id, meeting_id):
+    try:
+        club = Club.query.get_or_404(club_id)
+        
+        # Check if user is a member of the club
+        is_member = current_user.id == club.leader_id or ClubMembership.query.filter_by(
+            club_id=club_id, user_id=current_user.id).first() is not None
+            
+        if not is_member:
+            return jsonify({'error': 'You are not a member of this club'}), 403
+            
+        meeting = ClubMeeting.query.filter_by(id=meeting_id, club_id=club_id).first_or_404()
+        creator = User.query.get(meeting.created_by)
+        
+        meeting_data = {
+            'id': meeting.id,
+            'title': meeting.title,
+            'description': meeting.description,
+            'meeting_date': meeting.meeting_date.isoformat(),
+            'start_time': meeting.start_time.strftime('%H:%M') if meeting.start_time else None,
+            'end_time': meeting.end_time.strftime('%H:%M') if meeting.end_time else None,
+            'location': meeting.location,
+            'meeting_link': meeting.meeting_link,
+            'creator': {
+                'id': creator.id,
+                'username': creator.username
+            }
+        }
+        
+        return jsonify({'meeting': meeting_data})
+        
+    except Exception as e:
+        app.logger.error(f'Error getting meeting: {str(e)}')
+        return jsonify({'error': f'Failed to get meeting: {str(e)}'}), 500
+
+@app.route('/api/clubs/<int:club_id>/meetings/<int:meeting_id>', methods=['PUT'])
+@login_required
+def update_meeting(club_id, meeting_id):
+    try:
+        club = Club.query.get_or_404(club_id)
+        
+        # Check if user is club leader or co-leader
+        is_leader = current_user.id == club.leader_id or ClubMembership.query.filter_by(
+            club_id=club_id, user_id=current_user.id, role='co-leader').first() is not None
+            
+        if not is_leader:
+            return jsonify({'error': 'Only club leaders can update meetings'}), 403
+            
+        meeting = ClubMeeting.query.filter_by(id=meeting_id, club_id=club_id).first_or_404()
+        
+        # Get meeting data from request
+        data = request.get_json()
+        
+        # Update meeting fields
+        if 'title' in data:
+            meeting.title = data['title']
+        if 'description' in data:
+            meeting.description = data['description']
+        if 'meeting_date' in data:
+            meeting.meeting_date = datetime.strptime(data['meeting_date'], '%Y-%m-%d').date()
+        if 'start_time' in data:
+            meeting.start_time = datetime.strptime(data['start_time'], '%H:%M').time()
+        if 'end_time' in data:
+            meeting.end_time = datetime.strptime(data['end_time'], '%H:%M').time() if data['end_time'] else None
+        if 'location' in data:
+            meeting.location = data['location']
+        if 'meeting_link' in data:
+            meeting.meeting_link = data['meeting_link']
+            
+        meeting.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Meeting updated successfully',
+            'meeting': {
+                'id': meeting.id,
+                'title': meeting.title,
+                'meeting_date': meeting.meeting_date.isoformat()
+            }
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error updating meeting: {str(e)}')
+        return jsonify({'error': f'Failed to update meeting: {str(e)}'}), 500
+
+@app.route('/api/clubs/<int:club_id>/meetings/<int:meeting_id>', methods=['DELETE'])
+@login_required
+def delete_meeting(club_id, meeting_id):
+    try:
+        club = Club.query.get_or_404(club_id)
+        
+        # Check if user is club leader or co-leader
+        is_leader = current_user.id == club.leader_id or ClubMembership.query.filter_by(
+            club_id=club_id, user_id=current_user.id, role='co-leader').first() is not None
+            
+        if not is_leader:
+            return jsonify({'error': 'Only club leaders can delete meetings'}), 403
+            
+        meeting = ClubMeeting.query.filter_by(id=meeting_id, club_id=club_id).first_or_404()
+        
+        # Delete meeting attendances first
+        ClubMeetingAttendance.query.filter_by(meeting_id=meeting_id).delete()
+        
+        # Delete the meeting
+        db.session.delete(meeting)
+        db.session.commit()
+        
+        return jsonify({'message': 'Meeting deleted successfully'})
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error deleting meeting: {str(e)}')
+        return jsonify({'error': f'Failed to delete meeting: {str(e)}'}), 500
+
+@app.route('/api/clubs/<int:club_id>/meetings/<int:meeting_id>/attendance', methods=['GET'])
+@login_required
+def get_meeting_attendance(club_id, meeting_id):
+    try:
+        club = Club.query.get_or_404(club_id)
+        
+        # Check if user is a member of the club
+        is_member = current_user.id == club.leader_id or ClubMembership.query.filter_by(
+            club_id=club_id, user_id=current_user.id).first() is not None
+            
+        if not is_member:
+            return jsonify({'error': 'You are not a member of this club'}), 403
+            
+        meeting = ClubMeeting.query.filter_by(id=meeting_id, club_id=club_id).first_or_404()
+        
+        # Get attendance records
+        attendance_records = ClubMeetingAttendance.query.filter_by(meeting_id=meeting_id).all()
+        
+        # Get user's attendance status
+        user_attendance = ClubMeetingAttendance.query.filter_by(
+            meeting_id=meeting_id, user_id=current_user.id).first()
+        user_status = user_attendance.status if user_attendance else 'none'
+        
+        # Convert to JSON serializable format
+        attendance_data = []
+        for record in attendance_records:
+            user = User.query.get(record.user_id)
+            attendance_data.append({
+                'id': record.id,
+                'status': record.status,
+                'user': {
+                    'id': user.id,
+                    'username': user.username
+                }
+            })
+            
+        # Count attendance by status
+        counts = {
+            'attending': ClubMeetingAttendance.query.filter_by(meeting_id=meeting_id, status='attending').count(),
+            'maybe': ClubMeetingAttendance.query.filter_by(meeting_id=meeting_id, status='maybe').count(),
+            'not_attending': ClubMeetingAttendance.query.filter_by(meeting_id=meeting_id, status='not-attending').count()
+        }
+        
+        return jsonify({
+            'attendance': attendance_data,
+            'counts': counts,
+            'user_status': user_status
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Error getting meeting attendance: {str(e)}')
+        return jsonify({'error': f'Failed to get meeting attendance: {str(e)}'}), 500
+
+@app.route('/api/clubs/<int:club_id>/meetings/<int:meeting_id>/attendance', methods=['POST'])
+@login_required
+def update_attendance_status(club_id, meeting_id):
+    try:
+        club = Club.query.get_or_404(club_id)
+        
+        # Check if user is a member of the club
+        is_member = current_user.id == club.leader_id or ClubMembership.query.filter_by(
+            club_id=club_id, user_id=current_user.id).first() is not None
+            
+        if not is_member:
+            return jsonify({'error': 'You are not a member of this club'}), 403
+            
+        meeting = ClubMeeting.query.filter_by(id=meeting_id, club_id=club_id).first_or_404()
+        
+        # Get status from request
+        data = request.get_json()
+        status = data.get('status')
+        
+        if status not in ['attending', 'maybe', 'not-attending']:
+            return jsonify({'error': 'Invalid attendance status'}), 400
+            
+        # Check if attendance record already exists
+        attendance = ClubMeetingAttendance.query.filter_by(
+            meeting_id=meeting_id, user_id=current_user.id).first()
+            
+        if attendance:
+            attendance.status = status
+        else:
+            attendance = ClubMeetingAttendance(
+                meeting_id=meeting_id,
+                user_id=current_user.id,
+                status=status
+            )
+            db.session.add(attendance)
+            
+        db.session.commit()
+        
+        # Get updated counts
+        counts = {
+            'attending': ClubMeetingAttendance.query.filter_by(meeting_id=meeting_id, status='attending').count(),
+            'maybe': ClubMeetingAttendance.query.filter_by(meeting_id=meeting_id, status='maybe').count(),
+            'not_attending': ClubMeetingAttendance.query.filter_by(meeting_id=meeting_id, status='not-attending').count()
+        }
+        
+        return jsonify({
+            'message': 'Attendance status updated',
+            'status': status,
+            'counts': counts
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error updating attendance status: {str(e)}')
+        return jsonify({'error': f'Failed to update attendance status: {str(e)}'}), 500
