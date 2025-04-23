@@ -3270,8 +3270,16 @@ function loadMeetings(filter = 'upcoming') {
         </div>
     `;
 
-    fetch(`/api/clubs/${clubId}/meetings?filter=${filter}`)
-        .then(response => response.json())
+    // Filter parameter for URL
+    const filterParam = filter ? `?filter=${filter}` : '';
+
+    fetch(`/api/clubs/${clubId}/meetings${filterParam}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.error) {
                 showToast('error', data.error);
@@ -5538,6 +5546,8 @@ document.addEventListener('DOMContentLoaded', function() {
             loadMeetings();
         } else if (tabName === 'projects') {
             loadProjects();
+        } else if (tabName === 'meetings') {
+            loadMeetings('upcoming');
         }
     }
 
@@ -5559,12 +5569,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadMeetings();
             } else if (tabName === 'projects') {
                 loadProjects();
+            } else if (tabName === 'meetings') {
+                loadMeetings('upcoming');
             }
         });
     });
 
     // Make chat input send on Enter key
-    document.getElementById('chat-message-input').addEventListener('keydown', function(e) {
+    document.getElementById('chat-message-input')?.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendChatMessage();
