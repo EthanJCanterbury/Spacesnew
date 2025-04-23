@@ -259,6 +259,9 @@ class User(UserMixin, db.Model):
                Club.query.filter_by(leader_id=self.id).first() is not None or \
                ClubMembership.query.filter_by(user_id=self.id, role='co-leader').first() is not None
 
+    def is_club_coleader(self, club_id):
+        return ClubMembership.query.filter_by(user_id=self.id, club_id=club_id, role='co-leader').first() is not None
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 

@@ -440,7 +440,7 @@
             <div class="meetings-container">
                 <div class="meetings-header">
                     <h3>Club Meetings</h3>
-                    {% if club and (current_user.id == club.leader_id or current_user.id in [m.user_id for m in club.members if m.role == 'co-leader']) %}
+                    {% if club and (current_user.id == club.leader_id or current_user.is_club_coleader(club.id)) %}
                     <button class="btn-primary" onclick="openCreateMeetingModal()">
                         <i class="fas fa-plus"></i> New Meeting
                     </button>
@@ -904,7 +904,7 @@
                 </div>
             </div>
             
-            {% if club and (current_user.id == club.leader_id or current_user.id in [m.user_id for m in club.members if m.role == 'co-leader']) %}
+            {% if club and (current_user.id == club.leader_id or current_user.is_club_coleader(club.id)) %}
             <div class="attendance-list-container">
                 <h3>Members</h3>
                 <div class="attendance-list" id="attendanceList">
