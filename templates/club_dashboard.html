@@ -160,10 +160,10 @@
                 <div class="members-header">
                     <h3>Club Members</h3>
                     <div class="member-actions">
-                        <button class="btn-secondary" onclick="emailAllMembers()">
+                        <button class="btn-secondary members-action-btn" onclick="emailAllMembers()">
                             <i class="fas fa-envelope"></i> Email All
                         </button>
-                        <button class="btn-primary" onclick="openAddMemberModal()">
+                        <button class="btn-primary members-action-btn" onclick="openAddMemberModal()">
                             <i class="fas fa-user-plus"></i> Add Member
                         </button>
                     </div>
@@ -1472,6 +1472,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+}
+
+.members-action-btn {
+    width: auto;
+    min-width: 120px;
+    max-width: fit-content;
 }
 
 /* Removed btn-add-member style to ensure consistent button styling */
@@ -4200,12 +4206,11 @@ function emailAllMembers() {
     const emails = Array.from(emailCells).map(cell => cell.textContent.trim());
     
     // Create mailto link with all emails in BCC
-    // Each email needs to be individually encoded
     const encodedEmails = emails.map(email => encodeURIComponent(email)).join(',');
     const mailtoLink = `mailto:?bcc=${encodedEmails}&subject=${encodeURIComponent('Message from your club')}`;
     
     // Open the default email client
-    window.open(mailtoLink, '_blank');
+    window.location.href = mailtoLink;
 }
 
 // Initialize when document is loaded
