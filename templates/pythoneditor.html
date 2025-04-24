@@ -134,6 +134,10 @@ function showToast(type, message) {
                 <i class="fas fa-magic"></i>
                 Format
             </button>
+            <button id="deployBtn" class="btn-primary" onclick="deployPythonSite()" style="background: linear-gradient(135deg, #6a0dad 0%, #8a2be2 100%);">
+                <i class="fas fa-rocket"></i>
+                Deploy
+            </button>
             <button id="saveBtn" class="btn-primary" onclick="savePythonContent()">
                 <i class="fas fa-save"></i>
                 Save Changes
@@ -179,6 +183,43 @@ function showToast(type, message) {
                 </div>
                 <pre id="pythonOutput" class="console-output">Run your code to see the output here!</pre>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Deployment notification modal -->
+<div id="deploymentNoticeModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-rocket"></i> New Deployment System</h2>
+            <button class="close-btn" onclick="closeModal('deploymentNoticeModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="info-box" style="background-color: #f0f4f8; padding: 15px; border-left: 4px solid #4e54c8; margin-bottom: 15px;">
+                <p><strong>Important:</strong> The deployment system has been updated!</p>
+            </div>
+            
+            <h3>What's new?</h3>
+            <ul style="margin-bottom: 15px; line-height: 1.6;">
+                <li><strong>Preview:</strong> Live preview of your code is now available at <code>/s/preview/siteid</code></li>
+                <li><strong>GitHub Required:</strong> Deployments now require a GitHub repository connection</li>
+                <li><strong>Separation of Concerns:</strong> Published sites at <code>/s/customname</code> will display code from your GitHub repo, not your editor code</li>
+            </ul>
+            
+            <h3>What does this mean?</h3>
+            <p>This professional workflow more closely resembles industry standards:</p>
+            <ol style="margin-bottom: 15px; line-height: 1.6;">
+                <li>Make changes in the editor</li>
+                <li>Test in the preview environment</li>
+                <li>Commit and push to GitHub</li>
+                <li>Deploy the GitHub version to production</li>
+            </ol>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-primary" onclick="closeModal('deploymentNoticeModal')" style="background-color: #4e54c8;">Got it!</button>
+            <label style="margin-left: 10px;">
+                <input type="checkbox" id="dontShowAgain"> Don't show again
+            </label>
         </div>
     </div>
 </div>

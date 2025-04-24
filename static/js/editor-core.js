@@ -7,6 +7,262 @@ let lastCursorPosition = { line: 0, ch: 0 };
 let isDirty = false;
 let completionActive = false;
 
+
+// GitHub Deployment Functions
+function checkGitHubStatus() {
+    const siteId = document.getElementById('site-id').value;
+    const githubStatusMessage = document.getElementById('githubStatusMessage');
+    const connectGithubBtn = document.getElementById('connectGithubBtn');
+    const pushChangesBtn = document.getElementById('pushChangesBtn');
+    const deployNowBtn = document.getElementById('deployNowBtn');
+    
+    if (!githubStatusMessage) return;
+    
+    githubStatusMessage.innerHTML = 'Checking GitHub connection status...';
+    
+    fetch(`/api/github/status?site_id=${siteId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.connected) {
+                githubStatusMessage.innerHTML = '<span style="color: #dc3545;"><i class="fas fa-times-circle"></i> No GitHub account connected.</span>';
+                connectGithubBtn.style.display = 'inline-block';
+                pushChangesBtn.style.display = 'none';
+                deployNowBtn.style.display = 'none';
+            } else if (!data.repo_connected) {
+                githubStatusMessage.innerHTML = '<span style="color: #dc3545;"><i class="fas fa-times-circle"></i> GitHub account connected, but no repository for this site.</span>';
+                connectGithubBtn.style.display = 'inline-block';
+                pushChangesBtn.style.display = 'none';
+                deployNowBtn.style.display = 'none';
+            } else {
+                githubStatusMessage.innerHTML = `<span style="color: #28a745;"><i class="fas fa-check-circle"></i> Connected to GitHub repository: ${data.repo_name}</span>`;
+                connectGithubBtn.style.display = 'none';
+                pushChangesBtn.style.display = 'inline-block';
+                deployNowBtn.style.display = 'inline-block';
+            }
+        })
+        .catch(error => {
+            console.error('Error checking GitHub status:', error);
+            githubStatusMessage.innerHTML = '<span style="color: #dc3545;"><i class="fas fa-exclamation-circle"></i> Error checking GitHub connection.</span>';
+            connectGithubBtn.style.display = 'inline-block';
+        });
+}
+
+function deploySite() {
+    const siteId = document.getElementById('site-id').value;
+    
+    // First save content
+    saveContent();
+    
+    // Open deployment modal and check GitHub status
+    document.getElementById('deployModal').classList.add('show');
+    checkGitHubStatus();
+}
+
+function deployPythonSite() {
+    const siteId = document.getElementById('site-id').value;
+    
+    // First save content
+    savePythonContent();
+    
+    // Open deployment notice modal first time
+    const deploymentNoticeSeen = localStorage.getItem('deploymentNoticeSeen');
+    if (!deploymentNoticeSeen) {
+        openModal('deploymentNoticeModal');
+    } else {
+        // Check GitHub status directly
+        checkGitHubConnectionForPythonDeploy();
+    }
+}
+
+function deployFromGitHub() {
+    const siteId = document.getElementById('site-id').value;
+    const deployNowBtn = document.getElementById('deployNowBtn');
+    
+    if (!deployNowBtn) return;
+    
+    const originalBtnText = deployNowBtn.innerHTML;
+    deployNowBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deploying...';
+    deployNowBtn.disabled = true;
+    
+    fetch(`/api/site/${siteId}/deploy-from-github`, {
+        method: 'POST',
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showToast('success', 'Site deployed successfully!');
+            // Update the deployment URLs if needed
+        } else {
+            showToast('error', 'Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('error', 'Error deploying site');
+    })
+    .finally(() => {
+        deployNowBtn.innerHTML = originalBtnText;
+        deployNowBtn.disabled = false;
+    });
+}
+
+function checkGitHubConnectionForPythonDeploy() {
+    const siteId = document.getElementById('site-id').value;
+    
+    fetch(`/api/github/status?site_id=${siteId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.connected) {
+                showToast('error', 'GitHub account not connected. Please connect your GitHub account first.');
+                GitHubManager.openModal();
+            } else if (!data.repo_connected) {
+                showToast('error', 'No GitHub repository connected to this site. Please create or connect a repository.');
+                GitHubManager.openModal();
+            } else {
+                showToast('info', 'GitHub repository connected. Preparing to deploy...');
+                openPythonDeployOptions(data.repo_name);
+            }
+        })
+        .catch(error => {
+            console.error('Error checking GitHub status:', error);
+            showToast('error', 'Error checking GitHub connection status');
+        });
+}
+
+function openPythonDeployOptions(repoName) {
+    // Create a modal for Python deployment options
+    const modalHtml = `
+        <div id="pythonDeployModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-rocket"></i> Deploy Python Application</h2>
+                    <button class="close-btn" onclick="closeModal('pythonDeployModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="info-box" style="background-color: #f0f4f8; padding: 15px; border-left: 4px solid #4e54c8; margin-bottom: 15px;">
+                        <p><strong>GitHub Repository:</strong> ${repoName}</p>
+                    </div>
+                    
+                    <h3>Deployment Options</h3>
+                    <p>Choose how to run your Python application:</p>
+                    
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Start Command:</label>
+                        <input type="text" id="pythonStartCommand" value="python main.py" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <p style="font-size: 12px; color: #6c757d; margin-top: 5px;">The command that will start your Python application.</p>
+                    </div>
+                    
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Environment Variables:</label>
+                        <textarea id="pythonEnvVars" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; height: 80px;" placeholder="KEY=value&#10;ANOTHER_KEY=another_value"></textarea>
+                        <p style="font-size: 12px; color: #6c757d; margin-top: 5px;">One environment variable per line in KEY=value format.</p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-primary" onclick="deployPythonFromGitHub()" style="background: linear-gradient(135deg, #6a0dad 0%, #8a2be2 100%);">
+                        <i class="fas fa-rocket"></i> Deploy Now
+                    </button>
+                    <button class="btn-secondary" onclick="closeModal('pythonDeployModal')">Cancel</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Append modal to body if it doesn't exist
+    if (!document.getElementById('pythonDeployModal')) {
+        const modalElement = document.createElement('div');
+        modalElement.innerHTML = modalHtml;
+        document.body.appendChild(modalElement.firstElementChild);
+    }
+    
+    // Show the modal
+    openModal('pythonDeployModal');
+}
+
+function deployPythonFromGitHub() {
+    const siteId = document.getElementById('site-id').value;
+    const startCommand = document.getElementById('pythonStartCommand').value;
+    const envVars = document.getElementById('pythonEnvVars').value;
+    
+    // Disable buttons and show loading state
+    const deployBtn = document.querySelector('#pythonDeployModal .btn-primary');
+    const originalBtnText = deployBtn.innerHTML;
+    deployBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deploying...';
+    deployBtn.disabled = true;
+    
+    // Parse environment variables
+    const envVarsObj = {};
+    if (envVars) {
+        envVars.split('\n').forEach(line => {
+            const [key, value] = line.split('=');
+            if (key && value) {
+                envVarsObj[key.trim()] = value.trim();
+            }
+        });
+    }
+    
+    fetch(`/api/site/${siteId}/deploy-python`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            start_command: startCommand,
+            env_vars: envVarsObj
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showToast('success', 'Python application deployed successfully!');
+            closeModal('pythonDeployModal');
+        } else {
+            showToast('error', 'Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('error', 'Error deploying Python application');
+    })
+    .finally(() => {
+        deployBtn.innerHTML = originalBtnText;
+        deployBtn.disabled = false;
+    });
+}
+
+// Function to close the deployment notice modal and possibly set preference
+document.addEventListener('DOMContentLoaded', function() {
+    const dontShowAgainCheckbox = document.getElementById('dontShowAgain');
+    if (dontShowAgainCheckbox) {
+        dontShowAgainCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                localStorage.setItem('deploymentNoticeSeen', 'true');
+            } else {
+                localStorage.removeItem('deploymentNoticeSeen');
+            }
+        });
+    }
+});
+
+// Update the preview URL to use the new format
+function updatePreview() {
+    if (siteType !== 'web') return;
+
+    const previewFrame = document.getElementById('preview');
+    if (!previewFrame) return;
+
+    const siteId = document.getElementById('site-id').value;
+    if (!siteId) return;
+
+    // Use the new preview URL format
+    const currentDomain = window.location.hostname;
+    const timestamp = new Date().getTime();
+    const previewUrl = `https://${currentDomain}/s/preview/${siteId}?t=${timestamp}`;
+
+    // Always set the src attribute to force a refresh
+    previewFrame.src = previewUrl;
+}
+
 let currentFilename = 'index.html';
 
 function initEditor(initialContent, type) {
@@ -741,6 +997,48 @@ function closeDeployModal() {
 function showToast(type, message) {
     // Using the global showToast function defined in main.js
     window.showToast(type, message);
+
+// Show deployment notice on page load if not seen before
+document.addEventListener('DOMContentLoaded', function() {
+    const deploymentNoticeSeen = localStorage.getItem('deploymentNoticeSeen');
+    if (!deploymentNoticeSeen) {
+        const deploymentNoticeModal = document.getElementById('deploymentNoticeModal');
+        if (deploymentNoticeModal) {
+            setTimeout(() => {
+                openModal('deploymentNoticeModal');
+            }, 1000);
+        }
+    }
+
+    // Handle closing and marking as seen
+    const closeBtn = document.querySelector('#deploymentNoticeModal .close-btn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            const dontShowAgain = document.getElementById('dontShowAgain');
+            if (dontShowAgain && dontShowAgain.checked) {
+                localStorage.setItem('deploymentNoticeSeen', 'true');
+            }
+            closeModal('deploymentNoticeModal');
+        });
+    }
+});
+
+// Close modal function
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
+// Open modal function
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('show');
+    }
+}
+
 }
 
 
