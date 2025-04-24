@@ -195,20 +195,6 @@ class ClubMeeting(db.Model):
         return f'<ClubMeeting {self.title} on {self.meeting_date}>'
         
         
-class ClubMeetingAttendance(db.Model):
-    __tablename__ = 'club_meeting_attendance'
-    id = db.Column(db.Integer, primary_key=True)
-    meeting_id = db.Column(db.Integer, db.ForeignKey('club_meeting.id', ondelete='CASCADE'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    status = db.Column(db.String(50), default='attending', nullable=False)  # attending, maybe, not-attending
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    meeting = db.relationship('ClubMeeting', backref=db.backref('attendees', lazy=True, cascade='all, delete-orphan'))
-    user = db.relationship('User', backref=db.backref('meeting_attendances', lazy=True))
-    
-    __table_args__ = (db.UniqueConstraint('meeting_id', 'user_id', name='uix_meeting_attendance'),)
-        
-        
 class GalleryEntry(db.Model):
     __tablename__ = 'gallery_entry'
     id = db.Column(db.Integer, primary_key=True)
@@ -258,9 +244,6 @@ class User(UserMixin, db.Model):
         return self.is_club_leader_role or \
                Club.query.filter_by(leader_id=self.id).first() is not None or \
                ClubMembership.query.filter_by(user_id=self.id, role='co-leader').first() is not None
-
-    def is_club_coleader(self, club_id):
-        return ClubMembership.query.filter_by(user_id=self.id, club_id=club_id, role='co-leader').first() is not None
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
