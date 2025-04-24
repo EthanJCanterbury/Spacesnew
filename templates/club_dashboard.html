@@ -440,7 +440,7 @@
             <div class="meetings-container">
                 <div class="meetings-header">
                     <h3>Club Meetings</h3>
-                    {% if club and (current_user.id == club.leader_id or current_user.is_club_coleader(club.id)) %}
+                    {% if club and (current_user.id == club.leader_id or current_user.id in [m.user_id for m in club.members if m.role == 'co-leader']) %}
                     <button class="btn-primary" onclick="openCreateMeetingModal()">
                         <i class="fas fa-plus"></i> New Meeting
                     </button>
@@ -904,7 +904,7 @@
                 </div>
             </div>
             
-            {% if club and (current_user.id == club.leader_id or current_user.is_club_coleader(club.id)) %}
+            {% if club and (current_user.id == club.leader_id or current_user.id in [m.user_id for m in club.members if m.role == 'co-leader']) %}
             <div class="attendance-list-container">
                 <h3>Members</h3>
                 <div class="attendance-list" id="attendanceList">
@@ -3270,32 +3270,15 @@ function loadMeetings(filter = 'upcoming') {
         </div>
     `;
 
-    // Filter parameter for URL
-    const filterParam = filter ? `?filter=${filter}` : '';
-
-    fetch(`/api/clubs/${clubId}/meetings${filterParam}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
+    fetch(`/api/clubs/${clubId}/meetings?filter=${filter}`)
+        .then(response => response.json())
         .then(data => {
             if (data.error) {
                 showToast('error', data.error);
-                meetingsContainer.innerHTML = `
-                    <div class="error-state">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <p>${data.error}</p>
-                    </div>
-                `;
                 return;
             }
 
-            // Store meetings globally for other functions to use
-            allMeetings = data.meetings || [];
-            
-            if (allMeetings.length === 0) {
+            if (!data.meetings || data.meetings.length === 0) {
                 meetingsContainer.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-calendar-times"></i>
@@ -3311,7 +3294,7 @@ function loadMeetings(filter = 'upcoming') {
             const isLeader = data.is_leader === true;
             const now = new Date();
 
-            allMeetings.forEach(meeting => {
+            data.meetings.forEach(meeting => {
                 const meetingDate = new Date(meeting.meeting_date);
                 const isPast = meetingDate < now;
                 const formattedDate = meetingDate.toLocaleDateString('en-US', { 
@@ -3399,7 +3382,6 @@ function loadMeetings(filter = 'upcoming') {
                 <div class="error-state">
                     <i class="fas fa-exclamation-circle"></i>
                     <p>Failed to load meetings. Please try again.</p>
-                    <small>${error.message}</small>
                 </div>
             `;
         });
@@ -3412,28 +3394,8 @@ function filterMeetings(filter) {
         btn.classList.remove('active');
     });
     
-    const activeFilterBtn = document.querySelector(`.filter-btn[data-filter="${filter}"]`);
-    if (activeFilterBtn) {
-        activeFilterBtn.classList.add('active');
-    } else {
-        console.error(`Filter button for "${filter}" not found`);
-    }
-    
-    try {
-        loadMeetings(filter);
-    } catch (error) {
-        console.error("Error in filterMeetings:", error);
-        const meetingsContainer = document.getElementById('meetings-container');
-        if (meetingsContainer) {
-            meetingsContainer.innerHTML = `
-                <div class="error-state">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <p>An error occurred while loading meetings.</p>
-                    <small>${error.message}</small>
-                </div>
-            `;
-        }
-    }
+    document.querySelector(`.filter-btn[data-filter="${filter}"]`).classList.add('active');
+    loadMeetings(filter);
 }
 
 // Search meetings
@@ -3562,23 +3524,6 @@ function openAttendanceModal(meetingId, title) {
 function closeMeetingAttendanceModal() {
     closeModal('meetingAttendanceModal');
 }
-
-// Document ready function to initialize tab content
-document.addEventListener('DOMContentLoaded', function() {
-    // If we're on the meetings tab initially or if meetings tab is clicked
-    const urlParams = new URLSearchParams(window.location.search);
-    const activeTab = urlParams.get('tab');
-    
-    if (activeTab === 'meetings') {
-        openTab('meetings');
-        loadMeetings('upcoming');
-    }
-    
-    // Add event listeners to tab buttons for content loading
-    document.querySelector('.tab-btn[onclick="openTab(\'meetings\')"]').addEventListener('click', function() {
-        loadMeetings('upcoming');
-    });
-});
 
 // Update attendance status
 function updateAttendance(status) {
@@ -5593,8 +5538,6 @@ document.addEventListener('DOMContentLoaded', function() {
             loadMeetings();
         } else if (tabName === 'projects') {
             loadProjects();
-        } else if (tabName === 'meetings') {
-            loadMeetings('upcoming');
         }
     }
 
@@ -5616,14 +5559,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadMeetings();
             } else if (tabName === 'projects') {
                 loadProjects();
-            } else if (tabName === 'meetings') {
-                loadMeetings('upcoming');
             }
         });
     });
 
     // Make chat input send on Enter key
-    document.getElementById('chat-message-input')?.addEventListener('keydown', function(e) {
+    document.getElementById('chat-message-input').addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendChatMessage();
