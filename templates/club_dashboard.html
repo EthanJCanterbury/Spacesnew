@@ -1,89 +1,408 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Dashboard | Spaces</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/club_dashboard_theme.css') }}">
+    
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* Top Navbar */
+        .top-navbar {
+            height: 60px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            height: 32px;
+            margin-right: 5px;
+        }
+        
+        .logo-text {
+            color: #EB3750;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .top-navbar-links {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .top-nav-link {
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #4A5568;
+            transition: background-color 0.2s;
+        }
+        
+        .top-nav-link:hover {
+            background-color: #F7FAFC;
+        }
+        
+        .top-nav-link.active {
+            background-color: #EB3750;
+            color: white;
+        }
+        
+        .user-nav-section {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navbar -->
+    <nav class="top-navbar">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Spaces Logo" class="logo">
+            <span class="logo-text">Spaces</span>
+        </div>
+        
+        <div class="top-navbar-links">
+            <a href="/" class="top-nav-link">Home</a>
+            <a href="/gallery" class="top-nav-link">Gallery</a>
+            <a href="/profile" class="top-nav-link">Profile</a>
+            <a href="/documentation" class="top-nav-link">Documentation</a>
+            <a href="/club-dashboard" class="top-nav-link active">Dashboard</a>
+            <a href="/clubs" class="top-nav-link">Clubs</a>
+        </div>
+        
+        <div class="user-nav-section">
+            <a href="/settings" class="top-nav-link">Settings</a>
+            <a href="/logout" class="top-nav-link">Logout</a>
+        </div>
+    </nav>
+    
+    <!-- Main Content Starts Here -->
+<!-- Theme Toggle -->
+<button class="theme-toggle" id="themeToggle">
+    <i class="fas fa-moon" id="themeIcon"></i>
+</button>
 
-{% block content %}
-<div class="club-dashboard-container">
-    <div class="dashboard-header">
-        <h1><i class="fas fa-users"></i> Club Dashboard</h1>
+<!-- Mobile Menu Toggle -->
+<button class="menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+</button>
 
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-title">Leaders Dashboard</h2>
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="#" class="nav-link active" id="dashboard-tab" onclick="openTab('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" id="members-tab" onclick="openTab('members')">
+                    <i class="fas fa-user-friends"></i> Members
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" id="tasks-tab" onclick="openTab('assignments')">
+                    <i class="fas fa-tasks"></i> Tasks
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" id="projects-tab" onclick="openTab('projects')">
+                    <i class="fas fa-code"></i> Projects
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" id="chat-tab" onclick="openTab('chat')">
+                    <i class="fas fa-comments"></i> Chat
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" id="resources-tab" onclick="openTab('resources')">
+                    <i class="fas fa-link"></i> Resources
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" id="schedule-tab" onclick="openTab('schedule')">
+                    <i class="fas fa-calendar-alt"></i> Schedule
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" id="rewards-tab" onclick="openTab('rewards')">
+                    <i class="fas fa-gift"></i> Rewards
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" id="settings-tab" onclick="openTab('settings')">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </li>
+        </ul>
+        
+        <div class="user-info">
+            <img src="{{ url_for('static', filename='images/logo-rounded.png') }}" alt="User Avatar" class="user-avatar">
+            <div>
+                <p class="user-name">{{ current_user.username }}</p>
+                <p class="user-email">{{ current_user.email }}</p>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+    
         {% if club %}
-            <!-- Club Leader View -->
-            <div class="club-tabs-container">
-                <div class="club-info-header" data-club-id="{{ club.id }}">
-                    <h2>{{ club.name }}</h2>
-                    <div class="club-actions">
-                        <button class="btn-primary edit-club-btn" onclick="openEditClubModal()">
-                            <i class="fas fa-edit"></i> Edit Club
-                        </button>
-                        <button class="btn-primary" onclick="generateJoinCode()">
-                            <i class="fas fa-key"></i> Join Code: <span id="join-code-display">{{ club.join_code }}</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="tabs" style="overflow-x: auto; white-space: nowrap; padding-bottom: 5px;">
-                    <button class="tab-btn active" onclick="openTab('stream')"><i class="fas fa-stream"></i> Stream</button>
-                    <button class="tab-btn" onclick="openTab('assignments')"><i class="fas fa-tasks"></i> Assignments</button>
-                    <button class="tab-btn" onclick="openTab('members')"><i class="fas fa-user-friends"></i> Members</button>
-                    <button class="tab-btn" onclick="openTab('projects')"><i class="fas fa-code"></i> Projects</button>
-                    <button class="tab-btn" onclick="openTab('chat')"><i class="fas fa-comments"></i> Chat</button>
-                    <button class="tab-btn" onclick="openTab('resources')"><i class="fas fa-link"></i> Resources</button>
-                    <button class="tab-btn" onclick="openTab('schedule')"><i class="fas fa-calendar-alt"></i> Schedule</button>
-                    <button class="tab-btn" onclick="openTab('rewards')"><i class="fas fa-gift"></i> Rewards</button>
-                    <button class="tab-btn" onclick="openTab('settings')"><i class="fas fa-cog"></i> Settings</button>
+        <!-- Club Leader View -->
+        <div id="dashboard" class="tab-pane active">
+            <div class="dashboard-header">
+                <h1 class="welcome-title">Welcome to {{ club.name }}</h1>
+                <p class="welcome-subtitle">Manage your hack club and empower your members with coding skills</p>
+                
+                <div class="club-actions" style="margin-top: 1rem;">
+                    <button class="btn btn-primary edit-club-btn" onclick="openEditClubModal()">
+                        <i class="fas fa-edit"></i> Edit Club
+                    </button>
+                    <button class="btn btn-secondary" onclick="generateJoinCode()">
+                        <i class="fas fa-key"></i> Join Code: <span id="join-code-display">{{ club.join_code }}</span>
+                    </button>
                 </div>
             </div>
+            
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+            <!-- Club Members Card -->
+            <div class="card" onclick="openTab('members')">
+                <div class="card-header">
+                    <div class="card-icon card-icon-members">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Club Members</h3>
+                        <p class="card-subtitle">Manage Members</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>{{ club.members|length }} total members</p>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-text" onclick="openTab('members')">
+                        <i class="fas fa-plus"></i> Add & View Members
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Club Meetings Card -->
+            <div class="card" onclick="openTab('schedule')">
+                <div class="card-header">
+                    <div class="card-icon card-icon-meetings">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Club Meetings</h3>
+                        <p class="card-subtitle">Schedule Meetings</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>Planning your next club meeting</p>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-text" onclick="openCreateMeetingModal()">
+                        <i class="fas fa-plus"></i> Schedule Meeting
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Club Budget Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon card-icon-finances">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Club Budget</h3>
+                        <p class="card-subtitle">Manage Finances</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>Track your club expenses and funding</p>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-text">
+                        <i class="fas fa-eye"></i> View Budget
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Club Tasks Card -->
+            <div class="card" onclick="openTab('assignments')">
+                <div class="card-header">
+                    <div class="card-icon card-icon-tasks">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Club Tasks</h3>
+                        <p class="card-subtitle">Manage Tasks</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>Assign coding challenges to members</p>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-text" onclick="openCreateAssignmentModal()">
+                        <i class="fas fa-plus"></i> Create Task
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Member Progress Card -->
+            <div class="card" onclick="openTab('projects')">
+                <div class="card-header">
+                    <div class="card-icon card-icon-progress">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Learning Pathways</h3>
+                        <p class="card-subtitle">Member Progress</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>Track member coding project progress</p>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-text" onclick="openTab('projects')">
+                        <i class="fas fa-eye"></i> View Pathways
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Hack Club Resources Card -->
+            <div class="card" onclick="openTab('resources')">
+                <div class="card-header">
+                    <div class="card-icon card-icon-resources">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Leader Resources</h3>
+                        <p class="card-subtitle">Hack Club Resources</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>Access Hack Club workshops and resources</p>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-text" onclick="openTab('resources')">
+                        <i class="fas fa-external-link-alt"></i> Access Resources
+                    </button>
+                </div>
+            </div>
+        </div>
+        
         {% elif current_user.club_memberships|length > 0 %}
-            <!-- Member View of Clubs -->
-            <div class="my-clubs-section">
-                <h2>My Clubs</h2>
-                <div class="clubs-grid">
-                    {% for membership in current_user.club_memberships %}
-                    <div class="club-card" onclick="viewClub({{ membership.club.id }})">
-                        <div class="club-card-header">
-                            <h3>{{ membership.club.name }}</h3>
-                            <span class="role-badge {% if membership.role == 'co-leader' %}role-badge-leader{% endif %}">
-                                {{ membership.role|capitalize }}
-                            </span>
-                        </div>
-                        <div class="club-card-body">
-                            <p>{{ membership.club.description or 'No description available' }}</p>
-                            <div class="club-meta">
-                                <span><i class="fas fa-map-marker-alt"></i> {{ membership.club.location or 'No location' }}</span>
-                                <span><i class="fas fa-user-friends"></i> {{ membership.club.members|length }} members</span>
-                            </div>
-                        </div>
-                        <div class="club-card-footer">
-                            <button class="btn-primary">View Club</button>
-                        </div>
+        <!-- Member View of Clubs -->
+        <div id="dashboard" class="tab-pane active">
+            <div class="dashboard-header">
+                <h1 class="welcome-title">My Clubs</h1>
+                <p class="welcome-subtitle">Select a club to view or manage</p>
+            </div>
+            
+            <div class="dashboard-grid">
+            {% for membership in current_user.club_memberships %}
+            <div class="card" onclick="viewClub({{ membership.club.id }})">
+                <div class="card-header">
+                    <div class="card-icon card-icon-members">
+                        <i class="fas fa-users"></i>
                     </div>
-                    {% endfor %}
+                    <div>
+                        <h3 class="card-title">{{ membership.club.name }}</h3>
+                        <span class="role-badge {% if membership.role == 'co-leader' %}role-badge-leader{% endif %}">
+                            {{ membership.role|capitalize }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>{{ membership.club.description or 'No description available' }}</p>
+                    <div class="club-meta">
+                        <p><i class="fas fa-map-marker-alt"></i> {{ membership.club.location or 'No location' }}</p>
+                        <p><i class="fas fa-user-friends"></i> {{ membership.club.members|length }} members</p>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary" onclick="viewClub({{ membership.club.id }})">
+                        <i class="fas fa-sign-in-alt"></i> View Club
+                    </button>
                 </div>
             </div>
+            {% endfor %}
+        </div>
         {% else %}
-            <!-- Empty State -->
-            <div class="club-empty-state">
-                <div class="empty-icon">
-                    <i class="fas fa-users-slash"></i>
-                </div>
-                <h2>You haven't joined any clubs yet</h2>
-                <p>Join an existing club with a join code or create your own!</p>
-                <div class="empty-actions">
-                    <button class="btn-primary" onclick="openCreateClubModal()">
-                        <i class="fas fa-plus"></i> Create Club
-                    </button>
-                    <button class="btn-secondary" onclick="openJoinClubModal()">
-                        <i class="fas fa-sign-in-alt"></i> Join Club
-                    </button>
-                </div>
+        <!-- Empty State -->
+        <div id="dashboard" class="tab-pane active">
+            <div class="dashboard-header">
+                <h1 class="welcome-title">Club Dashboard</h1>
+                <p class="welcome-subtitle">Join or create a club to get started</p>
             </div>
+            
+            <div class="club-empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-users-slash"></i>
+            </div>
+            <h2>You haven't joined any clubs yet</h2>
+            <p>Join an existing club with a join code or create your own!</p>
+            <div class="empty-actions">
+                <button class="btn btn-primary" onclick="openCreateClubModal()">
+                    <i class="fas fa-plus"></i> Create Club
+                </button>
+                <button class="btn btn-secondary" onclick="openJoinClubModal()">
+                    <i class="fas fa-sign-in-alt"></i> Join Club
+                </button>
+            </div>
+        </div>
         {% endif %}
-    </div>
 
     <!-- Tab Contents for Club Leader or Member View of a Specific Club -->
     {% if club %}
     <div class="tab-content">
         <!-- Stream Tab Content -->
-        <div id="stream" class="tab-pane active">
+        <div id="stream" class="tab-pane">
             <div class="stream-container">
                 <div class="post-composer">
                     <div class="composer-header">
@@ -1047,7 +1366,7 @@
 
 .club-empty-state p {
     margin: 0 0 2rem;
-    colorvar(--text-secondary);
+    color: var(--text-secondary);
     font-size: 1.25rem;
 }
 
@@ -3545,9 +3864,7 @@ function loadResources() {
                         <p>${resource.description || 'No description provided'}</p>
                     </div>
                     <div class="resource-actions">
-                        <a href="${resource.url}" target="_blank" class="btn-primary btn-sm">
-                            <i class="fas fa-external-link-alt"></i> Visit
-                        </a>
+                        <a href="${resource.url}" target="_blank" class="btn-primary btn-sm"><i class="fas fa-external-link-alt"></i> Visit</a>
                         <button class="btn-icon resource-menu-btn" onclick="toggleResourceMenu(${resource.id})">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
@@ -4174,68 +4491,157 @@ document.addEventListener('DOMContentLoaded', function() {
     if (activeTab) {
         const tabName = activeTab.getAttribute('onclick').match(/openTab\('(.+?)'\)/)[1];
         openTab(tabName);
+
+        // Load data for active tab
+        if (tabName === 'stream') {
+            loadPosts();
+        } else if (tabName === 'assignments') {
+            loadAssignments();
+        } else if (tabName === 'resources') {
+            loadResources();
+        } else if (tabName === 'chat') {
+            loadChatChannels();
+        }
+    }
+
+    // Add tab change handlers
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabName = this.getAttribute('onclick').match(/openTab\('(.+?)'\)/)[1];
+
+            // Load data when switching to tab
+            if (tabName === 'stream') {
+                loadPosts();
+            } else if (tabName === 'assignments') {
+                loadAssignments();
+            } else if (tabName === 'resources') {
+                loadResources();
+            } else if (tabName === 'chat') {
+                loadChatChannels();
+            }
+        });
+    });
+
+    // Make chat input send on Enter key
+    document.getElementById('chat-message-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendChatMessage();
+        }
+    });
+});
+
+// Theme toggle functionality
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+const body = document.documentElement;
+
+// Check for saved theme preference or respect OS preference
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme) {
+    body.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+} else {
+    // Check if user prefers dark mode
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) {
+        body.setAttribute('data-theme', 'dark');
+        updateThemeIcon('dark');
+    }
+}
+
+function updateThemeIcon(theme) {
+    if (theme === 'dark') {
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+    } else {
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+    }
+}
+
+themeToggle.addEventListener('click', function() {
+    const currentTheme = body.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+});
+
+// Tab functionality
+function openTab(tabName) {
+    // Hide all tab panes
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    tabPanes.forEach(function(pane) {
+        pane.classList.remove('active');
+    });
+    
+    // Deactivate all tab links
+    const tabLinks = document.querySelectorAll('.nav-link');
+    tabLinks.forEach(function(link) {
+        link.classList.remove('active');
+    });
+    
+    // Activate selected tab and link
+    const selectedTab = document.getElementById(tabName);
+    const selectedLink = document.getElementById(tabName + '-tab');
+    
+    if (selectedTab) {
+        selectedTab.classList.add('active');
+    }
+    
+    if (selectedLink) {
+        selectedLink.classList.add('active');
+    } else if (tabName === 'dashboard') {
+        // Special case for dashboard
+        document.getElementById('dashboard-tab').classList.add('active');
+    }
+}
+
+// Mobile sidebar toggle
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+menuToggle.addEventListener('click', toggleSidebar);
+sidebarBackdrop.addEventListener('click', toggleSidebar);
+
+function toggleSidebar() {
+    sidebar.classList.toggle('open');
+    sidebarBackdrop.classList.toggle('open');
+    document.body.classList.toggle('sidebar-open');
+}
+
+// Close sidebar when clicking a link on mobile
+const navLinks = document.querySelectorAll('.nav-link');
+navLinks.forEach(function(link) {
+    link.addEventListener('click', function() {
+        if (window.innerWidth < 1024) {
+            toggleSidebar();
+        }
+    });
+});
+
+// Handle responsiveness
+window.addEventListener('resize', function() {
+    if (window.innerWidth >= 1024) {
+        sidebar.classList.remove('open');
+        sidebarBackdrop.classList.remove('open');
+        document.body.classList.remove('sidebar-open');
     }
 });
 
-function openDeleteClubModal() {
-    if (confirm('Are you sure you want to delete this club? This action cannot be undone.')) {
-        const clubId = getClubId();
-        if (clubId) {
-            fetch(`/api/clubs/current`, {
-                method: 'DELETE'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    showToast('error', data.error);
-                    return;
-                }
-
-                showToast('success', 'Club deleted successfully');
-                setTimeout(() => {
-                    window.location.href = '/club-dashboard';
-                }, 1500);
-            })
-            .catch(error => {
-                console.error('Error deleting club:', error);
-                showToast('error', 'Failed to delete club');
-            });
-        }
+// Initialize dashboard as active tab by default
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if there's a specific tab to open from URL hash
+    const hash = window.location.hash.substr(1);
+    if (hash && document.getElementById(hash)) {
+        openTab(hash);
+    } else {
+        openTab('dashboard');
     }
-}
-
-function changeClubMemberRole(membershipId, username, currentRole) {
-
-}
-
-function toggleLike(postId) {
-    const clubId = getClubId();
-    const likeCountSpan = document.getElementById(`like-count-${postId}`);
-    const likeButtonIcon = likeCountSpan.previousElementSibling; // Get the i element
-
-    fetch(`/api/clubs/${clubId}/posts/${postId}/like`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            showToast('error', data.error);
-            return;
-        }
-
-        const liked = data.liked;
-        const likesCount = data.likes;
-        likeCountSpan.textContent = likesCount;
-        likeButtonIcon.className = liked ? 'fas fa-heart' : 'far fa-heart'; // Update class name
-    })
-    .catch(error => {
-        console.error('Error toggling like:', error);
-        showToast('error', 'Failed to toggle like');
-    });
-}
+});
 
 // Schedule Tab Functionality
 // -------------------------------------------------------------------------
@@ -4996,6 +5402,7 @@ function filterProjects() {
     displayProjects();
 }
 </script>
+
 <style>
 /* Custom Scrollbar Styles */
 .tabs::-webkit-scrollbar {
@@ -5057,11 +5464,6 @@ function filterProjects() {
     display: flex;
     flex-direction: column;
     position: relative;
-}
-
-.project-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
 .project-card.featured {
@@ -5286,11 +5688,161 @@ function filterProjects() {
 
 .resource-menu button:hover {
     background-color: var(--light);
-}
 
-.resource-actions {
-    position: relative;
-}
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 10;
+        display: none;
+    }
+
+    .sidebar-backdrop.open {
+        display: block;
+    }
+
+    .nav-link {
+        display: block;
+        padding: 0.5rem 1rem;
+        color: #fff;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+
+    .nav-link:hover {
+        background-color: #555;
+    }
+
+    .theme-toggle {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background-color: #333;
+        color: #fff;
+        border: none;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .theme-toggle:hover {
+        background-color: #555;
+    }
+
+    .theme-icon {
+        font-size: 1.5rem;
+    }
 </style>
 
+    <!-- Custom JS for Dashboard Functionality -->
+    <script>
+        // Theme toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const body = document.documentElement;
+            
+            // Check for saved theme preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                body.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                body.setAttribute('data-theme', 'dark');
+                updateThemeIcon('dark');
+            }
+            
+            // Theme toggle function
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                body.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+            
+            function updateThemeIcon(theme) {
+                if (theme === 'dark') {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                } else {
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                }
+            }
+            
+            // Tab functionality
+            window.openTab = function(tabName) {
+                // Hide all tab panes
+                const tabPanes = document.querySelectorAll('.tab-pane');
+                tabPanes.forEach(function(pane) {
+                    pane.classList.remove('active');
+                });
+                
+                // Deactivate all tab links
+                const tabLinks = document.querySelectorAll('.nav-link');
+                tabLinks.forEach(function(link) {
+                    link.classList.remove('active');
+                });
+                
+                // Activate selected tab and link
+                const selectedTab = document.getElementById(tabName);
+                const selectedLink = document.getElementById(tabName + '-tab');
+                
+                if (selectedTab) {
+                    selectedTab.classList.add('active');
+                }
+                
+                if (selectedLink) {
+                    selectedLink.classList.add('active');
+                } else if (tabName === 'dashboard') {
+                    document.getElementById('dashboard-tab').classList.add('active');
+                }
+            };
+            
+            // Mobile sidebar toggle
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+            
+            if (menuToggle && sidebar && sidebarBackdrop) {
+                menuToggle.addEventListener('click', toggleSidebar);
+                sidebarBackdrop.addEventListener('click', toggleSidebar);
+                
+                function toggleSidebar() {
+                    sidebar.classList.toggle('open');
+                    sidebarBackdrop.classList.toggle('open');
+                    document.body.classList.toggle('sidebar-open');
+                }
+                
+                // Close sidebar when clicking a link on mobile
+                const navLinks = document.querySelectorAll('.nav-link');
+                navLinks.forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        if (window.innerWidth < 1024) {
+                            toggleSidebar();
+                        }
+                    });
+                });
+            }
+            
+            // Initialize dashboard as active tab by default
+            const hash = window.location.hash.substr(1);
+            if (hash && document.getElementById(hash)) {
+                openTab(hash);
+            } else {
+                openTab('dashboard');
+            }
+        });
+    </script>
+</body>
+</html>
 {% endblock %}
