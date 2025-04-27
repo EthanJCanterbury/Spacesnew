@@ -101,10 +101,7 @@ function scrollToSection(event, id) {
 
 document.addEventListener('DOMContentLoaded', function() {
     document.body.classList.add('loaded');
-    
-    // Initialize calendar event handlers
-    initCalendarEvents();
-    
+
     // Safely bind folder headers
     document.querySelectorAll('.folder-header').forEach(header => {
         if (header) {
@@ -238,69 +235,6 @@ function showToast(type, message, duration = 4000) {
 
 // For backward compatibility with other toast systems
 window.showToast = showToast;
-
-// Calendar event handling
-function initCalendarEvents() {
-    // Find all calendar events on the page
-    document.querySelectorAll('.calendar-event').forEach(eventElement => {
-        eventElement.addEventListener('click', function() {
-            // Get event data from data attributes or create sample data
-            const eventData = {
-                id: this.getAttribute('data-event-id') || '1',
-                title: this.querySelector('.calendar-event-title')?.textContent || 'Event',
-                date: this.getAttribute('data-event-date') || new Date().toISOString().split('T')[0],
-                time: this.querySelector('.calendar-event-time')?.textContent || '9:00 AM - 10:00 AM',
-                location: this.getAttribute('data-event-location') || 'Online',
-                description: this.getAttribute('data-event-description') || 'Event details will be provided soon.'
-            };
-            
-            // Open the event modal with this data
-            openEventModal(eventData);
-        });
-    });
-}
-
-// Event Modal Functions
-function openEventModal(eventData) {
-    // Set the current event ID
-    currentEventId = eventData.id;
-    
-    // Populate modal with event data
-    document.getElementById('eventModalTitle').textContent = eventData.title || 'Untitled Event';
-    document.getElementById('eventModalDate').textContent = formatEventDate(eventData.date || new Date());
-    document.getElementById('eventModalTime').textContent = eventData.time || 'All day';
-    document.getElementById('eventModalLocation').textContent = eventData.location || 'No location specified';
-    document.getElementById('eventModalDescription').textContent = eventData.description || 'No description provided';
-    
-    // Show the modal
-    const modal = document.getElementById('eventDetailsModal');
-    modal.style.display = 'flex';
-    setTimeout(() => {
-        modal.classList.add('show');
-    }, 10);
-}
-
-function closeEventModal() {
-    const modal = document.getElementById('eventDetailsModal');
-    modal.classList.remove('show');
-    setTimeout(() => {
-        modal.style.display = 'none';
-    }, 300);
-}
-
-function formatEventDate(dateStr) {
-    try {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    } catch (e) {
-        return dateStr;
-    }
-}
 
 // Function to toggle club leader status (Admin Panel)
 async function toggleClubLeader(userId, username, isCurrentlyLeader) {
