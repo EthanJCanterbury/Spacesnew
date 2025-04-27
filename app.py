@@ -2314,6 +2314,135 @@ def admin_remove_club_member(membership_id):
         return jsonify({'error': 'Failed to remove club member'}), 500
 
 
+@app.route('/api/clubs/<int:club_id>/projects', methods=['GET'])
+@login_required
+def get_club_projects(club_id):
+    """Get all projects for a club."""
+    try:
+        club = Club.query.get_or_404(club_id)
+        
+        # Check if user is a member of the club
+        is_member = ClubMembership.query.filter_by(club_id=club_id, user_id=current_user.id).first()
+        if not is_member and club.leader_id != current_user.id:
+            return jsonify({'error': 'You are not a member of this club'}), 403
+            
+        # Get all sites from club members
+        members = ClubMembership.query.filter_by(club_id=club_id).all()
+        member_ids = [m.user_id for m in members]
+        member_ids.append(club.leader_id)  # Include the leader
+        
+        # Get projects (sites) by these members
+        sites = Site.query.filter(Site.user_id.in_(member_ids)).all()
+        
+        # Get featured projects
+        featured_projects = ClubFeaturedProject.query.filter_by(club_id=club_id).all()
+        featured_site_ids = [p.site_id for p in featured_projects]
+        
+        # Format response
+        projects = []
+        for site in sites:
+            user = User.query.get(site.user_id)
+            projects.append({
+                'id': site.id,
+                'name': site.name,
+                'slug': site.slug,
+                'description': '',  # Sites don't have descriptions in current schema
+                'owner': {
+                    'id': user.id,
+                    'username': user.username
+                },
+                'featured': site.id in featured_site_ids,
+                'updated_at': site.updated_at.isoformat(),
+                'created_at': site.created_at.isoformat()
+            })
+            
+        return jsonify({'projects': projects})
+        
+    except Exception as e:
+        app.logger.error(f'Error getting club projects: {str(e)}')
+        return jsonify({'error': f'Failed to get club projects: {str(e)}'}), 500
+
+@app.route('/api/clubs/<int:club_id>/projects/<int:project_id>/feature', methods=['POST'])
+@login_required
+def toggle_project_featured(club_id, project_id):
+    """Toggle a project's featured status in a club."""
+    try:
+        club = Club.query.get_or_404(club_id)
+        
+        # Only club leader and co-leaders can feature projects
+        membership = ClubMembership.query.filter_by(club_id=club_id, user_id=current_user.id).first()
+        if club.leader_id != current_user.id and (not membership or membership.role != 'co-leader'):
+            return jsonify({'error': 'Only club leaders can feature projects'}), 403
+            
+        site = Site.query.get_or_404(project_id)
+        
+        # Check if project is already featured
+        featured = ClubFeaturedProject.query.filter_by(club_id=club_id, site_id=project_id).first()
+        
+        data = request.get_json()
+        feature = data.get('featured', True)
+        
+        if featured and not feature:
+            # Unfeature the project
+            db.session.delete(featured)
+            db.session.commit()
+            return jsonify({'message': 'Project unfeatured successfully'})
+        elif not featured and feature:
+            # Feature the project
+            new_featured = ClubFeaturedProject(
+                club_id=club_id,
+                site_id=project_id,
+                featured_by=current_user.id
+            )
+            db.session.add(new_featured)
+            db.session.commit()
+            return jsonify({'message': 'Project featured successfully'})
+        else:
+            # No change needed
+            status = 'featured' if feature else 'unfeatured'
+            return jsonify({'message': f'Project already {status}'})
+            
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error toggling project featured status: {str(e)}')
+        return jsonify({'error': f'Failed to update project status: {str(e)}'}), 500
+
+@app.route('/api/clubs/<int:club_id>/stats', methods=['GET'])
+@login_required
+def get_club_stats(club_id):
+    """Get statistics for a club dashboard."""
+    try:
+        club = Club.query.get_or_404(club_id)
+        
+        # Check if user is a member of the club
+        is_member = ClubMembership.query.filter_by(club_id=club_id, user_id=current_user.id).first()
+        if not is_member and club.leader_id != current_user.id:
+            return jsonify({'error': 'You are not a member of this club'}), 403
+            
+        # Get member count
+        member_count = ClubMembership.query.filter_by(club_id=club_id).count() + 1  # +1 for the leader
+        
+        # Get active assignments count
+        active_assignments = ClubAssignment.query.filter_by(club_id=club_id, is_active=True).count()
+        
+        # Get all sites from club members
+        members = ClubMembership.query.filter_by(club_id=club_id).all()
+        member_ids = [m.user_id for m in members]
+        member_ids.append(club.leader_id)  # Include the leader
+        
+        # Get projects (sites) by these members
+        project_count = Site.query.filter(Site.user_id.in_(member_ids)).count()
+        
+        return jsonify({
+            'member_count': member_count,
+            'active_assignments': active_assignments,
+            'project_count': project_count
+        })
+        
+    except Exception as e:
+        app.logger.error(f'Error getting club stats: {str(e)}')
+        return jsonify({'error': f'Failed to get club stats: {str(e)}'}), 500
+
 @app.route('/api/admin/stats/counts')
 @login_required
 @admin_required
