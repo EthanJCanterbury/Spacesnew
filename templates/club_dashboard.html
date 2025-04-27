@@ -26,11 +26,11 @@
 <style>
     /* Calendar event styling */
     .calendar-event {
-        margin: 4px 0;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        background-color: rgba(236, 55, 80, 0.15);
+        margin: 2px 0;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-size: 11px;
+        background-color: rgba(236, 55, 80, 0.1);
         color: #ec3750;
         cursor: pointer;
         white-space: nowrap;
@@ -38,20 +38,17 @@
         text-overflow: ellipsis;
         border-left: 3px solid #ec3750;
         transition: all 0.2s ease;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
     
     .calendar-event:hover {
-        background-color: rgba(236, 55, 80, 0.25);
+        background-color: rgba(236, 55, 80, 0.2);
         transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     
     .calendar-day {
         min-height: 60px;
         max-height: 100px;
         overflow-y: auto;
-        padding: 2px;
     }
     
     .calendar-day::-webkit-scrollbar {
@@ -64,70 +61,20 @@
     }
     
     /* Event modal styling */
-    #eventDetailsModal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.3s, visibility 0.3s;
-    }
-    
-    #eventDetailsModal.show {
-        opacity: 1;
-        visibility: visible;
-    }
-    
-    #eventDetailsModal .modal-content {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        border-radius: 12px;
-        width: 90%;
-        max-width: 500px;
-        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
-        animation: scaleIn 0.3s ease;
-    }
-    
-    @keyframes scaleIn {
-        from {
-            transform: translate(-50%, -50%) scale(0.95);
-            opacity: 0;
-        }
-        to {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1;
-        }
-    }
-    
     .event-detail-row {
         margin-bottom: 12px;
     }
     
     .event-detail-label {
-        font-weight: 600;
+        font-weight: 500;
         margin-right: 8px;
         display: inline-block;
         width: 100px;
-        color: var(--text-primary);
     }
     
     .event-detail-label i {
         width: 16px;
-        margin-right: 6px;
-        color: var(--primary);
-    }
-    
-    #eventModalDescription {
-        margin-top: 5px;
-        line-height: 1.5;
+        margin-right: 4px;
     }
 </style>
 
@@ -166,7 +113,7 @@
         // Populate modal with event data
         document.getElementById('eventModalTitle').textContent = eventData.eventTitle;
         document.getElementById('eventModalDate').textContent = formatDate(eventData.eventDate);
-        document.getElementById('eventModalTime').textContent = eventData.eventTime || 'Not specified';
+        document.getElementById('eventModalTime').textContent = eventData.eventTime;
         document.getElementById('eventModalLocation').textContent = eventData.eventLocation || 'Not specified';
         document.getElementById('eventModalDescription').textContent = eventData.eventDescription || 'No description provided';
         
@@ -177,16 +124,9 @@
         // Open modal
         const modal = document.getElementById('eventDetailsModal');
         modal.style.display = 'block';
-        
-        // Force reflow before adding the show class for animation
-        modal.offsetWidth;
-        
         setTimeout(() => {
             modal.classList.add('show');
         }, 10);
-        
-        // Prevent background scrolling when modal is open
-        document.body.style.overflow = 'hidden';
     }
     
     function closeEventModal() {
@@ -194,8 +134,6 @@
         modal.classList.remove('show');
         setTimeout(() => {
             modal.style.display = 'none';
-            // Re-enable scrolling
-            document.body.style.overflow = '';
         }, 300);
         currentEventId = null;
     }
@@ -213,23 +151,6 @@
             return dateStr;
         }
     }
-    
-    // Close modal when clicking outside of it
-    document.addEventListener('click', function(event) {
-        const modal = document.getElementById('eventDetailsModal');
-        const modalContent = modal.querySelector('.modal-content');
-        
-        if (modal.classList.contains('show') && !modalContent.contains(event.target) && event.target !== modalContent) {
-            closeEventModal();
-        }
-    });
-    
-    // Close modal with escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape' && document.getElementById('eventDetailsModal').classList.contains('show')) {
-            closeEventModal();
-        }
-    });
 </script>
 
                     <a href="#chat" class="nav-link" data-section="chat">
@@ -4230,63 +4151,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 dayNumber.classList.add('current-day');
             }
             
-            // Sample events for demonstration
-            if (i === 23) {
-                const event = document.createElement('div');
-                event.classList.add('calendar-event');
-                event.textContent = 'Test meeting';
-                
-                // Store meeting data in dataset
-                event.dataset.eventId = '123'; // Replace with actual meeting ID when available
-                event.dataset.eventTitle = 'Test meeting';
-                event.dataset.eventTime = '3:00 PM - 4:30 PM';
-                event.dataset.eventLocation = 'Room 204';
-                event.dataset.eventDescription = 'Discussion about upcoming projects and assignments.';
-                event.dataset.eventDate = new Date(currentYear, currentMonth, i).toISOString(); // Use actual date
-                
-                event.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    // Open modal with event details
-                    openEventModal(event.dataset);
-                });
-                
-                cell.appendChild(event);
-            }
-            
+            // Sample event for demonstration
             if (i === 24) {
                 const event = document.createElement('div');
                 event.classList.add('calendar-event');
                 event.textContent = 'Weekly Meeting';
+                event.style.backgroundColor = 'rgba(236, 55, 80, 0.1)';
+                event.style.color = '#ec3750';
+                event.style.padding = '3px 6px';
+                event.style.borderRadius = '4px';
+                event.style.fontSize = '12px';
+                event.style.marginTop = '3px';
+                event.style.cursor = 'pointer';
                 
                 // Store meeting data in dataset
-                event.dataset.eventId = '124'; // Replace with actual meeting ID when available
+                event.dataset.eventId = '123'; // Replace with actual meeting ID when available
                 event.dataset.eventTitle = 'Weekly Meeting';
-                event.dataset.eventTime = '4:00 PM - 5:30 PM';
+                event.dataset.eventTime = '4:00 PM';
                 event.dataset.eventLocation = 'Room 203';
-                event.dataset.eventDescription = 'Regular weekly club meeting to discuss progress and upcoming events.';
-                event.dataset.eventDate = new Date(currentYear, currentMonth, i).toISOString(); // Use actual date
-                
-                event.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    // Open modal with event details
-                    openEventModal(event.dataset);
-                });
-                
-                cell.appendChild(event);
-            }
-            
-            if (i === 26) {
-                const event = document.createElement('div');
-                event.classList.add('calendar-event');
-                event.textContent = 'Hackathon Prep';
-                
-                // Store meeting data in dataset
-                event.dataset.eventId = '125'; // Replace with actual meeting ID when available
-                event.dataset.eventTitle = 'Hackathon Prep';
-                event.dataset.eventTime = '5:00 PM - 7:00 PM';
-                event.dataset.eventLocation = 'Computer Lab';
-                event.dataset.eventDescription = 'Preparation for the upcoming hackathon. Bring your laptops!';
-                event.dataset.eventDate = new Date(currentYear, currentMonth, i).toISOString(); // Use actual date
+                event.dataset.eventDescription = 'Regular weekly club meeting';
+                event.dataset.eventDate = '2025-04-20'; // Use actual date
                 
                 event.addEventListener('click', (e) => {
                     e.stopPropagation();
