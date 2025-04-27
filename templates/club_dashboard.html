@@ -395,11 +395,16 @@
             min-height: 300px; /* Ensure minimum height so it's visible */
             position: relative; /* Create a new stacking context */
             z-index: 1; /* Ensure it's above any potential overlapping elements */
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s ease;
         }
 
         .tab-pane.active {
             display: block !important; /* Use !important to override any other styles */
-            z-index: 2; /* Higher than inactive tabs */
+            visibility: visible !important;
+            opacity: 1 !important;
+            z-index: 10; /* Higher than inactive tabs */
         }
         
         /* Make sure main content area is visible */
@@ -2000,6 +2005,8 @@ function openTab(tabName) {
     tabPanes.forEach(function(pane) {
         pane.classList.remove('active');
         pane.style.display = 'none';
+        pane.style.visibility = 'hidden';
+        pane.style.opacity = '0';
     });
 
     // Deactivate all tab links
@@ -2008,9 +2015,12 @@ function openTab(tabName) {
         link.classList.remove('active');
     });
 
-    // Activate selected tab immediately
+    // Activate selected tab immediately with all necessary styles
     selectedTab.classList.add('active');
     selectedTab.style.display = 'block';
+    selectedTab.style.visibility = 'visible';
+    selectedTab.style.opacity = '1';
+    selectedTab.style.zIndex = '10';
     
     // Activate the correct nav link
     const selectedLink = document.getElementById(tabName + '-tab');
@@ -2020,6 +2030,8 @@ function openTab(tabName) {
         // Special case for dashboard
         document.getElementById('dashboard-tab').classList.add('active');
     }
+
+    console.log('Tab activated:', tabName, 'Display:', selectedTab.style.display);
 
     // Load data for active tab with proper error handling
     try {
@@ -3452,13 +3464,36 @@ function filterProjects() {
 
 // Initialize dashboard as active tab by default
 document.addEventListener('DOMContentLoaded', function() {
+    // Make sure all tab panes are initially reset
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.style.display = 'none';
+        pane.style.visibility = 'hidden';
+        pane.style.opacity = '0';
+        pane.classList.remove('active');
+    });
+    
     // Check if there's a specific tab to open from URL hash
     const hash = window.location.hash.substr(1);
-    if (hash && document.getElementById(hash)) {
-        openTab(hash);
-    } else {
-        openTab('dashboard');
+    const targetTab = hash && document.getElementById(hash) ? hash : 'dashboard';
+    
+    // Pre-activate the tab before calling openTab for smoother rendering
+    const selectedTab = document.getElementById(targetTab);
+    if (selectedTab) {
+        selectedTab.style.display = 'block';
+        selectedTab.style.visibility = 'visible';
+        selectedTab.style.opacity = '1';
+        selectedTab.classList.add('active');
+        
+        // Also activate the tab link
+        const tabLink = document.getElementById(targetTab + '-tab');
+        if (tabLink) tabLink.classList.add('active');
     }
+    
+    // Then call openTab to fully initialize the tab
+    setTimeout(() => {
+        openTab(targetTab);
+        console.log('Initial tab set:', targetTab);
+    }, 100);
 });
     </script>
 </body>
