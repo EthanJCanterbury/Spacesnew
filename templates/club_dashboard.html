@@ -22,6 +22,62 @@
                         <span>Dashboard</span>
                     </a>
                 </li>
+
+<style>
+    /* Calendar event styling */
+    .calendar-event {
+        margin: 2px 0;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-size: 11px;
+        background-color: rgba(236, 55, 80, 0.1);
+        color: #ec3750;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        border-left: 3px solid #ec3750;
+        transition: all 0.2s ease;
+    }
+    
+    .calendar-event:hover {
+        background-color: rgba(236, 55, 80, 0.2);
+        transform: translateY(-1px);
+    }
+    
+    .calendar-day {
+        min-height: 60px;
+        max-height: 100px;
+        overflow-y: auto;
+    }
+    
+    .calendar-day::-webkit-scrollbar {
+        width: 4px;
+    }
+    
+    .calendar-day::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+    }
+    
+    /* Event modal styling */
+    .event-detail-row {
+        margin-bottom: 12px;
+    }
+    
+    .event-detail-label {
+        font-weight: 500;
+        margin-right: 8px;
+        display: inline-block;
+        width: 100px;
+    }
+    
+    .event-detail-label i {
+        width: 16px;
+        margin-right: 4px;
+    }
+</style>
+
                 <li>
                     <a href="#stream" class="nav-link" data-section="stream">
                         <i class="fas fa-stream"></i>
@@ -47,6 +103,56 @@
                     </a>
                 </li>
                 <li>
+
+<script>
+    let currentEventId = null;
+    
+    function openEventModal(eventData) {
+        currentEventId = eventData.eventId;
+        
+        // Populate modal with event data
+        document.getElementById('eventModalTitle').textContent = eventData.eventTitle;
+        document.getElementById('eventModalDate').textContent = formatDate(eventData.eventDate);
+        document.getElementById('eventModalTime').textContent = eventData.eventTime;
+        document.getElementById('eventModalLocation').textContent = eventData.eventLocation || 'Not specified';
+        document.getElementById('eventModalDescription').textContent = eventData.eventDescription || 'No description provided';
+        
+        // Show edit button only if user has permission (can be enhanced later)
+        const editBtn = document.getElementById('eventModalEditBtn');
+        editBtn.style.display = 'inline-block';
+        
+        // Open modal
+        const modal = document.getElementById('eventDetailsModal');
+        modal.style.display = 'block';
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+    }
+    
+    function closeEventModal() {
+        const modal = document.getElementById('eventDetailsModal');
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+        currentEventId = null;
+    }
+    
+    function formatDate(dateStr) {
+        try {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        } catch (e) {
+            return dateStr;
+        }
+    }
+</script>
+
                     <a href="#chat" class="nav-link" data-section="chat">
                         <i class="fas fa-comments"></i>
                         <span>Chat</span>
@@ -133,6 +239,41 @@
                     const clubDescription = document.getElementById('clubDescription').value;
                     
                     if (!clubName) {
+
+<!-- Event Details Modal -->
+<div id="eventDetailsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="eventModalTitle">Event Details</h3>
+            <button class="close-btn" onclick="closeEventModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="event-details">
+                <div class="event-detail-row">
+                    <span class="event-detail-label"><i class="fas fa-calendar"></i> Date:</span>
+                    <span id="eventModalDate"></span>
+                </div>
+                <div class="event-detail-row">
+                    <span class="event-detail-label"><i class="fas fa-clock"></i> Time:</span>
+                    <span id="eventModalTime"></span>
+                </div>
+                <div class="event-detail-row">
+                    <span class="event-detail-label"><i class="fas fa-map-marker-alt"></i> Location:</span>
+                    <span id="eventModalLocation"></span>
+                </div>
+                <div class="event-detail-row">
+                    <span class="event-detail-label"><i class="fas fa-info-circle"></i> Description:</span>
+                    <p id="eventModalDescription"></p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn secondary" onclick="closeEventModal()">Close</button>
+            <button id="eventModalEditBtn" class="btn primary" onclick="editMeeting(currentEventId)">Edit</button>
+        </div>
+    </div>
+</div>
+
                         showToast('error', 'Please enter a club name');
                         return;
                     }
@@ -4023,9 +4164,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 event.style.marginTop = '3px';
                 event.style.cursor = 'pointer';
                 
-                event.addEventListener('click', () => {
-                    // Logic to show meeting details
-                    alert('Weekly Meeting: 4:00 PM in Room 203');
+                // Store meeting data in dataset
+                event.dataset.eventId = '123'; // Replace with actual meeting ID when available
+                event.dataset.eventTitle = 'Weekly Meeting';
+                event.dataset.eventTime = '4:00 PM';
+                event.dataset.eventLocation = 'Room 203';
+                event.dataset.eventDescription = 'Regular weekly club meeting';
+                event.dataset.eventDate = '2025-04-20'; // Use actual date
+                
+                event.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // Open modal with event details
+                    openEventModal(event.dataset);
                 });
                 
                 cell.appendChild(event);
