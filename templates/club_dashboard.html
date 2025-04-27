@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -56,18 +57,6 @@
             color-scheme: dark;
         }
         
-        [data-theme="dark"] .card {
-            background-color: var(--card-dark);
-        }
-        
-        [data-theme="dark"] .modal-content,
-        [data-theme="dark"] .form-input,
-        [data-theme="dark"] .form-textarea,
-        [data-theme="dark"] .form-select {
-            background-color: var(--bg-dark);
-            color: var(--text-dark);
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -849,7 +838,7 @@
                     <p class="welcome-subtitle">Manage your hack club and empower your members with coding skills</p>
 
                     <div class="club-actions" style="margin-top: 1rem;">
-                        <button class="btn btn-primary edit-club-btn" onclick="openEditClubModal()">
+                        <button class="btn btn-primary" onclick="openEditClubModal()">
                             <i class="fas fa-edit"></i> Edit Club
                         </button>
                         <button class="btn btn-secondary" onclick="generateJoinCode()">
@@ -1424,7 +1413,7 @@
                                         <label for="editClubDescription">Description</label>
                                         <textarea id="editClubDescription" name="editClubDescription" rows="4" class="form-textarea">{{ club.description }}</textarea>
                                     </div>
-                                    <button type="button" onclick="updateClub()" class="btn-primary">
+                                    <button type="button" onclick="updateClub()" class="btn btn-primary">
                                         <i class="fas fa-save"></i> Save Changes
                                     </button>
                                 </form>
@@ -1433,7 +1422,7 @@
                             <div class="settings-section danger-zone">
                                 <h4>Danger Zone</h4>
                                 <p>Deleting a club is permanent and will remove all members, posts, and assignments.</p>
-                                <button class="btn-danger" onclick="openDeleteClubModal()">
+                                <button class="btn btn-danger" onclick="openDeleteClubModal()">
                                     <i class="fas fa-trash"></i> Delete Club
                                 </button>
                             </div>
@@ -1504,7 +1493,7 @@
         </div>
     </div>
 
-    <!-- Edit Club Modal (Same as Create but preloaded)-->
+    <!-- Edit Club Modal -->
     <div id="editClubModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1512,24 +1501,24 @@
                 <button class="close-btn" onclick="closeEditClubModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="editClubForm">
+                <form id="editModalForm">
                     <div class="form-group">
-                        <label for="editClubName">Club Name <span class="required">*</span></label>
-                        <input type="text" id="editClubName" name="editClubName" required class="form-input">
+                        <label for="editModalClubName">Club Name <span class="required">*</span></label>
+                        <input type="text" id="editModalClubName" name="editModalClubName" required class="form-input">
                     </div>
                     <div class="form-group">
-                        <label for="editClubLocation">Location</label>
-                        <input type="text" id="editClubLocation" name="editClubLocation" class="form-input">
+                        <label for="editModalClubLocation">Location</label>
+                        <input type="text" id="editModalClubLocation" name="editModalClubLocation" class="form-input">
                     </div>
                     <div class="form-group">
-                        <label for="editClubDescription">Description</label>
-                        <textarea id="editClubDescription" name="editClubDescription" rows="4" class="form-textarea"></textarea>
+                        <label for="editModalClubDescription">Description</label>
+                        <textarea id="editModalClubDescription" name="editModalClubDescription" rows="4" class="form-textarea"></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-actions">
                 <button class="btn-secondary" onclick="closeEditClubModal()">Cancel</button>
-                <button class="btn-primary" onclick="updateClub()">
+                <button class="btn-primary" onclick="updateClubFromModal()">
                     <i class="fas fa-save"></i> Save Changes
                 </button>
             </div>
@@ -1762,7 +1751,7 @@
             <div class="modal-actions">
                 <button class="btn-secondary" onclick="closeCreateMeetingModal()">Cancel</button>
                 <button class="btn-primary" onclick="createMeeting()">
-                    <i class`fas fa-plus"></i> Schedule Meeting
+                    <i class="fas fa-plus"></i> Schedule Meeting
                 </button>
             </div>
         </div>
@@ -1987,9 +1976,9 @@ function openEditClubModal() {
                 return;
             }
 
-            document.getElementById('editClubName').value = data.name || '';
-            document.getElementById('editClubLocation').value = data.location || '';
-            document.getElementById('editClubDescription').value = data.description || '';
+            document.getElementById('editModalClubName').value = data.name || '';
+            document.getElementById('editModalClubLocation').value = data.location || '';
+            document.getElementById('editModalClubDescription').value = data.description || '';
 
             openModal('editClubModal');
         })
@@ -2228,6 +2217,45 @@ function updateClub() {
         name: document.getElementById('editClubName').value.trim(),
         location: document.getElementById('editClubLocation').value.trim(),
         description: document.getElementById('editClubDescription').value.trim()
+    };
+
+    if (!formData.name) {
+        showToast('error', 'Club name is required');
+        return;
+    }
+
+    fetch('/api/clubs/current', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            showToast('success', data.message);
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else if (data.error) {
+            showToast('error', data.error);
+        } else {
+            showToast('error', 'Failed to update club');
+        }
+    })
+    .catch(error => {
+        showToast('error', 'Failed to update club');
+        console.error('Error:', error);
+    });
+}
+
+// Update club from modal
+function updateClubFromModal() {
+    const formData = {
+        name: document.getElementById('editModalClubName').value.trim(),
+        location: document.getElementById('editModalClubLocation').value.trim(),
+        description: document.getElementById('editModalClubDescription').value.trim()
     };
 
     if (!formData.name) {
@@ -3269,6 +3297,6 @@ document.addEventListener('DOMContentLoaded', function() {
         openTab('dashboard');
     }
 });
-</script>
+    </script>
 </body>
 </html>
