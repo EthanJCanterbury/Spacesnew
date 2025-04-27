@@ -1,7 +1,9 @@
+
 {% extends "base.html" %}
 
 {% block content %}
 <div class="club-dashboard-container">
+    <!-- Sidebar Navigation -->
     <div class="club-sidebar">
         <div class="club-profile">
             <div class="profile-avatar">
@@ -89,15 +91,19 @@
         </div>
     </div>
 
+    <!-- Main Content Area -->
     <div class="club-content">
-        <div class="club-header">
-            <h1><i class="fas fa-users"></i> Club Dashboard</h1>
-            <div class="header-actions">
+        <!-- Horizontal Navbar -->
+        <div class="horizontal-navbar">
+            <div class="navbar-title">
+                <h1><i class="fas fa-users"></i> {% if club %}{{ club.name }}{% else %}Club Dashboard{% endif %}</h1>
+            </div>
+            <div class="navbar-actions">
                 {% if club %}
-                <button class="btn-primary edit-club-btn" onclick="openEditClubModal()">
+                <button class="btn-edit" onclick="openEditClubModal()">
                     <i class="fas fa-edit"></i> Edit Club
                 </button>
-                <button class="btn-primary" onclick="generateJoinCode()">
+                <button class="btn-join-code" onclick="generateJoinCode()">
                     <i class="fas fa-key"></i> Join Code: <span id="join-code-display">{{ club.join_code }}</span>
                 </button>
                 {% endif %}
@@ -151,7 +157,7 @@
         </div>
         {% else %}
 
-        <!-- Dashboard Section (New) -->
+        <!-- Dashboard Section -->
         <section id="dashboard" class="club-section active">
             <div class="section-header">
                 <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
@@ -159,46 +165,44 @@
             </div>
 
             <div class="dashboard-stats">
-                <div class="stats-wrapper">
-                    <div class="stat-card">
-                        <div class="stat-icon user-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="memberCount">{{ club.members|length }}</h3>
-                            <p>Club Members</p>
-                        </div>
+                <div class="stat-card">
+                    <div class="stat-icon user-icon">
+                        <i class="fas fa-users"></i>
                     </div>
-
-                    <div class="stat-card">
-                        <div class="stat-icon site-icon">
-                            <i class="fas fa-code"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="projectCount">0</h3>
-                            <p>Total Projects</p>
-                        </div>
+                    <div class="stat-info">
+                        <h3>{{ club.members|length }}</h3>
+                        <p>Club Members</p>
                     </div>
+                </div>
 
-                    <div class="stat-card">
-                        <div class="stat-icon admin-icon">
-                            <i class="fas fa-tasks"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="assignmentCount">0</h3>
-                            <p>Active Assignments</p>
-                        </div>
+                <div class="stat-card">
+                    <div class="stat-icon site-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="projectCount">0</h3>
+                        <p>Total Projects</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon task-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="assignmentCount">0</h3>
+                        <p>Active Assignments</p>
                     </div>
                 </div>
             </div>
 
             <div class="dashboard-row">
-                <div class="dashboard-card recent-activity">
+                <div class="dashboard-card">
                     <div class="card-header">
                         <h3><i class="fas fa-history"></i> Recent Activity</h3>
                     </div>
                     <div class="card-content">
-                        <ul class="activity-list" id="recentActivitiesList">
+                        <ul class="activity-list">
                             <li class="activity-item">
                                 <div class="activity-icon">
                                     <i class="fas fa-user-plus"></i>
@@ -230,7 +234,7 @@
                     </div>
                 </div>
 
-                <div class="dashboard-card upcoming-events">
+                <div class="dashboard-card">
                     <div class="card-header">
                         <h3><i class="fas fa-calendar"></i> Upcoming Meetings</h3>
                     </div>
@@ -261,8 +265,8 @@
                 </div>
             </div>
 
-            <div class="dashboard-row">
-                <div class="dashboard-card active-assignments">
+            <div class="dashboard-row single-col">
+                <div class="dashboard-card">
                     <div class="card-header">
                         <h3><i class="fas fa-clipboard-list"></i> Active Assignments</h3>
                         <a href="#assignments" class="card-link" onclick="openTab('assignments')">View All</a>
@@ -317,7 +321,7 @@
                     </div>
                 </div>
 
-                <div class="posts-list" id="posts-container">
+                <div class="posts-list">
                     <div class="post-card">
                         <div class="post-header">
                             <img src="{{ url_for('static', filename='images/logo-rounded.png') }}" alt="Profile" class="avatar">
@@ -355,7 +359,7 @@
                     </button>
                 </div>
 
-                <div class="assignments-list" id="assignments-container">
+                <div class="assignment-cards">
                     <div class="assignment-card">
                         <div class="assignment-status">
                             <span class="status-badge status-active">Active</span>
@@ -369,9 +373,9 @@
                             </div>
                         </div>
                         <div class="assignment-actions">
-                            <button class="btn-primary"><i class="fas fa-eye"></i> View</button>
-                            <button class="btn-secondary"><i class="fas fa-edit"></i> Edit</button>
-                            <button class="btn-danger"><i class="fas fa-trash"></i> Delete</button>
+                            <button class="btn-primary btn-sm"><i class="fas fa-eye"></i> View</button>
+                            <button class="btn-secondary btn-sm"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn-danger btn-sm"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
                 </div>
@@ -393,7 +397,7 @@
                     </button>
                 </div>
 
-                <div class="members-list">
+                <div class="members-table-container">
                     <table class="members-table">
                         <thead>
                             <tr>
@@ -404,7 +408,7 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="membersTableBody">
+                        <tbody>
                             {% for membership in club.members %}
                                 <tr>
                                     <td>{{ membership.user.username }}</td>
@@ -444,9 +448,11 @@
                 <div class="projects-header">
                     <h3>Club Member Projects</h3>
                     <div class="projects-actions">
-                        <button class="btn-secondary btn-sm" onclick="toggleFeaturedOnly()"><i class="fas fa-star"></i> <span id="featured-toggle-text">Show Featured Only</span></button>
+                        <button class="btn-secondary btn-sm" id="toggle-featured">
+                            <i class="fas fa-star"></i> Show Featured Only
+                        </button>
                         <div class="search-box">
-                            <input type="text" id="project-search" placeholder="Search projects..." onkeyup="filterProjects()">
+                            <input type="text" id="project-search" placeholder="Search projects...">
                             <i class="fas fa-search"></i>
                         </div>
                     </div>
@@ -488,7 +494,7 @@
                         <h3><i class="fas fa-hashtag"></i> general</h3>
                     </div>
 
-                    <div class="chat-messages" id="chat-messages-container">
+                    <div class="chat-messages">
                         <div class="chat-message">
                             <img src="{{ url_for('static', filename='images/logo-rounded.png') }}" alt="Profile" class="avatar">
                             <div class="message-content">
@@ -526,7 +532,7 @@
                     </button>
                 </div>
 
-                <div class="resources-grid" id="resources-container">
+                <div class="resources-grid">
                     <div class="resource-card">
                         <div class="resource-icon">
                             <i class="fas fa-book"></i>
@@ -561,11 +567,11 @@
 
                 <div class="calendar-view">
                     <div class="calendar-nav">
-                        <button class="btn-icon" onclick="prevMonth()">
+                        <button class="btn-icon" id="prevMonth">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <h3 id="currentMonth">Loading...</h3>
-                        <button class="btn-icon" onclick="nextMonth()">
+                        <h3 id="currentMonth">April 2025</h3>
+                        <button class="btn-icon" id="nextMonth">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
@@ -581,11 +587,7 @@
                             <div>Sat</div>
                         </div>
                         <div class="calendar-body" id="calendar-body">
-                            <!-- Calendar will be filled dynamically -->
-                            <div class="loading-state">
-                                <div class="loading-spinner"></div>
-                                <p>Loading calendar...</p>
-                            </div>
+                            <!-- Calendar will be filled dynamically with JS -->
                         </div>
                     </div>
                 </div>
@@ -593,10 +595,20 @@
                 <div class="meetings-list">
                     <h4>Upcoming Meetings</h4>
                     <div id="upcoming-meetings">
-                        <!-- Meetings will be filled dynamically -->
-                        <div class="loading-state">
-                            <div class="loading-spinner"></div>
-                            <p>Loading meetings...</p>
+                        <div class="upcoming-meeting">
+                            <div class="meeting-date">
+                                <span class="date-num">24</span>
+                                <span class="date-month">Apr</span>
+                            </div>
+                            <div class="meeting-details">
+                                <h4>Weekly Club Meeting</h4>
+                                <p><i class="fas fa-clock"></i> 4:00 PM - 5:30 PM</p>
+                                <p><i class="fas fa-map-marker-alt"></i> Room 203</p>
+                            </div>
+                            <div class="meeting-actions">
+                                <button class="btn-icon"><i class="fas fa-edit"></i></button>
+                                <button class="btn-icon"><i class="fas fa-trash"></i></button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -794,7 +806,7 @@
     </div>
 </div>
 
-<!-- Edit Club Modal (Same as Create but preloaded)-->
+<!-- Edit Club Modal -->
 <div id="editClubModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -802,24 +814,24 @@
             <button class="close-btn" onclick="closeEditClubModal()">&times;</button>
         </div>
         <div class="modal-body">
-            <form id="editClubForm">
+            <form id="modalEditClubForm">
                 <div class="form-group">
-                    <label for="editClubName">Club Name <span class="required">*</span></label>
-                    <input type="text" id="editClubName" name="editClubName" required class="form-input">
+                    <label for="modalEditClubName">Club Name <span class="required">*</span></label>
+                    <input type="text" id="modalEditClubName" name="modalEditClubName" required class="form-input">
                 </div>
                 <div class="form-group">
-                    <label for="editClubLocation">Location</label>
-                    <input type="text" id="editClubLocation" name="editClubLocation" class="form-input">
+                    <label for="modalEditClubLocation">Location</label>
+                    <input type="text" id="modalEditClubLocation" name="modalEditClubLocation" class="form-input">
                 </div>
                 <div class="form-group">
-                    <label for="editClubDescription">Description</label>
-                    <textarea id="editClubDescription" name="editClubDescription" rows="4" class="form-textarea"></textarea>
+                    <label for="modalEditClubDescription">Description</label>
+                    <textarea id="modalEditClubDescription" name="modalEditClubDescription" rows="4" class="form-textarea"></textarea>
                 </div>
             </form>
         </div>
         <div class="modal-actions">
             <button class="btn-secondary" onclick="closeEditClubModal()">Cancel</button>
-            <button class="btn-primary" onclick="updateClub()">
+            <button class="btn-primary" onclick="updateClubFromModal()">
                 <i class="fas fa-save"></i> Save Changes
             </button>
         </div>
@@ -839,7 +851,7 @@
                     <h3><i class="fas fa-key"></i> Join Code</h3>
                     <p>Share your club's join code with members and let them join on their own.</p>
                     <div class="join-code-display">
-                        {% if club.join_code %}
+                        {% if club and club.join_code %}
                             <div class="code-box">{{ club.join_code }}</div>
                             <button class="btn-primary" onclick="copyJoinCode()">
                                 <i class="fas fa-copy"></i> Copy
@@ -1058,53 +1070,6 @@
     </div>
 </div>
 
-<!-- View Meeting Modal -->
-<div id="viewMeetingModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2><i class="fas fa-calendar-day"></i> <span id="viewMeetingTitle">Meeting Details</span></h2>
-            <button class="close-btn" onclick="closeViewMeetingModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="meeting-details">
-                <div class="meeting-meta">
-                    <div class="meta-item">
-                        <i class="fas fa-clock"></i>
-                        <span id="viewMeetingTime"></span>
-                    </div>
-                    <div class="meta-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span id="viewMeetingLocation">No location specified</span>
-                    </div>
-                    <div class="meta-item" id="viewMeetingLinkContainer">
-                        <i class="fas fa-link"></i>
-                        <a href="#" id="viewMeetingLink" target="_blank">Join Meeting</a>
-                    </div>
-                    <div class="meta-item">
-                        <i class="fas fa-user"></i>
-                        <span id="viewMeetingCreator"></span>
-                    </div>
-                </div>
-
-                <div class="meeting-description-section">
-                    <h4>Description</h4>
-                    <p id="viewMeetingDescription">No description provided.</p>
-                </div>
-            </div>
-        </div>
-        <div class="modal-actions">
-            <input type="hidden" id="currentMeetingId">
-            <button class="btn-secondary" onclick="closeViewMeetingModal()">Close</button>
-            <button class="btn-primary" onclick="editMeeting()">
-                <i class="fas fa-edit"></i> Edit
-            </button>
-            <button class="btn-danger" onclick="confirmDeleteMeeting()">
-                <i class="fas fa-trash"></i> Delete
-            </button>
-        </div>
-    </div>
-</div>
-
 <!-- Toast container for notifications -->
 <div id="toast-container"></div>
 
@@ -1137,6 +1102,7 @@
     background-color: var(--body-bg);
     color: var(--text-primary);
     transition: all 0.3s ease;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 /* Sidebar Styles */
@@ -1280,21 +1246,24 @@
 /* Content Area */
 .club-content {
     flex: 1;
-    padding: 2rem;
+    padding: 1.5rem 2rem;
     margin-left: 260px;
     transition: all 0.3s ease;
 }
 
-.club-header {
+/* Horizontal Navbar */
+.horizontal-navbar {
     margin-bottom: 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 60px;
+    padding: 1rem 0;
+    margin-top: 60px;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.club-header h1 {
-    font-size: 2rem;
+.navbar-title h1 {
+    font-size: 1.75rem;
     font-weight: 700;
     margin: 0;
     color: var(--text-primary);
@@ -1302,21 +1271,144 @@
     align-items: center;
 }
 
-.club-header h1 i {
+.navbar-title h1 i {
     margin-right: 0.75rem;
     color: var(--primary);
 }
 
-.header-actions {
+.navbar-actions {
     display: flex;
     gap: 10px;
+}
+
+.btn-edit, .btn-join-code {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-edit {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-join-code {
+    background-color: var(--light);
+    color: var(--text-primary);
+}
+
+.btn-join-code:hover {
+    background-color: var(--border-color);
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary i {
+    font-size: 14px;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-secondary {
+    background-color: var(--light);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary i {
+    font-size: 14px;
+}
+
+.btn-secondary:hover {
+    background-color: var(--border-color);
+}
+
+.btn-danger {
+    background-color: var(--danger);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-danger i {
+    font-size: 14px;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+.btn-sm {
+    padding: 0.35rem 0.7rem;
+    font-size: 12px;
+}
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background-color: var(--light);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+    background-color: var(--border-color);
 }
 
 /* Section Styles */
 .club-section {
     background-color: var(--card-bg);
     border-radius: 12px;
-    padding: 2rem;
+    padding: 1.5rem;
     margin-bottom: 2rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     display: none;
@@ -1329,6 +1421,8 @@
 
 .section-header {
     margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
 }
 
 .section-header h2 {
@@ -1351,40 +1445,28 @@
 
 /* Dashboard Stats */
 .dashboard-stats {
-    margin-bottom: 2rem;
     display: flex;
-    justify-content: center;
-}
-
-.stats-wrapper {
-    display: flex;
-    gap: 1.5rem;
-    max-width: 900px;
     flex-wrap: wrap;
-    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .stat-card {
-    background-color: var(--light);
+    background-color: var(--card-bg);
     border-radius: 12px;
-    padding: 1.5rem;
+    padding: 1.25rem;
     display: flex;
     align-items: center;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    min-width: 200px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
 }
 
 .stat-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1392,7 +1474,7 @@
 }
 
 .stat-icon i {
-    font-size: 24px;
+    font-size: 22px;
     color: white;
 }
 
@@ -1404,12 +1486,12 @@
     background: linear-gradient(135deg, #2ecc71, #27ae60);
 }
 
-.admin-icon {
+.task-icon {
     background: linear-gradient(135deg, #9b59b6, #8e44ad);
 }
 
 .stat-info h3 {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: 700;
     margin: 0 0 5px;
 }
@@ -1424,19 +1506,24 @@
 .dashboard-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
     margin-bottom: 1.5rem;
+}
+
+.dashboard-row.single-col {
+    grid-template-columns: 1fr;
 }
 
 .dashboard-card {
     background-color: var(--card-bg);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
 }
 
 .card-header {
-    padding: 1.25rem 1.5rem;
+    padding: 1rem 1.25rem;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
@@ -1445,7 +1532,7 @@
 
 .card-header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -1468,7 +1555,7 @@
 }
 
 .card-content {
-    padding: 1.5rem;
+    padding: 1.25rem;
 }
 
 /* Activity List */
@@ -1481,7 +1568,7 @@
 .activity-item {
     display: flex;
     align-items: flex-start;
-    padding: 1rem 0;
+    padding: 0.75rem 0;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -1499,6 +1586,7 @@
     align-items: center;
     justify-content: center;
     margin-right: 1rem;
+    flex-shrink: 0;
 }
 
 .activity-icon i {
@@ -1520,7 +1608,7 @@
 .upcoming-meeting {
     display: flex;
     align-items: flex-start;
-    padding: 1rem 0;
+    padding: 0.75rem 0;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -1530,8 +1618,8 @@
 }
 
 .meeting-date {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     background-color: var(--primary);
     border-radius: 8px;
     display: flex;
@@ -1540,17 +1628,22 @@
     justify-content: center;
     margin-right: 1rem;
     color: white;
+    flex-shrink: 0;
 }
 
 .date-num {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     line-height: 1;
 }
 
 .date-month {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     font-weight: 500;
+}
+
+.meeting-details {
+    flex: 1;
 }
 
 .meeting-details h4 {
@@ -1559,7 +1652,7 @@
 }
 
 .meeting-details p {
-    margin: 0;
+    margin: 0 0 0.25rem;
     font-size: 0.9rem;
     color: var(--text-secondary);
     display: flex;
@@ -1571,11 +1664,17 @@
     width: 16px;
 }
 
+.meeting-actions {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
 /* Assignment Items */
 .assignment-item {
     display: flex;
     align-items: flex-start;
-    padding: 1rem 0;
+    padding: 0.75rem 0;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -1586,12 +1685,13 @@
 
 .assignment-status {
     margin-right: 1rem;
+    flex-shrink: 0;
 }
 
 .status-badge {
     padding: 4px 10px;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 500;
     display: inline-block;
 }
@@ -1599,6 +1699,10 @@
 .status-badge.status-active {
     background-color: rgba(46, 204, 113, 0.15);
     color: #2ecc71;
+}
+
+.assignment-details {
+    flex: 1;
 }
 
 .assignment-details h4 {
@@ -1627,91 +1731,845 @@
     margin-right: 0.5rem;
 }
 
-/* Button Styles */
-.btn-primary {
-    background-color: var(--primary);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
+/* Stream Section */
+.stream-container {
     display: flex;
-    align-items: center;
-    transition: all 0.2s ease;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
-.btn-primary i {
-    margin-right: 8px;
-}
-
-.btn-primary:hover {
-    background-color: var(--primary-dark);
-    transform: translateY(-2px);
-}
-
-.btn-secondary {
-    background-color: var(--light);
-    color: var(--text-primary);
+.post-composer {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     border: 1px solid var(--border-color);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
+}
+
+.composer-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.composer-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
     display: flex;
     align-items: center;
 }
 
-.btn-secondary i {
-    margin-right: 8px;
+.composer-header h3 i {
+    margin-right: 0.75rem;
+    color: var(--primary);
 }
 
-.btn-secondary:hover {
-    background-color: var(--body-bg);
+.composer-body {
+    padding: 1rem;
 }
 
-.btn-danger {
-    background-color: var(--danger);
-    color: white;
+.composer-body textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    resize: vertical;
+    margin-bottom: 1rem;
+}
+
+.composer-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.post-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+}
+
+.post-header {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.post-header .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 1rem;
+}
+
+.post-info {
+    flex: 1;
+}
+
+.post-info h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.post-date {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.post-content {
+    padding: 1rem;
+}
+
+.post-content p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+.post-footer {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+}
+
+.post-action {
+    background: none;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-weight: 500;
+    color: var(--text-secondary);
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.post-action:hover {
+    color: var(--primary);
+}
+
+/* Assignments Section */
+.assignments-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.assignments-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.assignments-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.assignment-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.assignment-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.assignment-body {
+    flex: 1;
+    margin: 1rem 0;
+}
+
+.assignment-body h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.assignment-body p {
+    margin: 0 0 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.assignment-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+/* Members Section */
+.members-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.members-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.members-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.members-table-container {
+    overflow-x: auto;
+}
+
+.members-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.members-table th {
+    background-color: var(--light);
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.members-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.members-table tr:last-child td {
+    border-bottom: none;
+}
+
+.role-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: inline-block;
+    background-color: var(--light);
+    color: var(--text-secondary);
+}
+
+.role-badge-leader {
+    background-color: rgba(var(--primary-rgb), 0.15);
+    color: var(--primary);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Projects Section */
+.projects-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.projects-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.projects-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.projects-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box input {
+    padding: 0.5rem 2.5rem 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    min-width: 200px;
+}
+
+.search-box i {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Loading State */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    text-align: center;
+    color: var(--text-secondary);
+    background: var(--light);
+    border-radius: 8px;
+    grid-column: 1 / -1;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(var(--primary-rgb), 0.2);
+    border-left-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Chat Section */
+.chat-container {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 1rem;
+    height: 500px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: var(--card-bg);
+}
+
+.chat-sidebar {
+    border-right: 1px solid var(--border-color);
+    padding: 1rem;
+    overflow-y: auto;
+    background-color: var(--light);
+}
+
+.chat-channels h3 {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.channels-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+}
+
+.channels-list li {
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.channels-list li.active {
+    background-color: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary);
+}
+
+.channels-list li:hover:not(.active) {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.chat-main {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.chat-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
 }
 
-.btn-danger i {
-    margin-right: 8px;
+.chat-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.btn-danger:hover {
-    background-color: #b91c1c;
+.chat-messages {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
 }
 
-.btn-icon {
-    width: 32px;
-    height: 32px;
+.chat-message {
+    display: flex;
+    margin-bottom: 1.5rem;
+}
+
+.chat-message .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.message-content {
+    flex: 1;
+}
+
+.message-header {
+    display: flex;
+    align-items: baseline;
+    margin-bottom: 0.25rem;
+}
+
+.message-sender {
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.message-time {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.message-content p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+.chat-input {
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chat-input textarea {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    resize: none;
+    min-height: 44px;
+    max-height: 120px;
+}
+
+.send-button {
+    width: 44px;
+    height: 44px;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: none;
-    background-color: var(--light);
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-icon:hover {
     background-color: var(--primary);
     color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
-.btn-sm {
-    padding: 0.35rem 0.7rem;
+.send-button:hover {
+    background-color: var(--primary-dark);
+}
+
+/* Resources Section */
+.resources-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.resources-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.resources-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.resources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.resource-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: flex-start;
+}
+
+.resource-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background-color: rgba(var(--primary-rgb), 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.resource-icon i {
+    color: var(--primary);
+    font-size: 20px;
+}
+
+.resource-content {
+    flex: 1;
+}
+
+.resource-content h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.resource-content p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.resource-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-left: 1rem;
+}
+
+/* Schedule Section */
+.schedule-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.schedule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.schedule-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.calendar-view {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+}
+
+.calendar-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.calendar-nav h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.calendar {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background-color: var(--light);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.calendar-header div {
+    padding: 0.75rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.calendar-body {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-auto-rows: minmax(80px, auto);
+}
+
+.calendar-body div {
+    padding: 0.5rem;
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    min-height: 80px;
+}
+
+.calendar-body div:nth-child(7n) {
+    border-right: none;
+}
+
+.calendar-body div:nth-last-child(-n+7) {
+    border-bottom: none;
+}
+
+.meetings-list {
+    margin-top: 1.5rem;
+}
+
+.meetings-list h4 {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Rewards Section */
+.rewards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.rewards-header {
+    margin-bottom: 1rem;
+}
+
+.rewards-header h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.rewards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.reward-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.reward-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    background-color: rgba(var(--primary-rgb), 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.reward-icon i {
+    color: var(--primary);
+    font-size: 24px;
+}
+
+.reward-content {
+    flex: 1;
+}
+
+.reward-content h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.reward-content p {
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.reward-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.reward-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.rewards-guide {
+    background-color: var(--light);
+    border-radius: 12px;
+    padding: 1.25rem;
+}
+
+.rewards-guide h4 {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.rewards-guide ol {
+    margin: 0 0 1.5rem;
+    padding-left: 1.5rem;
+}
+
+.rewards-guide li {
+    margin-bottom: 0.5rem;
+}
+
+.info-box {
+    background-color: rgba(var(--primary-rgb), 0.05);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.info-box i {
+    color: var(--primary);
+    font-size: 18px;
+    margin-top: 2px;
+}
+
+.info-box p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Settings Section */
+.settings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.settings-container h3 {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.settings-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+}
+
+.settings-section {
+    margin-bottom: 2rem;
+}
+
+.settings-section:last-child {
+    margin-bottom: 0;
+}
+
+.settings-section h4 {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-input, 
+.form-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.form-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.danger-zone {
+    background-color: rgba(220, 38, 38, 0.05);
+    border-radius: 8px;
+    padding: 1.25rem;
+}
+
+.danger-zone h4 {
+    color: var(--danger);
+    border-bottom-color: rgba(220, 38, 38, 0.2);
+}
+
+.danger-zone p {
+    margin: 0 0 1rem;
+    font-size: 0.95rem;
 }
 
 /* Empty State */
@@ -1719,16 +2577,16 @@
     background-color: var(--card-bg);
     border-radius: 16px;
     padding: 4rem 2rem;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05), 0 5px 10px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
     text-align: center;
     margin-bottom: 2rem;
 }
 
 .empty-icon {
     font-size: 5rem;
-    color: var(--primary);
+    color: var(--text-secondary);
     margin-bottom: 2rem;
-    opacity: 0.8;
+    opacity: 0.5;
 }
 
 .club-empty-state h2 {
@@ -1748,87 +2606,6 @@
     display: flex;
     justify-content: center;
     gap: 1rem;
-}
-
-/* Club Card Design for My Clubs view */
-.clubs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-}
-
-.club-card {
-    background-color: var(--card-bg);
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid var(--border-color);
-    display: flex;
-    flex-direction: column;
-}
-
-.club-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-
-.club-card-header {
-    padding: 1.5rem 1.5rem1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-
-.club-card-header h3 {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.club-card-body {
-    padding: 0 1.5rem 1.5rem;
-    flex-grow: 1;
-}
-
-.club-card-body p {
-    margin: 0 0 1rem;
-    color: var(--text-secondary);
-    font-size: 0.9375rem;
-    line-height: 1.5;
-}
-
-.club-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    font-size: 0.875rem;
-    color: var(--text-muted);
-}
-
-.club-card-footer {
-    padding: 1rem 1.5rem;
-    background-color: var(--light);
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    justify-content: flex-end;
-}
-
-.role-badge {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    display: inline-block;
-    background-color: var(--light);
-    color: var(--text-secondary);
-}
-
-.role-badge-leader {
-    background-color: rgba(var(--primary-rgb), 0.15);
-    color: var(--primary);
 }
 
 /* Modal Styles */
@@ -1931,68 +2708,66 @@
     border-top: 1px solid var(--border-color);
 }
 
-/* Form Elements */
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
 .required {
     color: var(--danger);
     margin-left: 3px;
 }
 
-.form-input, 
-.form-textarea {
-    width: 100%;
-    padding: 12px 16px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-    color: var(--text-primary);
-    background-color: var(--light);
-    transition: all 0.2s ease;
+.highlighted-text {
+    color: var(--primary);
+    font-weight: 600;
 }
 
-.form-input:focus,
-.form-textarea:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(236, 55, 80, 0.2);
-    outline: none;
-}
-
-.form-textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-/* Info Box */
-.info-box {
-    background-color: #f0f9ff;
-    border-radius: 8px;
-    padding: 1rem;
-    display: flex;
-    gap: 0.75rem;
+/* Role Selector */
+.role-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
     margin-top: 1rem;
 }
 
-.info-box i {
-    color: #0ea5e9;
-    font-size: 1.25rem;
-    margin-top: 2px;
+.role-option {
+    cursor: pointer;
 }
 
-.info-box p {
-    margin: 0;
-    font-size: 0.9375rem;
+.role-option input {
+    display: none;
+}
+
+.role-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.role-option input:checked + .role-card {
+    border-color: var(--primary);
+    background-color: rgba(var(--primary-rgb), 0.05);
+}
+
+.role-card i {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
     color: var(--text-secondary);
-    line-height: 1.5;
+}
+
+.role-option input:checked + .role-card i {
+    color: var(--primary);
+}
+
+.role-card span:nth-child(2) {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.role-description {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: center;
 }
 
 /* Toast Container */
@@ -2003,45 +2778,136 @@
     z-index: 9999;
 }
 
-/* Media Queries for Responsiveness */
+/* Form Row */
+.form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.form-group.half {
+    flex: 1;
+}
+
+/* Code Box */
+.code-box {
+    background-color: var(--light);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 1.1rem;
+    margin-right: 0.5rem;
+    display: inline-block;
+}
+
+.join-code-display {
+    display: flex;
+    align-items: center;
+    margin: 1rem 0;
+}
+
+/* Info Card */
+.info-card {
+    background-color: var(--light);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.info-card h3 {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-card p {
+    margin: 0 0 1rem;
+    font-size: 0.95rem;
+}
+
+.info-card small {
+    color: var(--text-secondary);
+}
+
+/* Responsive Adjustments */
 @media (max-width: 1024px) {
     .dashboard-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .role-selector {
         grid-template-columns: 1fr;
     }
 }
 
 @media (max-width: 768px) {
     .club-sidebar {
+        width: 220px;
         transform: translateX(-100%);
     }
-
+    
     .club-content {
         margin-left: 0;
     }
-
+    
     .club-dashboard-container.sidebar-expanded .club-sidebar {
         transform: translateX(0);
     }
-
-    .club-header {
+    
+    .horizontal-navbar {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
     }
-
-    .header-actions {
+    
+    .navbar-actions {
         width: 100%;
-        flex-direction: column;
-        gap: 0.5rem;
     }
-
-    .stats-wrapper {
-        flex-direction: column;
+    
+    .chat-container {
+        grid-template-columns: 1fr;
     }
+    
+    .chat-sidebar {
+        display: none;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
 
+@media (max-width: 480px) {
+    .club-content {
+        padding: 1rem;
+    }
+    
     .empty-actions {
         flex-direction: column;
         gap: 0.75rem;
+    }
+    
+    .dashboard-stats,
+    .assignments-header,
+    .members-header,
+    .projects-header,
+    .resources-header,
+    .schedule-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+        width: 100%;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
     }
 }
 
@@ -2054,13 +2920,11 @@
 .section-entrance {
     animation: fadeIn 0.5s ease;
 }
-
-/* Maintain existing styles for other components */
-/* Keep all existing styles from original file for stream, assignments, members, etc. */
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Navigation between tabs
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('.club-section');
 
@@ -2068,9 +2932,11 @@ document.addEventListener('DOMContentLoaded', function() {
         link.addEventListener('click', (e) => {
             e.preventDefault();
 
+            // Update active tab
             navLinks.forEach(l => l.classList.remove('active'));
             link.classList.add('active');
 
+            // Show corresponding section
             const sectionId = link.getAttribute('data-section');
             sections.forEach(section => {
                 section.classList.remove('active');
@@ -2083,10 +2949,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
+            // Update URL hash for direct linking
             window.location.hash = sectionId;
         });
     });
 
+    // Check URL hash on page load
     const hash = window.location.hash.substring(1);
     if (hash) {
         const activeLink = document.querySelector(`.nav-link[data-section="${hash}"]`);
@@ -2095,182 +2963,580 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Sidebar collapse functionality
     const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
     const container = document.querySelector('.club-dashboard-container');
 
-    sidebarCollapseBtn.addEventListener('click', () => {
-        container.classList.toggle('sidebar-collapsed');
-    });
+    if (sidebarCollapseBtn) {
+        sidebarCollapseBtn.addEventListener('click', () => {
+            container.classList.toggle('sidebar-collapsed');
+            
+            // Update sidebar and content styles based on collapsed state
+            const sidebar = document.querySelector('.club-sidebar');
+            const content = document.querySelector('.club-content');
+            
+            if (container.classList.contains('sidebar-collapsed')) {
+                sidebar.style.width = '80px';
+                content.style.marginLeft = '80px';
+                
+                // Hide text in sidebar
+                document.querySelectorAll('.nav-link span, .profile-info, .logout-link span').forEach(el => {
+                    el.style.display = 'none';
+                });
+                
+                // Rotate collapse button
+                sidebarCollapseBtn.querySelector('i').style.transform = 'rotate(180deg)';
+            } else {
+                sidebar.style.width = '260px';
+                content.style.marginLeft = '260px';
+                
+                // Show text in sidebar
+                document.querySelectorAll('.nav-link span, .profile-info, .logout-link span').forEach(el => {
+                    el.style.display = 'block';
+                });
+                
+                // Reset collapse button
+                sidebarCollapseBtn.querySelector('i').style.transform = 'rotate(0)';
+            }
+        });
+    }
 
-    // Initialize modals, tabs, and other UI components
-    // This section would include all the existing JavaScript from the original file
-    // for handling modals, CRUD operations, etc.
+    // Toggle featured projects
+    const toggleFeaturedBtn = document.getElementById('toggle-featured');
+    if (toggleFeaturedBtn) {
+        toggleFeaturedBtn.addEventListener('click', () => {
+            const isShowingFeatured = toggleFeaturedBtn.innerText.includes('Show Featured Only');
+            
+            if (isShowingFeatured) {
+                toggleFeaturedBtn.innerHTML = '<i class="fas fa-list"></i> Show All Projects';
+                // Logic to filter projects would go here
+            } else {
+                toggleFeaturedBtn.innerHTML = '<i class="fas fa-star"></i> Show Featured Only';
+                // Logic to show all projects would go here
+            }
+        });
+    }
 
-    // Keep original functions from club_dashboard.html for consistency
-
-    // Tab functionality
-    function openTab(tabName) {
+    // Calendar functionality
+    function generateCalendar() {
+        const calendarBody = document.getElementById('calendar-body');
+        if (!calendarBody) return;
+        
+        // Clear existing calendar
+        calendarBody.innerHTML = '';
+        
+        // Get current month and year
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        
+        // Update month display
+        const monthDisplay = document.getElementById('currentMonth');
+        if (monthDisplay) {
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            monthDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+        }
+        
+        // Get first day of month and total days
+        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        
+        // Create calendar cells
+        let dayCount = 1;
+        
+        // Create blank cells for days before first of month
+        for (let i = 0; i < firstDay; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('calendar-day', 'empty-day');
+            calendarBody.appendChild(cell);
+        }
+        
+        // Create cells for days in month
+        for (let i = 1; i <= daysInMonth; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('calendar-day');
+            
+            // Add day number
+            const dayNumber = document.createElement('div');
+            dayNumber.classList.add('day-number');
+            dayNumber.textContent = i;
+            cell.appendChild(dayNumber);
+            
+            // Highlight current day
+            if (i === now.getDate() && currentMonth === now.getMonth() && currentYear === now.getFullYear()) {
+                dayNumber.classList.add('current-day');
+            }
+            
+            // Sample event for demonstration
+            if (i === 24) {
+                const event = document.createElement('div');
+                event.classList.add('calendar-event');
+                event.textContent = 'Weekly Meeting';
+                event.style.backgroundColor = 'rgba(236, 55, 80, 0.1)';
+                event.style.color = '#ec3750';
+                event.style.padding = '3px 6px';
+                event.style.borderRadius = '4px';
+                event.style.fontSize = '12px';
+                event.style.marginTop = '3px';
+                event.style.cursor = 'pointer';
+                
+                event.addEventListener('click', () => {
+                    // Logic to show meeting details
+                    alert('Weekly Meeting: 4:00 PM in Room 203');
+                });
+                
+                cell.appendChild(event);
+            }
+            
+            calendarBody.appendChild(cell);
+            dayCount++;
+        }
+        
+        // Add navigation events
+        const prevMonth = document.getElementById('prevMonth');
+        const nextMonth = document.getElementById('nextMonth');
+        
+        if (prevMonth) {
+            prevMonth.addEventListener('click', () => {
+                // Logic to show previous month
+                alert('Previous month navigation will be implemented');
+            });
+        }
+        
+        if (nextMonth) {
+            nextMonth.addEventListener('click', () => {
+                // Logic to show next month
+                alert('Next month navigation will be implemented');
+            });
+        }
+    }
+    
+    // Generate calendar if we're on the schedule tab
+    if (document.getElementById('schedule')) {
+        generateCalendar();
+    }
+    
+    // Function to handle tab switching
+    window.openTab = function(tabName) {
         const tabLink = document.querySelector(`.nav-link[data-section="${tabName}"]`);
         if (tabLink) {
             tabLink.click();
         }
-    }
-
-    // Make openTab function globally available
-    window.openTab = openTab;
-
-    // Fake data initialization for dashboard
+    };
+    
+    // Toast notification system
+    window.showToast = function(type, message, duration = 4000) {
+        const toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) return;
+        
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        
+        // Select icon based on type
+        let icon = '';
+        switch (type) {
+            case 'success': icon = '<i class="fas fa-check-circle"></i>'; break;
+            case 'error': icon = '<i class="fas fa-exclamation-circle"></i>'; break;
+            case 'warning': icon = '<i class="fas fa-exclamation-triangle"></i>'; break;
+            case 'info': icon = '<i class="fas fa-info-circle"></i>'; break;
+        }
+        
+        toast.innerHTML = `
+            <div class="toast-content">
+                ${icon}
+                <span>${message}</span>
+            </div>
+            <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => {
+            toast.style.transform = 'translateX(0)';
+            toast.style.opacity = '1';
+        }, 10);
+        
+        // Auto-remove after duration
+        setTimeout(() => {
+            toast.style.transform = 'translateX(100%)';
+            toast.style.opacity = '0';
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, duration);
+    };
+    
+    // Modal functions
+    window.openModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.style.opacity = '1';
+            modal.style.visibility = 'visible';
+        }, 10);
+        document.body.style.overflow = 'hidden';
+    };
+    
+    window.closeModal = function(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        
+        modal.style.opacity = '0';
+        modal.style.visibility = 'hidden';
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+        document.body.style.overflow = '';
+    };
+    
+    // Create Club Modal functions
+    window.openCreateClubModal = function() {
+        openModal('createClubModal');
+    };
+    
+    window.closeCreateClubModal = function() {
+        closeModal('createClubModal');
+        document.getElementById('createClubForm').reset();
+    };
+    
+    // Join Club Modal functions
+    window.openJoinClubModal = function() {
+        openModal('joinClubModal');
+    };
+    
+    window.closeJoinClubModal = function() {
+        closeModal('joinClubModal');
+        document.getElementById('joinCode').value = '';
+    };
+    
+    // Edit Club Modal functions
+    window.openEditClubModal = function() {
+        // Populate form with current club data
+        const clubName = document.getElementById('editClubName').value;
+        const clubLocation = document.getElementById('editClubLocation').value;
+        const clubDescription = document.getElementById('editClubDescription').value;
+        
+        document.getElementById('modalEditClubName').value = clubName;
+        document.getElementById('modalEditClubLocation').value = clubLocation;
+        document.getElementById('modalEditClubDescription').value = clubDescription;
+        
+        openModal('editClubModal');
+    };
+    
+    window.closeEditClubModal = function() {
+        closeModal('editClubModal');
+    };
+    
+    window.updateClubFromModal = function() {
+        // Transfer values from modal to form
+        const modalName = document.getElementById('modalEditClubName').value;
+        const modalLocation = document.getElementById('modalEditClubLocation').value;
+        const modalDescription = document.getElementById('modalEditClubDescription').value;
+        
+        document.getElementById('editClubName').value = modalName;
+        document.getElementById('editClubLocation').value = modalLocation;
+        document.getElementById('editClubDescription').value = modalDescription;
+        
+        // Call the update function
+        updateClub();
+        
+        // Close modal
+        closeEditClubModal();
+    };
+    
+    // Add Member Modal functions
+    window.openAddMemberModal = function() {
+        openModal('addMemberModal');
+    };
+    
+    window.closeAddMemberModal = function() {
+        closeModal('addMemberModal');
+    };
+    
+    // Change Role Modal functions
+    window.openChangeRoleModal = function(membershipId, username, currentRole) {
+        document.getElementById('membershipIdForRole').value = membershipId;
+        document.getElementById('roleUsername').textContent = username;
+        
+        // Set the current role radio button
+        if (currentRole === 'member') {
+            document.getElementById('roleMember').checked = true;
+        } else if (currentRole === 'co-leader') {
+            document.getElementById('roleLeader').checked = true;
+        }
+        
+        openModal('changeRoleModal');
+    };
+    
+    window.closeChangeRoleModal = function() {
+        closeModal('changeRoleModal');
+    };
+    
+    // Create Assignment Modal functions
+    window.openCreateAssignmentModal = function() {
+        openModal('createAssignmentModal');
+    };
+    
+    window.closeCreateAssignmentModal = function() {
+        closeModal('createAssignmentModal');
+        document.getElementById('createAssignmentForm').reset();
+    };
+    
+    // Add Resource Modal functions
+    window.openAddResourceModal = function() {
+        openModal('addResourceModal');
+    };
+    
+    window.closeAddResourceModal = function() {
+        closeModal('addResourceModal');
+        document.getElementById('addResourceForm').reset();
+    };
+    
+    // Create Channel Modal functions
+    window.openCreateChannelModal = function() {
+        openModal('createChannelModal');
+    };
+    
+    window.closeCreateChannelModal = function() {
+        closeModal('createChannelModal');
+        document.getElementById('createChannelForm').reset();
+    };
+    
+    // Create Meeting Modal functions
+    window.openCreateMeetingModal = function() {
+        openModal('createMeetingModal');
+    };
+    
+    window.closeCreateMeetingModal = function() {
+        closeModal('createMeetingModal');
+        document.getElementById('createMeetingForm').reset();
+    };
+    
+    // Example data functions (placeholders)
+    window.createClub = function() {
+        const clubName = document.getElementById('clubName').value;
+        const clubLocation = document.getElementById('clubLocation').value;
+        const clubDescription = document.getElementById('clubDescription').value;
+        
+        if (!clubName) {
+            showToast('error', 'Please enter a club name');
+            return;
+        }
+        
+        // Simulate API call
+        showToast('info', 'Creating club...');
+        
+        setTimeout(() => {
+            showToast('success', 'Club created successfully!');
+            closeCreateClubModal();
+            // In a real app, we'd redirect or refresh
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        }, 1500);
+    };
+    
+    window.joinClub = function() {
+        const joinCode = document.getElementById('joinCode').value;
+        
+        if (!joinCode) {
+            showToast('error', 'Please enter a join code');
+            return;
+        }
+        
+        // Simulate API call
+        showToast('info', 'Joining club...');
+        
+        setTimeout(() => {
+            showToast('success', 'Joined club successfully!');
+            closeJoinClubModal();
+            // In a real app, we'd redirect or refresh
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        }, 1500);
+    };
+    
+    window.updateClub = function() {
+        const clubName = document.getElementById('editClubName').value;
+        const clubLocation = document.getElementById('editClubLocation').value;
+        const clubDescription = document.getElementById('editClubDescription').value;
+        
+        if (!clubName) {
+            showToast('error', 'Please enter a club name');
+            return;
+        }
+        
+        // Simulate API call
+        showToast('info', 'Updating club...');
+        
+        setTimeout(() => {
+            showToast('success', 'Club updated successfully!');
+            // In a real app, we'd update the UI
+        }, 1500);
+    };
+    
+    window.generateJoinCode = function() {
+        // Simulate API call
+        showToast('info', 'Generating join code...');
+        
+        setTimeout(() => {
+            const newCode = 'ABC123';
+            const codeDisplay = document.getElementById('join-code-display');
+            if (codeDisplay) {
+                codeDisplay.textContent = newCode;
+            }
+            showToast('success', 'New join code generated!');
+        }, 1000);
+    };
+    
+    window.copyJoinCode = function() {
+        const codeDisplay = document.getElementById('join-code-display');
+        if (!codeDisplay) return;
+        
+        // Create temporary element
+        const el = document.createElement('textarea');
+        el.value = codeDisplay.textContent;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        
+        showToast('success', 'Join code copied to clipboard!');
+    };
+    
+    window.changeRole = function() {
+        const membershipId = document.getElementById('membershipIdForRole').value;
+        const username = document.getElementById('roleUsername').textContent;
+        const newRole = document.querySelector('input[name="memberRole"]:checked').value;
+        
+        // Simulate API call
+        showToast('info', `Changing role for ${username}...`);
+        
+        setTimeout(() => {
+            showToast('success', `${username}'s role updated to ${newRole}`);
+            closeChangeRoleModal();
+            // In a real app, we'd update the UI
+        }, 1500);
+    };
+    
+    window.createAssignment = function() {
+        const title = document.getElementById('assignmentTitle').value;
+        const description = document.getElementById('assignmentDescription').value;
+        const dueDate = document.getElementById('assignmentDueDate').value;
+        
+        if (!title || !description) {
+            showToast('error', 'Please fill out all required fields');
+            return;
+        }
+        
+        // Simulate API call
+        showToast('info', 'Creating assignment...');
+        
+        setTimeout(() => {
+            showToast('success', 'Assignment created successfully!');
+            closeCreateAssignmentModal();
+            // In a real app, we'd update the UI
+        }, 1500);
+    };
+    
+    window.addResource = function() {
+        const title = document.getElementById('resourceTitle').value;
+        const url = document.getElementById('resourceUrl').value;
+        const description = document.getElementById('resourceDescription').value;
+        
+        if (!title || !url) {
+            showToast('error', 'Please fill out all required fields');
+            return;
+        }
+        
+        // Simulate API call
+        showToast('info', 'Adding resource...');
+        
+        setTimeout(() => {
+            showToast('success', 'Resource added successfully!');
+            closeAddResourceModal();
+            // In a real app, we'd update the UI
+        }, 1500);
+    };
+    
+    window.createChannel = function() {
+        const channelName = document.getElementById('channelName').value;
+        
+        if (!channelName) {
+            showToast('error', 'Please enter a channel name');
+            return;
+        }
+        
+        // Simulate API call
+        showToast('info', 'Creating channel...');
+        
+        setTimeout(() => {
+            showToast('success', 'Channel created successfully!');
+            closeCreateChannelModal();
+            // In a real app, we'd update the UI
+        }, 1500);
+    };
+    
+    window.createMeeting = function() {
+        const title = document.getElementById('meetingTitle').value;
+        const date = document.getElementById('meetingDate').value;
+        const startTime = document.getElementById('startTime').value;
+        
+        if (!title || !date || !startTime) {
+            showToast('error', 'Please fill out all required fields');
+            return;
+        }
+        
+        // Simulate API call
+        showToast('info', 'Scheduling meeting...');
+        
+        setTimeout(() => {
+            showToast('success', 'Meeting scheduled successfully!');
+            closeCreateMeetingModal();
+            // In a real app, we'd update the UI and regenerate calendar
+        }, 1500);
+    };
+    
+    window.viewClub = function(clubId) {
+        // In a real app, we'd navigate to the club page
+        window.location.href = `/club-dashboard?club_id=${clubId}`;
+    };
+    
+    window.sendChatMessage = function() {
+        const messageInput = document.getElementById('chat-message-input');
+        if (!messageInput || !messageInput.value.trim()) return;
+        
+        const message = messageInput.value.trim();
+        messageInput.value = '';
+        
+        // In a real app, we'd send the message via API
+        const chatMessages = document.querySelector('.chat-messages');
+        if (!chatMessages) return;
+        
+        const msgElement = document.createElement('div');
+        msgElement.className = 'chat-message';
+        msgElement.innerHTML = `
+            <img src="/static/images/logo-rounded.png" alt="Profile" class="avatar">
+            <div class="message-content">
+                <div class="message-header">
+                    <span class="message-sender">You</span>
+                    <span class="message-time">Just now</span>
+                </div>
+                <p>${message}</p>
+            </div>
+        `;
+        
+        chatMessages.appendChild(msgElement);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    };
+    
+    // Initialize stats counters
     document.getElementById('projectCount').textContent = Math.floor(Math.random() * 20) + 5;
     document.getElementById('assignmentCount').textContent = Math.floor(Math.random() * 10) + 1;
 });
-
-// Here include all the original functions for modal handling, CRUD operations, etc.
-// Modal Functions
-function openModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (!modal) return;
-
-    modal.style.display = 'flex';
-    modal.style.opacity = '1';
-    modal.style.visibility = 'visible';
-    document.body.style.overflow = 'hidden';
-}
-
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (!modal) return;
-
-    modal.style.opacity = '0';
-    modal.style.visibility = 'hidden';
-    setTimeout(() => {
-        modal.style.display = 'none';
-        modal.classList.remove('visible');
-        document.body.style.overflow = '';
-    }, 300);
-}
-
-// Create Club Modal
-function openCreateClubModal() {
-    openModal('createClubModal');
-}
-
-function closeCreateClubModal() {
-    closeModal('createClubModal');
-    document.getElementById('createClubForm').reset();
-}
-
-// Join Club Modal
-function openJoinClubModal() {
-    openModal('joinClubModal');
-}
-
-function closeJoinClubModal() {
-    closeModal('joinClubModal');
-    document.getElementById('joinCode').value = '';
-}
-
-// Edit Club Modal
-function openEditClubModal() {
-    // Fetch current club data
-    fetch('/api/clubs/current')
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                showToast('error', data.error);
-                return;
-            }
-
-            document.getElementById('editClubName').value = data.name || '';
-            document.getElementById('editClubLocation').value = data.location || '';
-            document.getElementById('editClubDescription').value = data.description || '';
-
-            openModal('editClubModal');
-        })
-        .catch(error => {
-            showToast('error', 'Failed to fetch club details');
-            console.error('Error:', error);
-        });
-}
-
-function closeEditClubModal() {
-    closeModal('editClubModal');
-}
-
-// Add Member Modal
-function openAddMemberModal() {
-    openModal('addMemberModal');
-}
-
-function closeAddMemberModal() {
-    closeModal('addMemberModal');
-}
-
-// Change Role Modal
-function openChangeRoleModal(membershipId, username, currentRole) {
-    document.getElementById('membershipIdForRole').value = membershipId;
-    document.getElementById('roleUsername').textContent = username;
-
-    // Set the current role
-    if (currentRole === 'member') {
-        document.getElementById('roleMember').checked = true;
-    } else if (currentRole === 'co-leader') {
-        document.getElementById('roleLeader').checked = true;
-    }
-
-    openModal('changeRoleModal');
-}
-
-function closeChangeRoleModal() {
-    closeModal('changeRoleModal');
-}
-
-// Include other modal functions and API interaction functions
-// from the original file to maintain functionality
-
-// Display toast notifications
-function showToast(type, message) {
-    const toastContainer = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.classList.add('toast', `toast-${type}`);
-
-    let icon = '';
-    switch (type) {
-        case 'success':
-            icon = '<i class="fas fa-check-circle"></i>';
-            break;
-        case 'error':
-            icon = '<i class="fas fa-exclamation-circle"></i>';
-            break;
-        case 'warning':
-            icon = '<i class="fas fa-exclamation-triangle"></i>';
-            break;
-        case 'info':
-            icon = '<i class="fas fa-info-circle"></i>';
-            break;
-    }
-
-    toast.innerHTML = `
-        <div class="toast-content">
-            ${icon}
-            <span>${message}</span>
-        </div>
-        <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
-    `;
-
-    toastContainer.appendChild(toast);
-
-    // Auto-remove the toast after 5 seconds
-    setTimeout(() => {
-        toast.classList.add('toast-fade-out');
-        setTimeout(() => {
-            toast.remove();
-        }, 300);
-    }, 5000);
-}
-
-// View a specific club for members with multiple clubs
-function viewClub(clubId) {
-    window.location.href = `/club-dashboard?club_id=${clubId}`;
-}
 </script>
 {% endblock %}
