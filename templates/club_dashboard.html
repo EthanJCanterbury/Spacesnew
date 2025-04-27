@@ -412,32 +412,148 @@
                 <p>Overview of your club activities and statistics</p>
             </div>
 
-            <div class="dashboard-stats">
-                <div class="stat-card">
-                    <div class="stat-icon user-icon">
+            <div class="dashboard-cards">
+                <!-- Club Members Card -->
+                <div class="feature-card">
+                    <div class="card-icon-container blue">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="stat-info">
-                        <h3>{{ club.members|length }}</h3>
+                    <div class="card-content">
+                        <h3>Club Members</h3>
+                        <p class="card-subtitle">Manage Members</p>
+                        <div class="card-info">
+                            <p>{{ club.members|length + 1 }} total members</p>
+                        </div>
+                        <div class="card-actions">
+                            <a href="#members" class="card-action-btn" onclick="openTab('members')">
+                                <i class="fas fa-plus"></i> Add & View Members
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Club Meetings Card -->
+                <div class="feature-card">
+                    <div class="card-icon-container purple">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Club Meetings</h3>
+                        <p class="card-subtitle">Schedule Meetings</p>
+                        <div class="card-info">
+                            <p>Planning your next club meeting</p>
+                        </div>
+                        <div class="card-actions">
+                            <a href="#schedule" class="card-action-btn" onclick="openTab('schedule')">
+                                <i class="fas fa-plus"></i> Schedule Meeting
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Club Budget Card -->
+                <div class="feature-card">
+                    <div class="card-icon-container green">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Club Budget</h3>
+                        <p class="card-subtitle">Manage Finances</p>
+                        <div class="card-info">
+                            <p>Track your club expenses and funding</p>
+                        </div>
+                        <div class="card-actions">
+                            <a href="#rewards" class="card-action-btn outlined" onclick="openTab('rewards')">
+                                <i class="fas fa-eye"></i> View Budget
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Club Tasks Card -->
+                <div class="feature-card">
+                    <div class="card-icon-container orange">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Club Tasks</h3>
+                        <p class="card-subtitle">Manage Tasks</p>
+                        <div class="card-info">
+                            <p>Assign coding challenges to members</p>
+                        </div>
+                        <div class="card-actions">
+                            <a href="#assignments" class="card-action-btn" onclick="openTab('assignments')">
+                                <i class="fas fa-plus"></i> Create Task
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Pathways Card -->
+                <div class="feature-card">
+                    <div class="card-icon-container purple-light">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Learning Pathways</h3>
+                        <p class="card-subtitle">Member Progress</p>
+                        <div class="card-info">
+                            <p>Track member coding project progress</p>
+                        </div>
+                        <div class="card-actions">
+                            <a href="#projects" class="card-action-btn outlined" onclick="openTab('projects')">
+                                <i class="fas fa-eye"></i> View Pathways
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leader Resources Card -->
+                <div class="feature-card">
+                    <div class="card-icon-container pink">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Leader Resources</h3>
+                        <p class="card-subtitle">Hack Club Resources</p>
+                        <div class="card-info">
+                            <p>Access Hack Club workshops and resources</p>
+                        </div>
+                        <div class="card-actions">
+                            <a href="#resources" class="card-action-btn outlined" onclick="openTab('resources')">
+                                <i class="fas fa-external-link-alt"></i> Access Resources
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-stats-summary">
+                <div class="summary-item">
+                    <div class="summary-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="summary-info">
+                        <h3>{{ club.members|length + 1 }}</h3>
                         <p>Club Members</p>
                     </div>
                 </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon site-icon">
+                <div class="summary-item">
+                    <div class="summary-icon">
                         <i class="fas fa-code"></i>
                     </div>
-                    <div class="stat-info">
+                    <div class="summary-info">
                         <h3 id="projectCount">0</h3>
                         <p>Total Projects</p>
                     </div>
                 </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon task-icon">
+                <div class="summary-item">
+                    <div class="summary-icon">
                         <i class="fas fa-tasks"></i>
                     </div>
-                    <div class="stat-info">
+                    <div class="summary-info">
                         <h3 id="assignmentCount">0</h3>
                         <p>Active Assignments</p>
                     </div>
@@ -507,41 +623,6 @@
                                 <h4>Workshop: Intro to React</h4>
                                 <p><i class="fas fa-clock"></i> 3:30 PM - 5:00 PM</p>
                                 <p><i class="fas fa-map-marker-alt"></i> Computer Lab</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dashboard-row single-col">
-                    <div class="dashboard-card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-clipboard-list"></i> Active Assignments</h3>
-                            <a href="#assignments" class="card-link" onclick="openTab('assignments')">View All</a>
-                        </div>
-                        <div class="card-content">
-                            <div class="assignment-item">
-                                <div class="assignment-status">
-                                    <span class="status-badge status-active">Active</span>
-                                </div>
-                                <div class="assignment-details">
-                                    <h4>Build a Personal Portfolio</h4>
-                                    <p>Create a responsive personal portfolio webpage showcasing your projects and skills.</p>
-                                    <div class="assignment-meta">
-                                        <span><i class="fas fa-calendar-alt"></i> Due: Apr 30, 2025</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="assignment-item">
-                                <div class="assignment-status">
-                                    <span class="status-badge status-active">Active</span>
-                                </div>
-                                <div class="assignment-details">
-                                    <h4>JavaScript Basics Quiz</h4>
-                                    <p>Complete the online quiz covering JavaScript fundamentals.</p>
-                                    <div class="assignment-meta">
-                                        <span><i class="fas fa-calendar-alt"></i> Due: May 5, 2025</span>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
