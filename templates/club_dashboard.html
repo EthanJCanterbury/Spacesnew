@@ -1,3 +1,186 @@
+
+<!-- Meeting Details Modal -->
+<div id="meetingDetailsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-calendar-day"></i> Meeting Details</h2>
+            <button class="close-btn" onclick="closeMeetingDetailsModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="meetingDetailsBody">
+            <!-- Meeting details will be filled dynamically -->
+        </div>
+        <div class="modal-actions">
+            <button class="btn-primary" onclick="editCurrentMeeting()">
+                <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="btn-danger" onclick="deleteCurrentMeeting()">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+            <button class="btn-secondary" onclick="closeMeetingDetailsModal()">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentMeetingId = null;
+    
+    function openMeetingDetailsModal(meeting) {
+        currentMeetingId = meeting.id;
+        
+        const meetingDetailsBody = document.getElementById('meetingDetailsBody');
+        meetingDetailsBody.innerHTML = `
+            <div class="meeting-detail-item">
+                <strong><i class="fas fa-heading"></i> Title:</strong>
+                <span>${meeting.title}</span>
+            </div>
+            <div class="meeting-detail-item">
+                <strong><i class="fas fa-calendar"></i> Date:</strong>
+                <span>${new Date(meeting.date).toLocaleDateString()}</span>
+            </div>
+            <div class="meeting-detail-item">
+                <strong><i class="fas fa-clock"></i> Time:</strong>
+                <span>${meeting.startTime} - ${meeting.endTime || 'TBD'}</span>
+            </div>
+            ${meeting.location ? `
+            <div class="meeting-detail-item">
+                <strong><i class="fas fa-map-marker-alt"></i> Location:</strong>
+                <span>${meeting.location}</span>
+            </div>` : ''}
+            ${meeting.description ? `
+            <div class="meeting-detail-item">
+                <strong><i class="fas fa-align-left"></i> Description:</strong>
+                <p>${meeting.description}</p>
+            </div>` : ''}
+        `;
+        
+        openModal('meetingDetailsModal');
+    }
+    
+    function closeMeetingDetailsModal() {
+        closeModal('meetingDetailsModal');
+        currentMeetingId = null;
+    }
+    
+    function editCurrentMeeting() {
+        if(currentMeetingId) {
+            // Implement edit functionality
+            closeMeetingDetailsModal();
+            openCreateMeetingModal(currentMeetingId);
+        }
+    }
+    
+    function deleteCurrentMeeting() {
+        if(currentMeetingId) {
+            if(confirm("Are you sure you want to delete this meeting?")) {
+                // Implement delete functionality
+                showToast('info', 'Deleting meeting...');
+                
+                // Simulated API call - replace with actual API call
+                setTimeout(() => {
+                    showToast('success', 'Meeting deleted successfully!');
+                    closeMeetingDetailsModal();
+                    // Refresh meetings list and calendar
+                }, 1000);
+            }
+        }
+    }
+    
+    // Function to open modals
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+    }
+    
+    // Function to close modals
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+    }
+</script>
+
+<style>
+    /* Calendar styles */
+    .calendar {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    
+    .calendar-header, .calendar-body {
+        width: 100%;
+    }
+    
+    .calendar-header div {
+        font-weight: 600;
+        text-align: center;
+        padding: 10px;
+        background: #f8f9fa;
+    }
+    
+    .calendar-day {
+        border: 1px solid #e9ecef;
+        vertical-align: top;
+        height: 90px;
+        padding: 5px;
+        position: relative;
+    }
+    
+    .day-number {
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+    
+    .calendar-event {
+        font-size: 11px !important;
+        padding: 2px 4px !important;
+        margin-top: 2px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+        background-color: rgba(236, 55, 80, 0.1) !important;
+        color: #ec3750 !important;
+        border-radius: 3px !important;
+    }
+    
+    .calendar-event:hover {
+        background-color: rgba(236, 55, 80, 0.2) !important;
+    }
+    
+    /* Meeting details modal styles */
+    .meeting-detail-item {
+        margin-bottom: 15px;
+    }
+    
+    .meeting-detail-item strong {
+        display: block;
+        margin-bottom: 5px;
+        color: #333;
+    }
+    
+    .meeting-detail-item i {
+        color: #ec3750;
+        width: 20px;
+        text-align: center;
+    }
+    
+    .meeting-detail-item p {
+        margin-top: 5px;
+        white-space: pre-line;
+    }
+</style>
+
 {% extends "base.html" %}
 
 {% block content %}
@@ -1318,7 +1501,17 @@
                                         event.style.cursor = 'pointer';
                                         
                                         event.addEventListener('click', () => {
-                                            alert(`${meeting.title}\nTime: ${meeting.start_time}${meeting.end_time ? ` - ${meeting.end_time}` : ''}\nLocation: ${meeting.location || 'Not specified'}`);
+                                            // Show meeting details in modal
+                                            const meetingDetails = {
+                                                id: meeting.id,
+                                                title: meeting.title,
+                                                date: new Date(meeting.meeting_date),
+                                                startTime: meeting.start_time,
+                                                endTime: meeting.end_time,
+                                                location: meeting.location,
+                                                description: meeting.description
+                                            };
+                                            openMeetingDetailsModal(meetingDetails);ime}${meeting.end_time ? ` - ${meeting.end_time}` : ''}\nLocation: ${meeting.location || 'Not specified'}`);
                                         });
                                         
                                         dayCells[i].appendChild(event);
@@ -4024,8 +4217,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 event.style.cursor = 'pointer';
                 
                 event.addEventListener('click', () => {
-                    // Logic to show meeting details
-                    alert('Weekly Meeting: 4:00 PM in Room 203');
+                    // Show meeting details in modal
+                    const meetingDetails = {
+                        id: 1, // This would come from your database
+                        title: 'Weekly Meeting',
+                        date: new Date(),
+                        startTime: '4:00 PM',
+                        endTime: '5:00 PM',
+                        location: 'Room 203',
+                        description: 'Regular weekly club meeting to discuss ongoing projects and activities.'
+                    };
+                    openMeetingDetailsModal(meetingDetails);
                 });
                 
                 cell.appendChild(event);
