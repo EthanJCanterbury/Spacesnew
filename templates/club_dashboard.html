@@ -389,22 +389,28 @@
         }
 
         .tab-pane {
-            display: none;
+            display: none !important; /* Force hidden by default */
             width: 100%;
             padding: 0.5rem;
             min-height: 300px; /* Ensure minimum height so it's visible */
             position: relative; /* Create a new stacking context */
             z-index: 1; /* Ensure it's above any potential overlapping elements */
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.2s ease;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            background-color: var(--bg); /* Match background color */
         }
 
         .tab-pane.active {
-            display: block !important; /* Use !important to override any other styles */
+            display: block !important; /* Force visible when active */
             visibility: visible !important;
             opacity: 1 !important;
-            z-index: 10; /* Higher than inactive tabs */
+            z-index: 100 !important; /* Much higher than inactive tabs */
+            position: relative !important; /* Ensure proper stacking context */
+        }
+        
+        /* Debug outline to see tab boundaries */
+        .tab-pane.active {
+            outline: 1px solid rgba(var(--primary-rgb), 0.1);
         }
         
         /* Make sure main content area is visible */
@@ -1880,8 +1886,21 @@
     <div id="toast-container"></div>
 
     <script>
-// Theme toggle functionality
+// Debug helper to check tab state
+    function debugTabStates() {
+        const allTabs = document.querySelectorAll('.tab-pane');
+        console.log('=== TAB STATE DEBUG ===');
+        allTabs.forEach(tab => {
+            console.log(`Tab ${tab.id}: active=${tab.classList.contains('active')}, display=${getComputedStyle(tab).display}, visibility=${getComputedStyle(tab).visibility}, opacity=${getComputedStyle(tab).opacity}`);
+        });
+        console.log('=======================');
+    }
+    
+    // Theme toggle functionality
 document.addEventListener('DOMContentLoaded', function() {
+    // Call debug helper on load
+    setTimeout(debugTabStates, 500);
+    
     // Initialize active tab on page load
     setTimeout(function() {
         // Get the hash from URL or default to dashboard
@@ -2000,13 +2019,15 @@ function openTab(tabName) {
         return;
     }
     
-    // Hide all tab panes first
+    // Force all tab panes to have defined display property first
     const tabPanes = document.querySelectorAll('.tab-pane');
     tabPanes.forEach(function(pane) {
+        // Clear any previous styles that might interfere
         pane.classList.remove('active');
         pane.style.display = 'none';
         pane.style.visibility = 'hidden';
         pane.style.opacity = '0';
+        pane.style.zIndex = '1';
     });
 
     // Deactivate all tab links
@@ -2015,12 +2036,18 @@ function openTab(tabName) {
         link.classList.remove('active');
     });
 
-    // Activate selected tab immediately with all necessary styles
+    // Explicitly force the selected tab to be visible with !important
     selectedTab.classList.add('active');
-    selectedTab.style.display = 'block';
-    selectedTab.style.visibility = 'visible';
-    selectedTab.style.opacity = '1';
-    selectedTab.style.zIndex = '10';
+    selectedTab.style.cssText = "display: block !important; visibility: visible !important; opacity: 1 !important; z-index: 10 !important;";
+    
+    // Double-check that the tab is truly visible
+    console.log('Tab display state after activation:', 
+        selectedTab.id,
+        'display:', selectedTab.style.display,
+        'visibility:', selectedTab.style.visibility,
+        'opacity:', selectedTab.style.opacity,
+        'classList:', selectedTab.classList.contains('active')
+    );
     
     // Activate the correct nav link
     const selectedLink = document.getElementById(tabName + '-tab');
@@ -2030,8 +2057,6 @@ function openTab(tabName) {
         // Special case for dashboard
         document.getElementById('dashboard-tab').classList.add('active');
     }
-
-    console.log('Tab activated:', tabName, 'Display:', selectedTab.style.display);
 
     // Load data for active tab with proper error handling
     try {
@@ -3464,35 +3489,53 @@ function filterProjects() {
 
 // Initialize dashboard as active tab by default
 document.addEventListener('DOMContentLoaded', function() {
-    // Make sure all tab panes are initially reset
+    console.log('DOM Content Loaded - initializing tabs');
+    
+    // First make sure all tabs are properly reset and have defined states
     document.querySelectorAll('.tab-pane').forEach(pane => {
-        pane.style.display = 'none';
-        pane.style.visibility = 'hidden';
-        pane.style.opacity = '0';
+        // Explicitly set display:none on all tabs
+        pane.style.cssText = "display: none; visibility: hidden; opacity: 0; z-index: 1;";
         pane.classList.remove('active');
     });
     
-    // Check if there's a specific tab to open from URL hash
+    // Determine which tab to show initially
     const hash = window.location.hash.substr(1);
     const targetTab = hash && document.getElementById(hash) ? hash : 'dashboard';
+    console.log('Initial tab will be:', targetTab);
     
-    // Pre-activate the tab before calling openTab for smoother rendering
+    // Get the tab element and force it to be visible
     const selectedTab = document.getElementById(targetTab);
     if (selectedTab) {
-        selectedTab.style.display = 'block';
-        selectedTab.style.visibility = 'visible';
-        selectedTab.style.opacity = '1';
+        // Force the tab to be visible with !important
         selectedTab.classList.add('active');
+        selectedTab.style.cssText = "display: block !important; visibility: visible !important; opacity: 1 !important; z-index: 10 !important;";
         
-        // Also activate the tab link
+        // Activate the corresponding navigation link
         const tabLink = document.getElementById(targetTab + '-tab');
         if (tabLink) tabLink.classList.add('active');
+        
+        console.log('Pre-initialized tab:', targetTab, 
+            'display:', selectedTab.style.display,
+            'visibility:', selectedTab.style.visibility,
+            'opacity:', selectedTab.style.opacity);
+    } else {
+        console.error('Target tab element not found:', targetTab);
     }
     
-    // Then call openTab to fully initialize the tab
+    // Additional step: force check all tabs to ensure they're in correct state
     setTimeout(() => {
-        openTab(targetTab);
-        console.log('Initial tab set:', targetTab);
+        const allTabs = document.querySelectorAll('.tab-pane');
+        const activeTab = document.querySelector('.tab-pane.active');
+        
+        console.log('Active tab check:', 
+            activeTab ? activeTab.id : 'none',
+            'visible tabs:', 
+            Array.from(allTabs).filter(t => t.style.display !== 'none').map(t => t.id).join(', '));
+            
+        // Call openTab to properly setup the tab and its data
+        setTimeout(() => {
+            openTab(targetTab);
+        }, 50);
     }, 100);
 });
     </script>
