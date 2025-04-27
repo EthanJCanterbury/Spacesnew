@@ -409,144 +409,624 @@
         <section id="dashboard" class="club-section active">
             <div class="section-header">
                 <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
-                <p>Overview of your club activities and statistics</p>
+                <p>Welcome to {% if club %}{{ club.name }}{% else %}your club{% endif %}</p>
+                <p class="club-subtitle">Manage your hack club and empower your members with coding skills</p>
             </div>
 
-            <div class="dashboard-stats">
-                <div class="stat-card">
-                    <div class="stat-icon user-icon">
+            <div class="club-info-bar">
+                <div class="club-code-box">
+                    <span class="club-code-label"><i class="fas fa-key"></i> Join Code:</span>
+                    <span class="club-code-value">{{ club.join_code }}</span>
+                    <button class="refresh-code-btn" onclick="generateJoinCode()" title="Refresh Join Code">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="dashboard-card-grid">
+                <!-- Club Members Card -->
+                <div class="dashboard-feature-card">
+                    <div class="card-icon member-icon">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="stat-info">
-                        <h3>{{ club.members|length }}</h3>
-                        <p>Club Members</p>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <h3>Club Members</h3>
+                            <span class="card-subtitle">Manage Members</span>
+                        </div>
+                        <div class="card-metric">
+                            <span class="metric-value">{{ club.members|length + 1 }}</span> total members
+                        </div>
+                        <p class="card-description">View and manage all your club members</p>
+                        <div class="card-action">
+                            <a href="#members" class="btn-action" onclick="openTab('members')">
+                                <i class="fas fa-plus"></i> Add & View Members
+                            </a>
+                        </div>
                     </div>
                 </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon site-icon">
-                        <i class="fas fa-code"></i>
+                <!-- Club Meetings Card -->
+                <div class="dashboard-feature-card">
+                    <div class="card-icon meeting-icon">
+                        <i class="fas fa-calendar-alt"></i>
                     </div>
-                    <div class="stat-info">
-                        <h3 id="projectCount">0</h3>
-                        <p>Total Projects</p>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <h3>Club Meetings</h3>
+                            <span class="card-subtitle">Schedule Meetings</span>
+                        </div>
+                        <p class="card-description">Planning your next club meeting</p>
+                        <div class="card-action">
+                            <a href="#schedule" class="btn-action" onclick="openTab('schedule')">
+                                <i class="fas fa-plus"></i> Schedule Meeting
+                            </a>
+                        </div>
                     </div>
                 </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon task-icon">
+                <!-- Club Budget Card -->
+                <div class="dashboard-feature-card">
+                    <div class="card-icon budget-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <h3>Club Budget</h3>
+                            <span class="card-subtitle">Manage Finances</span>
+                        </div>
+                        <p class="card-description">Track your club expenses and funding</p>
+                        <div class="card-action">
+                            <a href="#resources" class="btn-action" onclick="openTab('resources')">
+                                <i class="fas fa-eye"></i> View Resources
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Club Tasks Card -->
+                <div class="dashboard-feature-card">
+                    <div class="card-icon task-icon">
                         <i class="fas fa-tasks"></i>
                     </div>
-                    <div class="stat-info">
-                        <h3 id="assignmentCount">0</h3>
-                        <p>Active Assignments</p>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <h3>Club Tasks</h3>
+                            <span class="card-subtitle">Manage Tasks</span>
+                        </div>
+                        <p class="card-description">Assign coding challenges to members</p>
+                        <div class="card-action">
+                            <a href="#assignments" class="btn-action" onclick="openTab('assignments')">
+                                <i class="fas fa-plus"></i> Create Task
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Pathways Card -->
+                <div class="dashboard-feature-card">
+                    <div class="card-icon pathway-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <h3>Learning Pathways</h3>
+                            <span class="card-subtitle">Member Progress</span>
+                        </div>
+                        <p class="card-description">Track member coding project progress</p>
+                        <div class="card-action">
+                            <a href="#projects" class="btn-action" onclick="openTab('projects')">
+                                <i class="fas fa-eye"></i> View Pathways
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leader Resources Card -->
+                <div class="dashboard-feature-card">
+                    <div class="card-icon resources-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <h3>Leader Resources</h3>
+                            <span class="card-subtitle">Hack Club Resources</span>
+                        </div>
+                        <p class="card-description">Access Hack Club workshops and resources</p>
+                        <div class="card-action">
+                            <a href="#resources" class="btn-action" onclick="openTab('resources')">
+                                <i class="fas fa-link"></i> Access Resources
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="dashboard-row">
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-history"></i> Recent Activity</h3>
-                    </div>
-                    <div class="card-content">
-                        <ul class="activity-list">
-                            <li class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="fas fa-user-plus"></i>
-                                </div>
-                                <div class="activity-details">
-                                    <p>New member joined the club</p>
-                                    <span class="activity-time">Just now</span>
-                                </div>
-                            </li>
-                            <li class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="fas fa-tasks"></i>
-                                </div>
-                                <div class="activity-details">
-                                    <p>New assignment added: "Web Development Basics"</p>
-                                    <span class="activity-time">2 hours ago</span>
-                                </div>
-                            </li>
-                            <li class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="fas fa-comment"></i>
-                                </div>
-                                <div class="activity-details">
-                                    <p>New announcement posted in Stream</p>
-                                    <span class="activity-time">Yesterday</span>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="dashboard-card">
+            <div class="dashboard-secondary-row">
+                <div class="dashboard-card upcoming-meetings">
                     <div class="card-header">
                         <h3><i class="fas fa-calendar"></i> Upcoming Meetings</h3>
+                        <a href="#schedule" class="card-link" onclick="openTab('schedule')">Schedule</a>
                     </div>
-                    <div class="card-content">
-                        <div class="upcoming-meeting">
-                            <div class="meeting-date">
-                                <span class="date-num">24</span>
-                                <span class="date-month">Apr</span>
-                            </div>
-                            <div class="meeting-details">
-                                <h4>Weekly Club Meeting</h4>
-                                <p><i class="fas fa-clock"></i> 4:00 PM - 5:30 PM</p>
-                                <p><i class="fas fa-map-marker-alt"></i> Room 203</p>
-                            </div>
-                        </div>
-                        <div class="upcoming-meeting">
-                            <div class="meeting-date">
-                                <span class="date-num">28</span>
-                                <span class="date-month">Apr</span>
-                            </div>
-                            <div class="meeting-details">
-                                <h4>Workshop: Intro to React</h4>
-                                <p><i class="fas fa-clock"></i> 3:30 PM - 5:00 PM</p>
-                                <p><i class="fas fa-map-marker-alt"></i> Computer Lab</p>
-                            </div>
+                    <div class="card-content" id="upcoming-meetings-mini">
+                        <div class="loading-state">
+                            <div class="loading-spinner"></div>
+                            <p>Loading upcoming meetings...</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="dashboard-row single-col">
-                    <div class="dashboard-card">
-                        <div class="card-header">
-                            <h3><i class="fas fa-clipboard-list"></i> Active Assignments</h3>
-                            <a href="#assignments" class="card-link" onclick="openTab('assignments')">View All</a>
-                        </div>
-                        <div class="card-content">
-                            <div class="assignment-item">
-                                <div class="assignment-status">
-                                    <span class="status-badge status-active">Active</span>
-                                </div>
-                                <div class="assignment-details">
-                                    <h4>Build a Personal Portfolio</h4>
-                                    <p>Create a responsive personal portfolio webpage showcasing your projects and skills.</p>
-                                    <div class="assignment-meta">
-                                        <span><i class="fas fa-calendar-alt"></i> Due: Apr 30, 2025</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="assignment-item">
-                                <div class="assignment-status">
-                                    <span class="status-badge status-active">Active</span>
-                                </div>
-                                <div class="assignment-details">
-                                    <h4>JavaScript Basics Quiz</h4>
-                                    <p>Complete the online quiz covering JavaScript fundamentals.</p>
-                                    <div class="assignment-meta">
-                                        <span><i class="fas fa-calendar-alt"></i> Due: May 5, 2025</span>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="dashboard-card active-assignments">
+                    <div class="card-header">
+                        <h3><i class="fas fa-clipboard-list"></i> Active Assignments</h3>
+                        <a href="#assignments" class="card-link" onclick="openTab('assignments')">View All</a>
+                    </div>
+                    <div class="card-content" id="active-assignments-mini">
+                        <div class="loading-state">
+                            <div class="loading-spinner"></div>
+                            <p>Loading active assignments...</p>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Load mini dashboards when the dashboard is active
+                    loadMiniDashboards();
+                });
+
+                function loadMiniDashboards() {
+                    // Load upcoming meetings mini dashboard
+                    fetch(`/api/clubs/{{ club.id }}/meetings?limit=2&upcoming=true`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const container = document.getElementById('upcoming-meetings-mini');
+                        if (!container) return;
+                        
+                        container.innerHTML = '';
+                        
+                        if (data.meetings && data.meetings.length > 0) {
+                            data.meetings.forEach(meeting => {
+                                const meetingDate = new Date(meeting.meeting_date);
+                                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                                
+                                const meetingEl = document.createElement('div');
+                                meetingEl.className = 'upcoming-meeting';
+                                meetingEl.innerHTML = `
+                                    <div class="meeting-date">
+                                        <span class="date-num">${meetingDate.getDate()}</span>
+                                        <span class="date-month">${monthNames[meetingDate.getMonth()]}</span>
+                                    </div>
+                                    <div class="meeting-details">
+                                        <h4>${meeting.title}</h4>
+                                        <p><i class="fas fa-clock"></i> ${meeting.start_time}${meeting.end_time ? ` - ${meeting.end_time}` : ''}</p>
+                                        <p><i class="fas fa-map-marker-alt"></i> ${meeting.location || 'No location set'}</p>
+                                    </div>
+                                `;
+                                container.appendChild(meetingEl);
+                            });
+                        } else {
+                            container.innerHTML = '<div class="empty-state">No upcoming meetings. <a href="#schedule" onclick="openTab(\'schedule\')">Schedule one!</a></div>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading meetings:', error);
+                        const container = document.getElementById('upcoming-meetings-mini');
+                        if (container) {
+                            container.innerHTML = '<div class="error-state">Failed to load meetings.</div>';
+                        }
+                    });
+                    
+                    // Load active assignments mini dashboard
+                    fetch(`/api/clubs/{{ club.id }}/assignments?limit=2&active=true`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const container = document.getElementById('active-assignments-mini');
+                        if (!container) return;
+                        
+                        container.innerHTML = '';
+                        
+                        if (data.assignments && data.assignments.length > 0) {
+                            data.assignments.forEach(assignment => {
+                                const assignmentEl = document.createElement('div');
+                                assignmentEl.className = 'assignment-item';
+                                assignmentEl.innerHTML = `
+                                    <div class="assignment-status">
+                                        <span class="status-badge status-active">Active</span>
+                                    </div>
+                                    <div class="assignment-details">
+                                        <h4>${assignment.title}</h4>
+                                        <p>${assignment.description.length > 80 ? assignment.description.substring(0, 80) + '...' : assignment.description}</p>
+                                        <div class="assignment-meta">
+                                            ${assignment.due_date ? 
+                                            `<span><i class="fas fa-calendar-alt"></i> Due: ${new Date(assignment.due_date).toLocaleDateString()}</span>` : 
+                                            '<span><i class="fas fa-infinity"></i> No due date</span>'}
+                                        </div>
+                                    </div>
+                                `;
+                                container.appendChild(assignmentEl);
+                            });
+                        } else {
+                            container.innerHTML = '<div class="empty-state">No active assignments. <a href="#assignments" onclick="openTab(\'assignments\')">Create one!</a></div>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading assignments:', error);
+                        const container = document.getElementById('active-assignments-mini');
+                        if (container) {
+                            container.innerHTML = '<div class="error-state">Failed to load assignments.</div>';
+                        }
+                    });
+                }
+            </script>
+
+            <style>
+                .club-subtitle {
+                    color: #666;
+                    margin-top: 0;
+                    font-size: 0.9rem;
+                }
+                
+                .club-info-bar {
+                    display: flex;
+                    background-color: #f8f9fa;
+                    padding: 15px;
+                    border-radius: 8px;
+                    margin-bottom: 24px;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                }
+                
+                .club-code-box {
+                    display: flex;
+                    align-items: center;
+                }
+                
+                .club-code-label {
+                    font-weight: 500;
+                    margin-right: 10px;
+                    color: #555;
+                }
+                
+                .club-code-value {
+                    background-color: #ec3750;
+                    color: white;
+                    padding: 3px 10px;
+                    border-radius: 4px;
+                    font-family: monospace;
+                    font-weight: bold;
+                    letter-spacing: 1px;
+                }
+                
+                .refresh-code-btn {
+                    background: none;
+                    border: none;
+                    color: #666;
+                    cursor: pointer;
+                    padding: 5px;
+                    margin-left: 10px;
+                    border-radius: 50%;
+                    transition: all 0.2s;
+                }
+                
+                .refresh-code-btn:hover {
+                    background-color: #eee;
+                    color: #ec3750;
+                }
+                
+                .dashboard-card-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                    gap: 20px;
+                    margin-bottom: 24px;
+                }
+                
+                .dashboard-feature-card {
+                    display: flex;
+                    background-color: white;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+                    overflow: hidden;
+                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                    height: 100%;
+                }
+                
+                .dashboard-feature-card:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+                }
+                
+                .dashboard-feature-card .card-icon {
+                    flex: 0 0 80px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-size: 24px;
+                }
+                
+                .dashboard-feature-card .member-icon {
+                    background-color: #4285f4;
+                }
+                
+                .dashboard-feature-card .meeting-icon {
+                    background-color: #4285f4;
+                }
+                
+                .dashboard-feature-card .budget-icon {
+                    background-color: #34a853;
+                }
+                
+                .dashboard-feature-card .task-icon {
+                    background-color: #fbbc04;
+                }
+                
+                .dashboard-feature-card .pathway-icon {
+                    background-color: #9c27b0;
+                }
+                
+                .dashboard-feature-card .resources-icon {
+                    background-color: #ea4335;
+                }
+                
+                .dashboard-feature-card .card-content {
+                    padding: 16px;
+                    flex: 1;
+                }
+                
+                .dashboard-feature-card .card-header {
+                    margin-bottom: 10px;
+                }
+                
+                .dashboard-feature-card .card-header h3 {
+                    margin: 0;
+                    font-size: 18px;
+                    color: #333;
+                }
+                
+                .dashboard-feature-card .card-subtitle {
+                    font-size: 12px;
+                    color: #666;
+                    display: block;
+                }
+                
+                .dashboard-feature-card .card-metric {
+                    margin-bottom: 10px;
+                    font-size: 14px;
+                    color: #555;
+                }
+                
+                .dashboard-feature-card .metric-value {
+                    font-weight: bold;
+                    font-size: 20px;
+                    color: #333;
+                }
+                
+                .dashboard-feature-card .card-description {
+                    font-size: 14px;
+                    color: #666;
+                    margin-bottom: 16px;
+                }
+                
+                .dashboard-feature-card .card-action {
+                    margin-top: auto;
+                }
+                
+                .dashboard-feature-card .btn-action {
+                    display: inline-flex;
+                    align-items: center;
+                    padding: 8px 16px;
+                    background-color: #f5f5f5;
+                    color: #333;
+                    border-radius: 4px;
+                    text-decoration: none;
+                    font-size: 14px;
+                    transition: background-color 0.2s;
+                }
+                
+                .dashboard-feature-card .btn-action:hover {
+                    background-color: #e0e0e0;
+                }
+                
+                .dashboard-feature-card .btn-action i {
+                    margin-right: 6px;
+                }
+                
+                .dashboard-secondary-row {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 20px;
+                }
+                
+                .dashboard-card {
+                    background-color: white;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+                    overflow: hidden;
+                }
+                
+                .dashboard-card .card-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 16px;
+                    border-bottom: 1px solid #eee;
+                }
+                
+                .dashboard-card .card-header h3 {
+                    margin: 0;
+                    font-size: 16px;
+                    display: flex;
+                    align-items: center;
+                }
+                
+                .dashboard-card .card-header h3 i {
+                    margin-right: 8px;
+                    color: #ec3750;
+                }
+                
+                .dashboard-card .card-link {
+                    font-size: 14px;
+                    color: #ec3750;
+                    text-decoration: none;
+                }
+                
+                .dashboard-card .card-link:hover {
+                    text-decoration: underline;
+                }
+                
+                .dashboard-card .card-content {
+                    padding: 16px;
+                }
+                
+                .empty-state {
+                    text-align: center;
+                    padding: 20px;
+                    color: #666;
+                    font-size: 14px;
+                }
+                
+                .error-state {
+                    text-align: center;
+                    padding: 20px;
+                    color: #d32f2f;
+                    font-size: 14px;
+                }
+                
+                .upcoming-meeting {
+                    display: flex;
+                    margin-bottom: 12px;
+                    padding-bottom: 12px;
+                    border-bottom: 1px solid #eee;
+                }
+                
+                .upcoming-meeting:last-child {
+                    margin-bottom: 0;
+                    padding-bottom: 0;
+                    border-bottom: none;
+                }
+                
+                .meeting-date {
+                    flex: 0 0 50px;
+                    background-color: #ec3750;
+                    color: white;
+                    border-radius: 6px;
+                    text-align: center;
+                    margin-right: 12px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    padding: 8px 0;
+                }
+                
+                .date-num {
+                    font-size: 18px;
+                    font-weight: bold;
+                }
+                
+                .date-month {
+                    font-size: 12px;
+                    text-transform: uppercase;
+                }
+                
+                .meeting-details {
+                    flex: 1;
+                }
+                
+                .meeting-details h4 {
+                    margin: 0 0 5px 0;
+                    font-size: 16px;
+                }
+                
+                .meeting-details p {
+                    margin: 0 0 3px 0;
+                    font-size: 12px;
+                    color: #666;
+                }
+                
+                .assignment-item {
+                    display: flex;
+                    margin-bottom: 12px;
+                    padding-bottom: 12px;
+                    border-bottom: 1px solid #eee;
+                }
+                
+                .assignment-item:last-child {
+                    margin-bottom: 0;
+                    padding-bottom: 0;
+                    border-bottom: none;
+                }
+                
+                .assignment-status {
+                    flex: 0 0 auto;
+                    margin-right: 12px;
+                }
+                
+                .status-badge {
+                    display: inline-block;
+                    padding: 3px 8px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    font-weight: 500;
+                }
+                
+                .status-active {
+                    background-color: #e8f5e9;
+                    color: #2e7d32;
+                }
+                
+                .assignment-details {
+                    flex: 1;
+                }
+                
+                .assignment-details h4 {
+                    margin: 0 0 5px 0;
+                    font-size: 16px;
+                }
+                
+                .assignment-details p {
+                    margin: 0 0 8px 0;
+                    font-size: 13px;
+                    color: #666;
+                }
+                
+                .assignment-meta {
+                    font-size: 12px;
+                    color: #888;
+                }
+                
+                .assignment-meta span {
+                    display: inline-flex;
+                    align-items: center;
+                }
+                
+                .assignment-meta i {
+                    margin-right: 4px;
+                }
+                
+                .loading-state {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 20px;
+                }
+                
+                .loading-spinner {
+                    width: 24px;
+                    height: 24px;
+                    border: 3px solid rgba(236, 55, 80, 0.2);
+                    border-radius: 50%;
+                    border-top-color: #ec3750;
+                    animation: spin 1s ease-in-out infinite;
+                    margin-bottom: 10px;
+                }
+                
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+            </style>
         </section>
 
         <!-- Stream Tab Content -->
