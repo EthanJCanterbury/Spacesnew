@@ -24,45 +24,108 @@
                 </li>
 
 <style>
-    /* Calendar event styling */
-    .calendar-event {
-        margin: 2px 0;
-        padding: 2px 4px;
-        border-radius: 3px;
-        font-size: 11px;
-        background-color: rgba(236, 55, 80, 0.1);
-        color: #ec3750;
-        cursor: pointer;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        border-left: 3px solid #ec3750;
-        transition: all 0.2s ease;
+    /* Button styles for modals */
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        padding: 15px;
     }
     
-    .calendar-event:hover {
-        background-color: rgba(236, 55, 80, 0.2);
-        transform: translateY(-1px);
-    }
-    
-    .calendar-day {
-        min-height: 60px;
-        max-height: 100px;
-        overflow-y: auto;
-    }
-    
-    .calendar-day::-webkit-scrollbar {
-        width: 4px;
-    }
-    
-    .calendar-day::-webkit-scrollbar-thumb {
-        background: rgba(0, 0, 0, 0.1);
+    .btn-primary {
+        background-color: #ec3750;
+        color: white;
+        border: none;
         border-radius: 4px;
+        padding: 10px 20px;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-block;
+        font-size: 14px;
+        text-align: center;
+        min-width: 120px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .btn-secondary {
+        background-color: transparent;
+        color: #333;
+        border: none;
+        padding: 10px 20px;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-block;
+        font-size: 14px;
+        text-align: center;
+    }
+    
+    /* Font replacements for Google Fonts (to avoid CSP issues) */
+    :root {
+        --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        --font-mono: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    }
+    
+    body, button, input, select, textarea {
+        font-family: var(--font-sans);
+    }
+    
+    code, pre {
+        font-family: var(--font-mono);
+    }
+    
+    /* Meeting styles */
+    .meeting-item {
+        background-color: #fff;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        border: 1px solid var(--border-color);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .meeting-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .meeting-item h3 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        color: var(--primary);
+        font-size: 1.1rem;
+    }
+    
+    .meeting-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 8px;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    
+    .meeting-meta span {
+        display: flex;
+        align-items: center;
+    }
+    
+    .meeting-meta i {
+        margin-right: 5px;
+        width: 16px;
+        color: var(--primary);
+    }
+    
+    .meeting-actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
     }
     
     /* Event modal styling */
     .event-detail-row {
-        margin-bottom: 12px;
+        margin-bottom: 16px;
     }
     
     .event-detail-label {
@@ -70,11 +133,19 @@
         margin-right: 8px;
         display: inline-block;
         width: 100px;
+        color: #555;
     }
     
     .event-detail-label i {
         width: 16px;
-        margin-right: 4px;
+        margin-right: 6px;
+        color: #ec3750;
+    }
+    
+    #eventModalDescription {
+        margin-top: 8px;
+        line-height: 1.5;
+        color: #333;
     }
 </style>
 
@@ -108,36 +179,31 @@
     let currentEventId = null;
     
     function openEventModal(eventData) {
-        currentEventId = eventData.eventId;
-        
-        // Populate modal with event data
-        document.getElementById('eventModalTitle').textContent = eventData.eventTitle;
-        document.getElementById('eventModalDate').textContent = formatDate(eventData.eventDate);
-        document.getElementById('eventModalTime').textContent = eventData.eventTime;
-        document.getElementById('eventModalLocation').textContent = eventData.eventLocation || 'Not specified';
-        document.getElementById('eventModalDescription').textContent = eventData.eventDescription || 'No description provided';
-        
-        // Show edit button only if user has permission (can be enhanced later)
-        const editBtn = document.getElementById('eventModalEditBtn');
-        editBtn.style.display = 'inline-block';
-        
-        // Open modal
-        const modal = document.getElementById('eventDetailsModal');
-        modal.style.display = 'block';
-        setTimeout(() => {
-            modal.classList.add('show');
-        }, 10);
+        try {
+            currentEventId = eventData.eventId;
+            const titleEl = document.getElementById('eventModalTitle');
+            const dateEl = document.getElementById('eventDate');
+            const timeEl = document.getElementById('eventTime');
+            const locationEl = document.getElementById('eventLocation');
+            const descriptionEl = document.getElementById('eventDescription');
+            
+            if (titleEl) titleEl.textContent = eventData.eventTitle;
+            if (dateEl) dateEl.textContent = new Date(eventData.eventDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            if (timeEl) timeEl.textContent = eventData.eventTime;
+            if (locationEl) locationEl.textContent = eventData.eventLocation;
+            if (descriptionEl) descriptionEl.textContent = eventData.eventDescription;
+            
+            openModal('eventDetailsModal');
+        } catch (error) {
+            console.error('Error in openEventModal:', error);
+            showToast('error', 'Failed to open event details');
+        }
     }
     
     function closeEventModal() {
-        const modal = document.getElementById('eventDetailsModal');
-        modal.classList.remove('show');
-        setTimeout(() => {
-            modal.style.display = 'none';
-        }, 300);
+        closeModal('eventDetailsModal');
         currentEventId = null;
     }
-    
     function formatDate(dateStr) {
         try {
             const date = new Date(dateStr);
@@ -240,39 +306,7 @@
                     
                     if (!clubName) {
 
-<!-- Event Details Modal -->
-<div id="eventDetailsModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="eventModalTitle">Event Details</h3>
-            <button class="close-btn" onclick="closeEventModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="event-details">
-                <div class="event-detail-row">
-                    <span class="event-detail-label"><i class="fas fa-calendar"></i> Date:</span>
-                    <span id="eventModalDate"></span>
-                </div>
-                <div class="event-detail-row">
-                    <span class="event-detail-label"><i class="fas fa-clock"></i> Time:</span>
-                    <span id="eventModalTime"></span>
-                </div>
-                <div class="event-detail-row">
-                    <span class="event-detail-label"><i class="fas fa-map-marker-alt"></i> Location:</span>
-                    <span id="eventModalLocation"></span>
-                </div>
-                <div class="event-detail-row">
-                    <span class="event-detail-label"><i class="fas fa-info-circle"></i> Description:</span>
-                    <p id="eventModalDescription"></p>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn secondary" onclick="closeEventModal()">Close</button>
-            <button id="eventModalEditBtn" class="btn primary" onclick="editMeeting(currentEventId)">Edit</button>
-        </div>
-    </div>
-</div>
+
 
                         showToast('error', 'Please enter a club name');
                         return;
@@ -477,36 +511,36 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="dashboard-row single-col">
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-clipboard-list"></i> Active Assignments</h3>
-                        <a href="#assignments" class="card-link" onclick="openTab('assignments')">View All</a>
-                    </div>
-                    <div class="card-content">
-                        <div class="assignment-item">
-                            <div class="assignment-status">
-                                <span class="status-badge status-active">Active</span>
-                            </div>
-                            <div class="assignment-details">
-                                <h4>Build a Personal Portfolio</h4>
-                                <p>Create a responsive personal portfolio webpage showcasing your projects and skills.</p>
-                                <div class="assignment-meta">
-                                    <span><i class="fas fa-calendar-alt"></i> Due: Apr 30, 2025</span>
+                <div class="dashboard-row single-col">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-clipboard-list"></i> Active Assignments</h3>
+                            <a href="#assignments" class="card-link" onclick="openTab('assignments')">View All</a>
+                        </div>
+                        <div class="card-content">
+                            <div class="assignment-item">
+                                <div class="assignment-status">
+                                    <span class="status-badge status-active">Active</span>
+                                </div>
+                                <div class="assignment-details">
+                                    <h4>Build a Personal Portfolio</h4>
+                                    <p>Create a responsive personal portfolio webpage showcasing your projects and skills.</p>
+                                    <div class="assignment-meta">
+                                        <span><i class="fas fa-calendar-alt"></i> Due: Apr 30, 2025</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="assignment-item">
-                            <div class="assignment-status">
-                                <span class="status-badge status-active">Active</span>
-                            </div>
-                            <div class="assignment-details">
-                                <h4>JavaScript Basics Quiz</h4>
-                                <p>Complete the online quiz covering JavaScript fundamentals.</p>
-                                <div class="assignment-meta">
-                                    <span><i class="fas fa-calendar-alt"></i> Due: May 5, 2025</span>
+                            <div class="assignment-item">
+                                <div class="assignment-status">
+                                    <span class="status-badge status-active">Active</span>
+                                </div>
+                                <div class="assignment-details">
+                                    <h4>JavaScript Basics Quiz</h4>
+                                    <p>Complete the online quiz covering JavaScript fundamentals.</p>
+                                    <div class="assignment-meta">
+                                        <span><i class="fas fa-calendar-alt"></i> Due: May 5, 2025</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -530,7 +564,9 @@
                     <div class="composer-body">
                         <textarea id="post-content" placeholder="Share an announcement with your club..."></textarea>
                         <div class="composer-actions">
-                            <button onclick="createPost()" class="btn-primary"><i class="fas fa-paper-plane"></i> Post</button>
+                            <button class="btn-primary" onclick="createPost()">
+                                <i class="fas fa-paper-plane"></i> Post
+                            </button>
                     <script>
                         function createPost() {
                             const content = document.getElementById('post-content').value;
@@ -1327,29 +1363,22 @@
                     </button>
                 </div>
 
-                <div class="calendar-view">
-                    <div class="calendar-nav">
-                        <button class="btn-icon" id="prevMonth">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <h3 id="currentMonth">April 2025</h3>
-                        <button class="btn-icon" id="nextMonth">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-
-                    <div class="calendar">
-                        <div class="calendar-header">
-                            <div>Sun</div>
-                            <div>Mon</div>
-                            <div>Tue</div>
-                            <div>Wed</div>
-                            <div>Thu</div>
-                            <div>Fri</div>
-                            <div>Sat</div>
+                <div class="meetings-container">
+                    <div class="meetings-header">
+                        <h3>All Scheduled Meetings</h3>
+                        <div class="filter-controls">
+                            <select id="meetingFilter" class="form-select">
+                                <option value="all">All Meetings</option>
+                                <option value="upcoming">Upcoming</option>
+                                <option value="past">Past</option>
+                            </select>
                         </div>
-                        <div class="calendar-body" id="calendar-body">
-                            <!-- Calendar will be filled dynamically with JS -->
+                    </div>
+                    <div id="meetings-list" class="meetings-list-container">
+                        <!-- Meetings will be loaded dynamically -->
+                        <div class="loading-state">
+                            <div class="loading-spinner"></div>
+                            <p>Loading meetings...</p>
                         </div>
                     </div>
                 </div>
@@ -1365,28 +1394,65 @@
                     
                     <script>
                         function loadMeetings() {
-                            const container = document.getElementById('upcoming-meetings');
-                            container.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading meetings...</p></div>';
+                            const upcomingContainer = document.getElementById('upcoming-meetings');
+                            const allMeetingsContainer = document.getElementById('meetings-list');
+                            
+                            if (upcomingContainer) {
+                                upcomingContainer.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading meetings...</p></div>';
+                            }
+                            
+                            if (allMeetingsContainer) {
+                                allMeetingsContainer.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading meetings...</p></div>';
+                            }
                             
                             fetch(`/api/clubs/{{ club.id }}/meetings`)
-                            .then(response => response.json())
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! Status: ${response.status}`);
+                                }
+                                return response.json();
+                            })
                             .then(data => {
-                                container.innerHTML = '';
-                                
-                                if (data.meetings && data.meetings.length > 0) {
-                                    data.meetings.forEach(meeting => {
-                                        const meetingElement = createMeetingElement(meeting);
-                                        container.appendChild(meetingElement);
-                                    });
-                                } else {
-                                    container.innerHTML = '<div class="empty-state">No upcoming meetings. Schedule your first meeting!</div>';
+                                if (upcomingContainer) {
+                                    upcomingContainer.innerHTML = '';
+                                    
+                                    // Filter for upcoming meetings
+                                    const today = new Date();
+                                    today.setHours(0, 0, 0, 0);
+                                    
+                                    const upcomingMeetings = data.meetings ? data.meetings.filter(meeting => {
+                                        const meetingDate = new Date(meeting.meeting_date);
+                                        return meetingDate >= today;
+                                    }) : [];
+                                    
+                                    if (upcomingMeetings.length > 0) {
+                                        // Sort by date (closest first)
+                                        upcomingMeetings.sort((a, b) => new Date(a.meeting_date) - new Date(b.meeting_date));
+                                        
+                                        // Show only the next 3 meetings
+                                        upcomingMeetings.slice(0, 3).forEach(meeting => {
+                                            const meetingElement = createMeetingElement(meeting);
+                                            upcomingContainer.appendChild(meetingElement);
+                                        });
+                                    } else {
+                                        upcomingContainer.innerHTML = '<div class="empty-state">No upcoming meetings. Schedule your first meeting!</div>';
+                                    }
                                 }
                                 
-                                // Also update the calendar view
-                                updateCalendarWithMeetings(data.meetings);
+                                // Update the main meetings list
+                                if (allMeetingsContainer) {
+                                    displayMeetings(data.meetings);
+                                }
                             })
                             .catch(error => {
-                                container.innerHTML = '<div class="error-state">Error loading meetings. Please try again.</div>';
+                                if (upcomingContainer) {
+                                    upcomingContainer.innerHTML = '<div class="error-state">Error loading meetings. Please try again.</div>';
+                                }
+                                
+                                if (allMeetingsContainer) {
+                                    allMeetingsContainer.innerHTML = '<div class="error-state">Error loading meetings. Please try again.</div>';
+                                }
+                                
                                 console.error('Error loading meetings:', error);
                             });
                         }
@@ -1415,6 +1481,7 @@
                                     ${meeting.meeting_link ? `<p><i class="fas fa-link"></i> <a href="${meeting.meeting_link}" target="_blank">Meeting Link</a></p>` : ''}
                                 </div>
                                 <div class="meeting-actions">
+                                    <button class="btn-icon" onclick="viewMeeting(${meeting.id})"><i class="fas fa-eye"></i></button>
                                     <button class="btn-icon" onclick="editMeeting(${meeting.id})"><i class="fas fa-edit"></i></button>
                                     <button class="btn-icon" onclick="deleteMeeting(${meeting.id})"><i class="fas fa-trash"></i></button>
                                 </div>
@@ -1423,49 +1490,53 @@
                             return element;
                         }
                         
-                        function updateCalendarWithMeetings(meetings) {
-                            // This function will update the calendar with meeting events
-                            const calendarBody = document.getElementById('calendar-body');
-                            if (!calendarBody) return;
+                        function displayMeetings(meetings) {
+                            const meetingsContainer = document.getElementById('meetings-list');
+                            if (!meetingsContainer) return;
                             
-                            // Get all day cells in the calendar
-                            const dayCells = calendarBody.querySelectorAll('.calendar-day');
+                            // Clear existing meetings
+                            meetingsContainer.innerHTML = '';
                             
-                            // Clear existing events
-                            dayCells.forEach(cell => {
-                                const events = cell.querySelectorAll('.calendar-event');
-                                events.forEach(event => event.remove());
-                            });
+                            if (!meetings || meetings.length === 0) {
+                                meetingsContainer.innerHTML = `
+                                    <div class="meetings-list-empty">
+                                        <i class="fas fa-calendar-times"></i>
+                                        <p>No meetings scheduled. Create your first meeting!</p>
+                                    </div>
+                                `;
+                                return;
+                            }
                             
-                            // Add meeting events to the appropriate days
+                            // Sort meetings by date (newest first)
+                            meetings.sort((a, b) => new Date(b.meeting_date) - new Date(a.meeting_date));
+                            
+                            // Create meeting items
                             meetings.forEach(meeting => {
                                 const meetingDate = new Date(meeting.meeting_date);
-                                const dayNumber = meetingDate.getDate();
+                                const formattedDate = meetingDate.toLocaleDateString('en-US', { 
+                                    weekday: 'short', 
+                                    month: 'short', 
+                                    day: 'numeric', 
+                                    year: 'numeric' 
+                                });
                                 
-                                // Find the cell for this day
-                                for (let i = 0; i < dayCells.length; i++) {
-                                    const dayNumberElement = dayCells[i].querySelector('.day-number');
-                                    if (dayNumberElement && parseInt(dayNumberElement.textContent) === dayNumber) {
-                                        // Create event element
-                                        const event = document.createElement('div');
-                                        event.className = 'calendar-event';
-                                        event.textContent = meeting.title;
-                                        event.style.backgroundColor = 'rgba(236, 55, 80, 0.1)';
-                                        event.style.color = '#ec3750';
-                                        event.style.padding = '3px 6px';
-                                        event.style.borderRadius = '4px';
-                                        event.style.fontSize = '12px';
-                                        event.style.marginTop = '3px';
-                                        event.style.cursor = 'pointer';
-                                        
-                                        event.addEventListener('click', () => {
-                                            alert(`${meeting.title}\nTime: ${meeting.start_time}${meeting.end_time ? ` - ${meeting.end_time}` : ''}\nLocation: ${meeting.location || 'Not specified'}`);
-                                        });
-                                        
-                                        dayCells[i].appendChild(event);
-                                        break;
-                                    }
-                                }
+                                const meetingItem = document.createElement('div');
+                                meetingItem.className = 'meeting-item';
+                                meetingItem.innerHTML = `
+                                    <h3>${meeting.title}</h3>
+                                    <div class="meeting-meta">
+                                        <span><i class="fas fa-calendar"></i> ${formattedDate}</span>
+                                        <span><i class="fas fa-clock"></i> ${meeting.start_time}${meeting.end_time ? ` - ${meeting.end_time}` : ''}</span>
+                                        <span><i class="fas fa-map-marker-alt"></i> ${meeting.location || 'No location set'}</span>
+                                    </div>
+                                    <div class="meeting-actions">
+                                        <button class="btn-icon" onclick="viewMeeting(${meeting.id})"><i class="fas fa-eye"></i></button>
+                                        <button class="btn-icon" onclick="editMeeting(${meeting.id})"><i class="fas fa-edit"></i></button>
+                                        <button class="btn-icon" onclick="deleteMeeting(${meeting.id})"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                `;
+                                
+                                meetingsContainer.appendChild(meetingItem);
                             });
                         }
                         
@@ -1516,10 +1587,140 @@
                             });
                         }
                         
-                        function editMeeting(meetingId) {
-                            // Implementation can be added later
-                            showToast('info', 'Edit meeting functionality coming soon');
-                        }
+                        window.editMeeting = function(meetingId) {
+                            try {
+                                // Fetch the meeting details first
+                                fetch(`/api/clubs/{{ club.id }}/meetings/${meetingId}`)
+                                .then(response => {
+                                    if (!response.ok) {
+                                        if (response.status === 404) {
+                                            throw new Error('Meeting not found');
+                                        } else {
+                                            throw new Error(`Server error: ${response.status}`);
+                                        }
+                                    }
+                                    
+                                    // Check if response is JSON
+                                    const contentType = response.headers.get('content-type');
+                                    if (!contentType || !contentType.includes('application/json')) {
+                                        throw new Error('Invalid response format');
+                                    }
+                                    
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    if (data.meeting) {
+                                        const meeting = data.meeting;
+                                        
+                                        // Populate the edit meeting form with null checks
+                                        const idEl = document.getElementById('editMeetingId');
+                                        const titleEl = document.getElementById('editMeetingTitle');
+                                        const descEl = document.getElementById('editMeetingDescription');
+                                        const dateEl = document.getElementById('editMeetingDate');
+                                        const startTimeEl = document.getElementById('editStartTime');
+                                        const endTimeEl = document.getElementById('editEndTime');
+                                        const locationEl = document.getElementById('editMeetingLocation');
+                                        const linkEl = document.getElementById('editMeetingLink');
+                                        
+                                        if (idEl) idEl.value = meeting.id;
+                                        if (titleEl) titleEl.value = meeting.title;
+                                        if (descEl) descEl.value = meeting.description || '';
+                                        if (dateEl) dateEl.value = meeting.meeting_date;
+                                        if (startTimeEl) startTimeEl.value = meeting.start_time;
+                                        if (endTimeEl) endTimeEl.value = meeting.end_time || '';
+                                        if (locationEl) locationEl.value = meeting.location || '';
+                                        if (linkEl) linkEl.value = meeting.meeting_link || '';
+                                        
+                                        // Open the edit meeting modal
+                                        openModal('editMeetingModal');
+                                    } else {
+                                        showToast('error', 'Meeting not found');
+                                    }
+                                })
+                                .catch(error => {
+                                    showToast('error', 'Error loading meeting details');
+                                    console.error('Error:', error);
+                                });
+                            } catch (error) {
+                                console.error('Error in editMeeting:', error);
+                                showToast('error', 'Failed to edit meeting');
+                            }
+                        };
+                        
+                        window.updateMeeting = function() {
+                            try {
+                                // Get form elements with null checks
+                                const idEl = document.getElementById('editMeetingId');
+                                const titleEl = document.getElementById('editMeetingTitle');
+                                const descEl = document.getElementById('editMeetingDescription');
+                                const dateEl = document.getElementById('editMeetingDate');
+                                const startTimeEl = document.getElementById('editStartTime');
+                                const endTimeEl = document.getElementById('editEndTime');
+                                const locationEl = document.getElementById('editMeetingLocation');
+                                const linkEl = document.getElementById('editMeetingLink');
+                                
+                                // Check if elements exist
+                                if (!idEl || !titleEl || !dateEl || !startTimeEl) {
+                                    showToast('error', 'Form elements not found. Please try again later.');
+                                    return;
+                                }
+                                
+                                const meetingId = idEl.value;
+                                const title = titleEl.value;
+                                const description = descEl ? descEl.value : '';
+                                const date = dateEl.value;
+                                const startTime = startTimeEl.value;
+                                const endTime = endTimeEl ? endTimeEl.value : '';
+                                const location = locationEl ? locationEl.value : '';
+                                const meetingLink = linkEl ? linkEl.value : '';
+                                
+                                if (!title || !date || !startTime) {
+                                    showToast('error', 'Please fill out all required fields');
+                                    return;
+                                }
+                            } catch (error) {
+                                console.error('Error in updateMeeting:', error);
+                                showToast('error', 'An error occurred while updating the meeting');
+                                return;
+                            }
+                            
+                            const meetingData = {
+                                title: title,
+                                description: description,
+                                meeting_date: date,
+                                start_time: startTime,
+                                end_time: endTime,
+                                location: location,
+                                meeting_link: meetingLink
+                            };
+                            
+                            fetch(`/api/clubs/{{ club.id }}/meetings/${meetingId}`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(meetingData)
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! Status: ${response.status}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.error) {
+                                    showToast('error', data.error);
+                                } else {
+                                    showToast('success', 'Meeting updated successfully');
+                                    closeModal('editMeetingModal');
+                                    loadMeetings(); // Reload meetings to show the updated data
+                                }
+                            })
+                            .catch(error => {
+                                showToast('error', 'Failed to update meeting');
+                                console.error('Error:', error);
+                            });
+                        };
                         
                         function deleteMeeting(meetingId) {
                             if (confirm('Are you sure you want to delete this meeting?')) {
@@ -1651,7 +1852,7 @@
                         <h4>General Information</h4>
                         <form id="editClubForm">
                             <div class="form-group">
-                                <label for="editClubName">Club Name</label>
+                                <label for="editClubName">Club Name <span class="required">*</span></label>
                                 <input type="text" id="editClubName" name="editClubName" value="{{ club.name }}" class="form-input">
                             </div>
                             <div class="form-group">
@@ -1787,7 +1988,41 @@
 </div>
 
 <script>
-    // Initialize dashboard data when page loads
+    // Global error handler
+    window.addEventListener('error', function(event) {
+        console.error('Caught global error:', event.error);
+        // Prevent the error from showing in console
+        event.preventDefault();
+        
+        // You can add custom error handling here if needed
+        // For example, showing a toast message for critical errors
+        if (event.error && event.error.message && 
+            (event.error.message.includes('null') || 
+             event.error.message.includes('undefined'))) {
+            // This is likely a DOM element not found error
+            // We can safely ignore these in most cases
+        }
+    });
+    
+    // Test function to check if modals are working
+    window.testModal = function(modalId) {
+        console.log('Testing modal:', modalId);
+        openModal(modalId);
+        
+        // Log modal state
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            console.log('Modal element found:', modal);
+            console.log('Modal display:', modal.style.display);
+            console.log('Modal opacity:', modal.style.opacity);
+            console.log('Modal visibility:', modal.style.visibility);
+            console.log('Modal classList:', modal.classList);
+        } else {
+            console.error('Modal element not found:', modalId);
+        }
+    };
+    
+    // Initialize dashboard when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
         {% if club %}
         // Initialize the main dashboard stats and data
@@ -2290,10 +2525,11 @@
 }
 
 .club-sidebar-footer {
-    padding: 1rem 1.5rem;
+    padding: 1rem;
     border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 
 .sidebar-collapse-btn {
@@ -2618,8 +2854,6 @@
     margin: 0;
     font-size: 1rem;
     font-weight: 600;
-    display: flex;
-    align-items: center;
 }
 
 .card-header h3 i {
@@ -2795,7 +3029,7 @@
 }
 
 .assignment-details p {
-    margin: 0 0 0.5rem;
+    margin: 0;
     font-size: 0.9rem;
     color: var(--text-secondary);
 }
@@ -3040,13 +3274,13 @@
 }
 
 .role-badge {
+    background-color: var(--light);
+    color: var(--text-secondary);
     padding: 4px 10px;
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 500;
     display: inline-block;
-    background-color: var(--light);
-    color: var(--text-secondary);
 }
 
 .role-badge-leader {
@@ -3109,6 +3343,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 /* Loading State */
@@ -3385,66 +3620,70 @@
     font-weight: 600;
 }
 
-.calendar-view {
+.meetings-container {
     background-color: var(--card-bg);
     border-radius: 12px;
-    padding: 1.25rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
     border: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
 }
 
-.calendar-nav {
+.meetings-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.calendar-nav h3 {
+.meetings-header h3 {
     margin: 0;
     font-size: 1.1rem;
     font-weight: 600;
 }
 
-.calendar {
-    border: 1px solid var(--border-color);
+.meetings-list-container {
+    background-color: #fff;
     border-radius: 8px;
     overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    padding: 1rem;
 }
 
-.calendar-header {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    background-color: var(--light);
-    border-bottom: 1px solid var(--border-color);
+.filter-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.calendar-header div {
-    padding: 0.75rem;
-    text-align: center;
-    font-weight: 600;
+.form-select {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: #fff;
     font-size: 0.9rem;
+    color: var(--text);
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s ease;
 }
 
-.calendar-body {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    grid-auto-rows: minmax(80px, auto);
+.form-select:focus {
+    border-color: var(--primary);
 }
 
-.calendar-body div {
-    padding: 0.5rem;
-    border-right: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
-    min-height: 80px;
+.meetings-list-empty {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
 }
 
-.calendar-body div:nth-child(7n) {
-    border-right: none;
-}
-
-.calendar-body div:nth-last-child(-n+7) {
-    border-bottom: none;
+.meetings-list-empty i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--border-color);
 }
 
 .meetings-list {
@@ -3696,20 +3935,19 @@
 .modal {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
     background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    animation: fadeIn 0.2s ease;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    backdrop-filter: blur(2px);
+    align-items: center;
+    justify-content: center;
 }
 
 .modal[style*="display: flex"],
@@ -3717,6 +3955,7 @@
     display: flex !important;
     opacity: 1 !important;
     visibility: visible !important;
+    z-index: 9999 !important;
 }
 
 @keyframes fadeIn {
@@ -3726,13 +3965,17 @@
 
 .modal-content {
     background-color: var(--card-bg);
-    border-radius: 16px;
-    width: 100%;
-    max-width: 550px;
-    max-height: 85vh;
-    overflow-y: auto;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-    animation: slideUp 0.3s ease;
+    margin: 0 auto;
+    padding: 0;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+    border: 1px solid var(--border-color);
+    position: relative;
+    z-index: 1001;
 }
 
 @keyframes slideUp {
@@ -4004,6 +4247,7 @@
 .section-entrance {
     animation: fadeIn 0.5s ease;
 }
+
 </style>
 
 <script>
@@ -4102,112 +4346,85 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Calendar functionality
-    function generateCalendar() {
-        const calendarBody = document.getElementById('calendar-body');
-        if (!calendarBody) return;
-        
-        // Clear existing calendar
-        calendarBody.innerHTML = '';
-        
-        // Get current month and year
-        const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
-        
-        // Update month display
-        const monthDisplay = document.getElementById('currentMonth');
-        if (monthDisplay) {
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-            monthDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
-        }
-        
-        // Get first day of month and total days
-        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-        
-        // Create calendar cells
-        let dayCount = 1;
-        
-        // Create blank cells for days before first of month
-        for (let i = 0; i < firstDay; i++) {
-            const cell = document.createElement('div');
-            cell.classList.add('calendar-day', 'empty-day');
-            calendarBody.appendChild(cell);
-        }
-        
-        // Create cells for days in month
-        for (let i = 1; i <= daysInMonth; i++) {
-            const cell = document.createElement('div');
-            cell.classList.add('calendar-day');
+    // Meeting filter functionality
+    const meetingFilter = document.getElementById('meetingFilter');
+    if (meetingFilter) {
+        meetingFilter.addEventListener('change', function() {
+            const filterValue = this.value;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
             
-            // Add day number
-            const dayNumber = document.createElement('div');
-            dayNumber.classList.add('day-number');
-            dayNumber.textContent = i;
-            cell.appendChild(dayNumber);
-            
-            // Highlight current day
-            if (i === now.getDate() && currentMonth === now.getMonth() && currentYear === now.getFullYear()) {
-                dayNumber.classList.add('current-day');
-            }
-            
-            // Sample event for demonstration
-            if (i === 24) {
-                const event = document.createElement('div');
-                event.classList.add('calendar-event');
-                event.textContent = 'Weekly Meeting';
-                event.style.backgroundColor = 'rgba(236, 55, 80, 0.1)';
-                event.style.color = '#ec3750';
-                event.style.padding = '3px 6px';
-                event.style.borderRadius = '4px';
-                event.style.fontSize = '12px';
-                event.style.marginTop = '3px';
-                event.style.cursor = 'pointer';
+            fetch(`/api/clubs/{{ club.id }}/meetings`)
+            .then(response => response.json())
+            .then(data => {
+                let filteredMeetings = data.meetings || [];
                 
-                // Store meeting data in dataset
-                event.dataset.eventId = '123'; // Replace with actual meeting ID when available
-                event.dataset.eventTitle = 'Weekly Meeting';
-                event.dataset.eventTime = '4:00 PM';
-                event.dataset.eventLocation = 'Room 203';
-                event.dataset.eventDescription = 'Regular weekly club meeting';
-                event.dataset.eventDate = '2025-04-20'; // Use actual date
+                if (filterValue === 'upcoming') {
+                    filteredMeetings = filteredMeetings.filter(meeting => {
+                        const meetingDate = new Date(meeting.meeting_date);
+                        return meetingDate >= today;
+                    });
+                } else if (filterValue === 'past') {
+                    filteredMeetings = filteredMeetings.filter(meeting => {
+                        const meetingDate = new Date(meeting.meeting_date);
+                        return meetingDate < today;
+                    });
+                }
                 
-                event.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    // Open modal with event details
-                    openEventModal(event.dataset);
-                });
-                
-                cell.appendChild(event);
-            }
-            
-            calendarBody.appendChild(cell);
-            dayCount++;
-        }
-        
-        // Add navigation events
-        const prevMonth = document.getElementById('prevMonth');
-        const nextMonth = document.getElementById('nextMonth');
-        
-        if (prevMonth) {
-            prevMonth.addEventListener('click', () => {
-                // Logic to show previous month
-                alert('Previous month navigation will be implemented');
+                displayMeetings(filteredMeetings);
+            })
+            .catch(error => {
+                console.error('Error filtering meetings:', error);
             });
-        }
-        
-        if (nextMonth) {
-            nextMonth.addEventListener('click', () => {
-                // Logic to show next month
-                alert('Next month navigation will be implemented');
-            });
-        }
+        });
     }
     
-    // Generate calendar if we're on the schedule tab
-    if (document.getElementById('schedule')) {
-        generateCalendar();
-    }
+    // Function to view meeting details
+    window.viewMeeting = function(meetingId) {
+        try {
+            fetch(`/api/clubs/{{ club.id }}/meetings/${meetingId}`)
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('Meeting not found');
+                    } else {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+                }
+                
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Invalid response format');
+                }
+                
+                return response.json();
+            })
+            .then(data => {
+                if (data.meeting) {
+                    const meeting = data.meeting;
+                    const eventData = {
+                        eventId: meeting.id,
+                        eventTitle: meeting.title,
+                        eventDate: meeting.meeting_date,
+                        eventTime: `${meeting.start_time}${meeting.end_time ? ` - ${meeting.end_time}` : ''}`,
+                        eventLocation: meeting.location || 'Not specified',
+                        eventDescription: meeting.description || 'No description provided'
+                    };
+                    openEventModal(eventData);
+                } else {
+                    showToast('error', 'Meeting not found');
+                }
+            })
+            .catch(error => {
+                showToast('error', error.message || 'Error loading meeting details');
+                console.error('Error:', error);
+            });
+        } catch (error) {
+            console.error('Error in viewMeeting:', error);
+            showToast('error', 'Failed to view meeting details');
+        }
+    };
     
     // Function to handle tab switching
     window.openTab = function(tabName) {
@@ -4262,26 +4479,54 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Modal functions
     window.openModal = function(modalId) {
+        console.log('Opening modal:', modalId);
         const modal = document.getElementById(modalId);
-        if (!modal) return;
+        if (!modal) {
+            console.error('Modal not found:', modalId);
+            return;
+        }
         
+        // Force display to flex
         modal.style.display = 'flex';
+        modal.classList.add('visible');
+        
+        // Use setTimeout to ensure the transition works
         setTimeout(() => {
             modal.style.opacity = '1';
             modal.style.visibility = 'visible';
+            const modalContent = modal.querySelector('.modal-content');
+            if (modalContent) {
+                modalContent.style.transform = 'translateY(0)';
+            }
         }, 10);
+        
         document.body.style.overflow = 'hidden';
     };
     
     window.closeModal = function(modalId) {
+        console.log('Closing modal:', modalId);
         const modal = document.getElementById(modalId);
-        if (!modal) return;
+        if (!modal) {
+            console.error('Modal not found:', modalId);
+            return;
+        }
         
+        // Animate the modal content out
+        const modalContent = modal.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.style.transform = 'translateY(-20px)';
+        }
+        
+        // Hide the modal
         modal.style.opacity = '0';
         modal.style.visibility = 'hidden';
+        modal.classList.remove('visible');
+        
+        // After animation completes, set display to none
         setTimeout(() => {
             modal.style.display = 'none';
         }, 300);
+        
         document.body.style.overflow = '';
     };
     
@@ -4632,4 +4877,83 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('assignmentCount').textContent = Math.floor(Math.random() * 10) + 1;
 });
 </script>
+
+<!-- Event Details Modal -->
+<div id="eventDetailsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="eventModalTitle">Event Title</h2>
+            <span class="close" onclick="closeEventModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="event-details">
+                <p><i class="fas fa-calendar"></i> <span id="eventDate">Date</span></p>
+                <p><i class="fas fa-clock"></i> <span id="eventTime">Time</span></p>
+                <p><i class="fas fa-map-marker-alt"></i> <span id="eventLocation">Location</span></p>
+                <div class="event-description">
+                    <h3>Description</h3>
+                    <p id="eventDescription">Event description will appear here.</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeEventModal()">Close</button>
+            <button class="btn-primary" onclick="editMeeting(currentEventId)">Edit</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Meeting Modal -->
+<div id="editMeetingModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Edit Meeting</h2>
+            <span class="close" onclick="closeModal('editMeetingModal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="editMeetingForm" class="form-grid">
+                <input type="hidden" id="editMeetingId">
+                
+                <div class="form-group">
+                    <label for="editMeetingTitle">Title *</label>
+                    <input type="text" id="editMeetingTitle" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editMeetingDescription">Description</label>
+                    <textarea id="editMeetingDescription" class="form-control" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editMeetingDate">Date *</label>
+                    <input type="date" id="editMeetingDate" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editStartTime">Start Time *</label>
+                    <input type="time" id="editStartTime" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editEndTime">End Time</label>
+                    <input type="time" id="editEndTime" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editMeetingLocation">Location</label>
+                    <input type="text" id="editMeetingLocation" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editMeetingLink">Meeting Link</label>
+                    <input type="url" id="editMeetingLink" class="form-control" placeholder="https://...">
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('editMeetingModal')">Cancel</button>
+            <button class="btn-primary" onclick="updateMeeting()">Save Changes</button>
+        </div>
+    </div>
+</div>
 {% endblock %}
