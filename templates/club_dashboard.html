@@ -57,6 +57,20 @@
             color-scheme: dark;
         }
         
+        /* Ensure form elements work in dark mode */
+        [data-theme="dark"] .form-input,
+        [data-theme="dark"] .form-textarea,
+        [data-theme="dark"] .form-select {
+            background-color: var(--card);
+            color: var(--text);
+        }
+        
+        /* Fix modals in dark mode */
+        [data-theme="dark"] .modal-content {
+            background-color: var(--card);
+            color: var(--text);
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -378,10 +392,28 @@
             display: none;
             width: 100%;
             padding: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            min-height: 300px; /* Ensure minimum height so it's visible */
+            position: relative; /* Create a new stacking context */
+            z-index: 1; /* Ensure it's above any potential overlapping elements */
+            visibility: hidden;
         }
 
         .tab-pane.active {
-            display: block;
+            display: block !important; /* Use !important to override any other styles */
+            opacity: 1 !important;
+            visibility: visible !important;
+            z-index: 2; /* Higher than inactive tabs */
+        }
+        
+        /* Make sure main content area is visible */
+        .main-content {
+            background-color: var(--bg);
+            min-height: 100vh;
+            width: 100%;
+            position: relative;
+            z-index: 1;
         }
 
         .modal {
@@ -402,10 +434,37 @@
             transition: opacity 0.3s, visibility 0.3s;
         }
 
-        .modal[style*="display: flex"] {
+        .modal[style*="display: flex"],
+        .modal.active-modal {
             display: flex !important;
             opacity: 1 !important;
             visibility: visible !important;
+        }
+        
+        /* Improve modal button styling */
+        .modal-actions .btn-primary,
+        .modal-actions .btn-secondary {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 80px;
+            justify-content: center;
+        }
+        
+        .modal-actions .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+        }
+        
+        .modal-actions .btn-secondary {
+            background-color: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
         }
 
         .modal-content {
@@ -527,7 +586,7 @@
 
         .toast-container {
             position: fixed;
-            top: 20px;
+            top: 80px;
             right: 20px;
             z-index: 9999;
             display: flex;
@@ -547,6 +606,9 @@
             max-width: 400px;
             animation: slideIn 0.3s, fadeOut 0.3s 4.7s;
             position: relative;
+            z-index: 9999; /* Ensure notifications are visible */
+            color: var(--text); /* Make sure text is readable */
+            margin-bottom: 10px; /* Add space between toasts */
         }
 
         .toast-success {
@@ -752,7 +814,7 @@
         }
     </style>
 </head>
-<body data-theme="light">
+<body data-theme="light" class="theme-applied">
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="themeToggle">
         <i class="fas fa-moon" id="themeIcon"></i>
@@ -764,6 +826,8 @@
     </button>
 
     <div class="dashboard-container" id="dashboardContainer">
+        <!-- Debug element to show errors -->
+        <div id="debug-output" style="display: none; position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; z-index: 9999; max-width: 80%; max-height: 200px; overflow: auto;"></div>
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -1114,7 +1178,7 @@
                 </div>
 
                 <!-- Members Tab Content -->
-                <div id="members" class="tab-pane">
+                <div id="members" class="tab-pane" style="display: none;">
                     <div class="members-container">
                         <div class="members-header">
                             <h3>Club Members</h3>
@@ -1164,7 +1228,7 @@
                 </div>
 
                 <!-- Chat Tab Content -->
-                <div id="chat" class="tab-pane">
+                <div id="chat" class="tab-pane" style="display: none;">
                     <div class="chat-container">
                         <div class="chat-sidebar">
                             <div class="chat-channels">
@@ -1209,7 +1273,7 @@
                 </div>
 
                 <!-- Resources Tab Content -->
-                <div id="resources" class="tab-pane">
+                <div id="resources" class="tab-pane" style="display: none;">
                     <div class="resources-container">
                         <div class="resources-header">
                             <h3>Quick Links & Resources</h3>
@@ -1236,7 +1300,7 @@
                 </div>
 
                 <!-- Schedule Tab Content -->
-                <div id="schedule" class="tab-pane">
+                <div id="schedule" class="tab-pane" style="display: none;">
                     <div class="schedule-container">
                         <div class="schedule-header">
                             <h3>Club Meeting Schedule</h3>
@@ -1290,7 +1354,7 @@
                 </div>
 
                 <!-- Projects Tab Content -->
-                <div id="projects" class="tab-pane">
+                <div id="projects" class="tab-pane" style="display: none;">
                     <div class="projects-container">
                         <div class="projects-header">
                             <h3>Club Member Projects</h3>
@@ -1313,7 +1377,7 @@
                 </div>
 
                 <!-- Rewards Tab Content -->
-                <div id="rewards" class="tab-pane">
+                <div id="rewards" class="tab-pane" style="display: none;">
                     <div class="rewards-container">
                         <div class="rewards-header">
                             <h3>Hack Club Workshops & YSWSs </h3>
@@ -1393,7 +1457,7 @@
                 </div>
 
                 <!-- Settings Tab Content -->
-                <div id="settings" class="tab-pane">
+                <div id="settings" class="tab-pane" style="display: none;">
                     <div class="settings-container">
                         <h3>Club Settings</h3>
 
@@ -1810,21 +1874,71 @@
     <script>
 // Theme toggle functionality
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize active tab on page load
+    setTimeout(function() {
+        // Get the hash from URL or default to dashboard
+        let hash = window.location.hash.substring(1) || 'dashboard';
+        
+        // Make sure the tab content exists
+        if (!document.getElementById(hash)) {
+            console.warn('Tab not found, defaulting to dashboard:', hash);
+            hash = 'dashboard';
+        }
+        
+        // Pre-show the active tab
+        const activeTab = document.getElementById(hash);
+        if (activeTab) {
+            activeTab.style.display = 'block';
+            activeTab.style.opacity = '1';
+            activeTab.style.visibility = 'visible';
+            activeTab.classList.add('active');
+        }
+        
+        // Then call openTab to properly setup the UI
+        openTab(hash);
+    }, 50);
+    
+    // Also listen for hash changes
+    window.addEventListener('hashchange', function() {
+        const hash = window.location.hash.substring(1);
+        if (hash) {
+            openTab(hash);
+        }
+    });
+    
     const themeToggle = document.getElementById('themeToggle');
     const themeIcon = document.getElementById('themeIcon');
     const body = document.documentElement;
 
+    // Force apply the theme to body as well for broader compatibility
+    function applyTheme(theme) {
+        body.setAttribute('data-theme', theme);
+        document.body.setAttribute('data-theme', theme); // Also set on body
+        updateThemeIcon(theme);
+        
+        // Force refresh CSS variables on some elements
+        const elementsToRefresh = document.querySelectorAll('.modal-content, .card, .form-input, .form-textarea, .btn, .nav-link');
+        elementsToRefresh.forEach(el => {
+            el.style.color = 'var(--text)';
+            if (el.classList.contains('card') || el.classList.contains('modal-content')) {
+                el.style.backgroundColor = 'var(--card)';
+            }
+        });
+        
+        console.log('Theme applied:', theme);
+    }
+
     // Check for saved theme preference or respect OS preference
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
-        body.setAttribute('data-theme', savedTheme);
-        updateThemeIcon(savedTheme);
+        applyTheme(savedTheme);
     } else {
         // Check if user prefers dark mode
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (prefersDark) {
-            body.setAttribute('data-theme', 'dark');
-            updateThemeIcon('dark');
+            applyTheme('dark');
+        } else {
+            applyTheme('light');
         }
     }
 
@@ -1842,18 +1956,49 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentTheme = body.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
-        body.setAttribute('data-theme', newTheme);
+        applyTheme(newTheme);
         localStorage.setItem('theme', newTheme);
-        updateThemeIcon(newTheme);
+    });
+    
+    // Initial tab setup
+    // Clear all style attributes that might be interfering with display
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        if (pane.classList.contains('active')) {
+            pane.style.display = 'block';
+            pane.style.opacity = '1';
+            pane.style.visibility = 'visible';
+            console.log('Initial tab set visible:', pane.id);
+        }
     });
 });
 
 // Tab functionality
 function openTab(tabName) {
-    // Hide all tab panes
+    console.log('Opening tab:', tabName);
+    
+    // Update URL hash without scrolling
+    const scrollPos = window.scrollY;
+    window.location.hash = tabName;
+    window.scrollTo(0, scrollPos);
+    
+    // First, check if the tab exists to prevent issues
+    const selectedTab = document.getElementById(tabName);
+    if (!selectedTab) {
+        console.error('Tab not found:', tabName);
+        // Fallback to dashboard if tab doesn't exist
+        if (tabName !== 'dashboard') {
+            return openTab('dashboard');
+        }
+        return;
+    }
+    
+    // Hide all tab panes first
     const tabPanes = document.querySelectorAll('.tab-pane');
     tabPanes.forEach(function(pane) {
         pane.classList.remove('active');
+        pane.style.display = 'none';
+        pane.style.opacity = '0';
+        pane.style.visibility = 'hidden';
     });
 
     // Deactivate all tab links
@@ -1862,35 +2007,50 @@ function openTab(tabName) {
         link.classList.remove('active');
     });
 
-    // Activate selected tab and link
-    const selectedTab = document.getElementById(tabName);
-    const selectedLink = document.getElementById(tabName + '-tab');
-
-    if (selectedTab) {
+    // Force a small delay for DOM updates to process
+    setTimeout(() => {
+        // Activate selected tab with all necessary styling
         selectedTab.classList.add('active');
-    }
-
-    if (selectedLink) {
-        selectedLink.classList.add('active');
-    } else if (tabName === 'dashboard') {
-        // Special case for dashboard
-        document.getElementById('dashboard-tab').classList.add('active');
-    }
-
-    // Load data for active tab
-    if (tabName === 'stream') {
-        loadPosts();
-    } else if (tabName === 'assignments') {
-        loadAssignments();
-    } else if (tabName === 'resources') {
-        loadResources();
-    } else if (tabName === 'chat') {
-        loadChatChannels();
-    } else if (tabName === 'schedule') {
-        loadMeetings();
-    } else if (tabName === 'projects') {
-        loadProjects();
-    }
+        selectedTab.style.display = 'block';
+        selectedTab.style.visibility = 'visible';
+        
+        // Force a reflow
+        void selectedTab.offsetHeight;
+        
+        // Then set opacity
+        selectedTab.style.opacity = '1';
+        
+        console.log('Tab activated and visible:', tabName);
+        
+        // Activate the correct nav link
+        const selectedLink = document.getElementById(tabName + '-tab');
+        if (selectedLink) {
+            selectedLink.classList.add('active');
+        } else if (tabName === 'dashboard') {
+            // Special case for dashboard
+            document.getElementById('dashboard-tab').classList.add('active');
+        }
+    
+        // Load data for active tab with proper error handling
+        try {
+            if (tabName === 'stream') {
+                typeof loadPosts === 'function' && loadPosts();
+            } else if (tabName === 'assignments') {
+                typeof loadAssignments === 'function' && loadAssignments();
+            } else if (tabName === 'resources') {
+                typeof loadResources === 'function' && loadResources();
+            } else if (tabName === 'chat') {
+                typeof loadChatChannels === 'function' && loadChatChannels();
+            } else if (tabName === 'schedule') {
+                typeof loadMeetings === 'function' && loadMeetings();
+            } else if (tabName === 'projects') {
+                typeof loadProjects === 'function' && loadProjects();
+            }
+        } catch (error) {
+            console.error('Error loading tab data:', error);
+            showToast('error', 'Failed to load tab content');
+        }
+    }, 20);
 }
 
 // Mobile sidebar toggle
@@ -1931,6 +2091,9 @@ function openModal(modalId) {
     modal.style.opacity = '1';
     modal.style.visibility = 'visible';
     document.body.style.overflow = 'hidden';
+    
+    // Ensure modal is visible and properly styled
+    modal.classList.add('active-modal');
 }
 
 function closeModal(modalId) {
@@ -1939,6 +2102,7 @@ function closeModal(modalId) {
 
     modal.style.opacity = '0';
     modal.style.visibility = 'hidden';
+    modal.classList.remove('active-modal');
     setTimeout(() => {
         modal.style.display = 'none';
         document.body.style.overflow = '';
@@ -2334,6 +2498,16 @@ function getClubId() {
 
 // Display toast notifications
 function showToast(type, message) {
+    // Also log to debug output
+    const debugOutput = document.getElementById('debug-output');
+    if (debugOutput) {
+        debugOutput.style.display = 'block';
+        const timestamp = new Date().toLocaleTimeString();
+        debugOutput.innerHTML += `<div>[${timestamp}] ${type}: ${message}</div>`;
+        setTimeout(() => {
+            debugOutput.style.display = 'none';
+        }, 5000);
+    }
     const toastContainer = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.classList.add('toast', `toast-${type}`);
