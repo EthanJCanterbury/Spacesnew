@@ -126,6 +126,80 @@
                     <i class="fas fa-sign-in-alt"></i> Join Club
                 </button>
             </div>
+            
+            <script>
+                function createClub() {
+                    const clubName = document.getElementById('clubName').value;
+                    const clubLocation = document.getElementById('clubLocation').value;
+                    const clubDescription = document.getElementById('clubDescription').value;
+                    
+                    if (!clubName) {
+                        showToast('error', 'Please enter a club name');
+                        return;
+                    }
+                    
+                    const clubData = {
+                        name: clubName,
+                        location: clubLocation, 
+                        description: clubDescription
+                    };
+                    
+                    fetch('/api/clubs', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(clubData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            showToast('error', data.error);
+                        } else {
+                            showToast('success', 'Club created successfully!');
+                            closeCreateClubModal();
+                            // Redirect to the new club dashboard
+                            window.location.href = `/club-dashboard/${data.club_id}`;
+                        }
+                    })
+                    .catch(error => {
+                        showToast('error', 'Failed to create club');
+                        console.error('Error:', error);
+                    });
+                }
+                
+                function joinClub() {
+                    const joinCode = document.getElementById('joinCode').value;
+                    
+                    if (!joinCode) {
+                        showToast('error', 'Please enter a join code');
+                        return;
+                    }
+                    
+                    fetch('/api/clubs/join', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ join_code: joinCode })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            showToast('error', data.error);
+                        } else {
+                            showToast('success', 'Joined club successfully!');
+                            closeJoinClubModal();
+                            // Redirect to the club dashboard
+                            window.location.href = `/club-dashboard/${data.club_id}`;
+                        }
+                    })
+                    .catch(error => {
+                        showToast('error', 'Failed to join club');
+                        console.error('Error:', error);
+                    });
+                }
+            </script>
         </div>
 
         {% elif current_user.club_memberships|length > 0 and not club %}
@@ -317,6 +391,135 @@
                         <textarea id="post-content" placeholder="Share an announcement with your club..."></textarea>
                         <div class="composer-actions">
                             <button onclick="createPost()" class="btn-primary"><i class="fas fa-paper-plane"></i> Post</button>
+                    <script>
+                        function createPost() {
+                            const content = document.getElementById('post-content').value;
+                            if (!content) {
+                                showToast('error', 'Post content cannot be empty');
+                                return;
+                            }
+                            
+                            fetch(`/api/clubs/{{ club.id }}/posts`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ content: content })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.error) {
+                                    showToast('error', data.error);
+                                } else {
+                                    showToast('success', 'Post created successfully');
+                                    document.getElementById('post-content').value = '';
+                                    loadPosts();
+                                }
+                            })
+                            .catch(error => {
+                                showToast('error', 'Failed to create post');
+                                console.error('Error:', error);
+                            });
+                        }
+                        
+                        function loadPosts() {
+                            fetch(`/api/clubs/{{ club.id }}/posts`)
+                            .then(response => response.json())
+                            .then(data => {
+                                const postsContainer = document.querySelector('.posts-list');
+                                postsContainer.innerHTML = '';
+                                
+                                if (data.posts && data.posts.length > 0) {
+                                    data.posts.forEach(post => {
+                                        const postElement = createPostElement(post);
+                                        postsContainer.appendChild(postElement);
+                                    });
+                                } else {
+                                    postsContainer.innerHTML = '<div class="empty-posts">No posts yet. Be the first to create a post!</div>';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error loading posts:', error);
+                            });
+                        }
+                        
+                        function createPostElement(post) {
+                            const postCard = document.createElement('div');
+                            postCard.className = 'post-card';
+                            postCard.innerHTML = `
+                                <div class="post-header">
+                                    <img src="/static/images/logo-rounded.png" alt="Profile" class="avatar">
+                                    <div class="post-info">
+                                        <h3>${post.user.username}</h3>
+                                        <span class="post-date">${formatDate(post.created_at)}</span>
+                                    </div>
+                                    <div class="post-actions">
+                                        <button class="btn-icon"><i class="fas fa-ellipsis-v"></i></button>
+                                    </div>
+                                </div>
+                                <div class="post-content">
+                                    <p>${post.content}</p>
+                                </div>
+                                <div class="post-footer">
+                                    <button class="post-action" onclick="toggleLike(${post.id})">
+                                        <i class="${post.user_liked ? 'fas' : 'far'} fa-heart"></i> Like${post.likes > 0 ? ` (${post.likes})` : ''}
+                                    </button>
+                                </div>
+                            `;
+                            return postCard;
+                        }
+                        
+                        function formatDate(dateString) {
+                            const date = new Date(dateString);
+                            const now = new Date();
+                            const diffTime = Math.abs(now - date);
+                            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                            
+                            if (diffDays === 0) {
+                                const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+                                if (diffHours === 0) {
+                                    const diffMinutes = Math.floor(diffTime / (1000 * 60));
+                                    if (diffMinutes === 0) {
+                                        return 'Just now';
+                                    }
+                                    return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+                                }
+                                return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+                            } else if (diffDays === 1) {
+                                return 'Yesterday';
+                            } else if (diffDays < 7) {
+                                return `${diffDays} days ago`;
+                            } else {
+                                return date.toLocaleDateString();
+                            }
+                        }
+                        
+                        function toggleLike(postId) {
+                            fetch(`/api/clubs/{{ club.id }}/posts/${postId}/like`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.error) {
+                                    showToast('error', data.error);
+                                } else {
+                                    loadPosts();
+                                }
+                            })
+                            .catch(error => {
+                                showToast('error', 'Failed to process like');
+                                console.error('Error:', error);
+                            });
+                        }
+                        
+                        // Load posts when the stream tab is shown
+                        document.querySelector('a[data-section="stream"]').addEventListener('click', function() {
+                            loadPosts();
+                        });
+                    </script>
                         </div>
                     </div>
                 </div>
@@ -359,26 +562,148 @@
                     </button>
                 </div>
 
-                <div class="assignment-cards">
-                    <div class="assignment-card">
-                        <div class="assignment-status">
-                            <span class="status-badge status-active">Active</span>
-                        </div>
-                        <div class="assignment-body">
-                            <h3>Sample Assignment</h3>
-                            <p>This is a sample assignment to demonstrate how assignments will look in your club dashboard.</p>
-                            <div class="assignment-meta">
-                                <span><i class="fas fa-calendar-alt"></i> Due: Next week</span>
-                                <span><i class="fas fa-users"></i> For: All members</span>
-                            </div>
-                        </div>
-                        <div class="assignment-actions">
-                            <button class="btn-primary btn-sm"><i class="fas fa-eye"></i> View</button>
-                            <button class="btn-secondary btn-sm"><i class="fas fa-edit"></i> Edit</button>
-                            <button class="btn-danger btn-sm"><i class="fas fa-trash"></i></button>
-                        </div>
+                <div class="assignment-cards" id="assignments-container">
+                    <div class="loading-state">
+                        <div class="loading-spinner"></div>
+                        <p>Loading assignments...</p>
                     </div>
                 </div>
+                
+                <script>
+                    function loadAssignments() {
+                        const container = document.getElementById('assignments-container');
+                        container.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading assignments...</p></div>';
+                        
+                        fetch(`/api/clubs/{{ club.id }}/assignments`)
+                        .then(response => response.json())
+                        .then(data => {
+                            container.innerHTML = '';
+                            
+                            if (data.assignments && data.assignments.length > 0) {
+                                data.assignments.forEach(assignment => {
+                                    const assignmentCard = createAssignmentCard(assignment);
+                                    container.appendChild(assignmentCard);
+                                });
+                                
+                                // Update count on dashboard
+                                const activeAssignments = data.assignments.filter(a => a.status === 'active').length;
+                                document.getElementById('assignmentCount').textContent = activeAssignments;
+                            } else {
+                                container.innerHTML = '<div class="empty-state">No assignments yet. Create your first assignment!</div>';
+                                document.getElementById('assignmentCount').textContent = '0';
+                            }
+                        })
+                        .catch(error => {
+                            container.innerHTML = '<div class="error-state">Error loading assignments. Please try again.</div>';
+                            console.error('Error loading assignments:', error);
+                        });
+                    }
+                    
+                    function createAssignmentCard(assignment) {
+                        const card = document.createElement('div');
+                        card.className = 'assignment-card';
+                        
+                        const statusClass = assignment.status === 'active' ? 'status-active' : 'status-completed';
+                        
+                        card.innerHTML = `
+                            <div class="assignment-status">
+                                <span class="status-badge ${statusClass}">${assignment.status === 'active' ? 'Active' : 'Completed'}</span>
+                            </div>
+                            <div class="assignment-body">
+                                <h3>${assignment.title}</h3>
+                                <p>${assignment.description}</p>
+                                <div class="assignment-meta">
+                                    <span><i class="fas fa-calendar-alt"></i> Due: ${assignment.due_date ? new Date(assignment.due_date).toLocaleDateString() : 'No due date'}</span>
+                                    <span><i class="fas fa-users"></i> For: ${assignment.for_all_members ? 'All members' : 'Selected members'}</span>
+                                </div>
+                            </div>
+                            <div class="assignment-actions">
+                                <button class="btn-primary btn-sm" onclick="viewAssignment(${assignment.id})"><i class="fas fa-eye"></i> View</button>
+                                <button class="btn-secondary btn-sm" onclick="editAssignment(${assignment.id})"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="btn-danger btn-sm" onclick="deleteAssignment(${assignment.id})"><i class="fas fa-trash"></i></button>
+                            </div>
+                        `;
+                        
+                        return card;
+                    }
+                    
+                    function createAssignment() {
+                        const title = document.getElementById('assignmentTitle').value;
+                        const description = document.getElementById('assignmentDescription').value;
+                        const dueDate = document.getElementById('assignmentDueDate').value;
+                        const forAllMembers = document.getElementById('assignAllMembers').checked;
+                        
+                        if (!title || !description) {
+                            showToast('error', 'Please fill out all required fields');
+                            return;
+                        }
+                        
+                        const assignmentData = {
+                            title: title,
+                            description: description,
+                            due_date: dueDate,
+                            for_all_members: forAllMembers
+                        };
+                        
+                        fetch(`/api/clubs/{{ club.id }}/assignments`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(assignmentData)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) {
+                                showToast('error', data.error);
+                            } else {
+                                showToast('success', 'Assignment created successfully');
+                                closeCreateAssignmentModal();
+                                loadAssignments();
+                            }
+                        })
+                        .catch(error => {
+                            showToast('error', 'Failed to create assignment');
+                            console.error('Error:', error);
+                        });
+                    }
+                    
+                    function viewAssignment(assignmentId) {
+                        // Redirect to assignment details page or show details modal
+                        showToast('info', 'View assignment functionality coming soon');
+                    }
+                    
+                    function editAssignment(assignmentId) {
+                        // Open edit assignment modal
+                        showToast('info', 'Edit assignment functionality coming soon');
+                    }
+                    
+                    function deleteAssignment(assignmentId) {
+                        if (confirm('Are you sure you want to delete this assignment?')) {
+                            fetch(`/api/clubs/{{ club.id }}/assignments/${assignmentId}`, {
+                                method: 'DELETE'
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.error) {
+                                    showToast('error', data.error);
+                                } else {
+                                    showToast('success', 'Assignment deleted successfully');
+                                    loadAssignments();
+                                }
+                            })
+                            .catch(error => {
+                                showToast('error', 'Failed to delete assignment');
+                                console.error('Error:', error);
+                            });
+                        }
+                    }
+                    
+                    // Load assignments when the tab is shown
+                    document.querySelector('a[data-section="assignments"]').addEventListener('click', function() {
+                        loadAssignments();
+                    });
+                </script>
             </div>
         </section>
 
@@ -395,6 +720,74 @@
                     <button class="btn-primary" onclick="openAddMemberModal()">
                         <i class="fas fa-user-plus"></i> Add Member
                     </button>
+                    <script>
+                        function generateJoinCode() {
+                            fetch(`/api/clubs/{{ club.id }}/join-code`, {
+                                method: 'POST'
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.error) {
+                                    showToast('error', data.error);
+                                } else {
+                                    document.getElementById('join-code-display').textContent = data.join_code;
+                                    showToast('success', 'Join code generated successfully');
+                                }
+                            })
+                            .catch(error => {
+                                showToast('error', 'Failed to generate join code');
+                                console.error('Error:', error);
+                            });
+                        }
+                        
+                        function changeRole() {
+                            const membershipId = document.getElementById('membershipIdForRole').value;
+                            const newRole = document.querySelector('input[name="memberRole"]:checked').value;
+                            
+                            fetch(`/api/memberships/${membershipId}/role`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ role: newRole })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.error) {
+                                    showToast('error', data.error);
+                                } else {
+                                    showToast('success', 'Role updated successfully');
+                                    closeChangeRoleModal();
+                                    window.location.reload(); // Refresh to show updated roles
+                                }
+                            })
+                            .catch(error => {
+                                showToast('error', 'Failed to update role');
+                                console.error('Error:', error);
+                            });
+                        }
+                        
+                        function openRemoveMemberModal(membershipId, username) {
+                            if (confirm(`Are you sure you want to remove ${username} from the club?`)) {
+                                fetch(`/api/memberships/${membershipId}/remove`, {
+                                    method: 'POST'
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.error) {
+                                        showToast('error', data.error);
+                                    } else {
+                                        showToast('success', data.message || 'Member removed successfully');
+                                        window.location.reload(); // Refresh to update member list
+                                    }
+                                })
+                                .catch(error => {
+                                    showToast('error', 'Failed to remove member');
+                                    console.error('Error:', error);
+                                });
+                            }
+                        }
+                    </script>
                 </div>
 
                 <div class="members-table-container">
@@ -464,6 +857,119 @@
                         <p>Loading member projects...</p>
                     </div>
                 </div>
+                
+                <script>
+                    function loadProjects() {
+                        const container = document.getElementById('projects-container');
+                        container.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading member projects...</p></div>';
+                        
+                        const showFeaturedOnly = document.getElementById('toggle-featured').innerText.includes('Show All');
+                        const searchQuery = document.getElementById('project-search').value;
+                        
+                        let url = `/api/clubs/{{ club.id }}/projects`;
+                        if (showFeaturedOnly) {
+                            url += '?featured=true';
+                        }
+                        if (searchQuery) {
+                            url += (url.includes('?') ? '&' : '?') + `search=${encodeURIComponent(searchQuery)}`;
+                        }
+                        
+                        fetch(url)
+                        .then(response => response.json())
+                        .then(data => {
+                            container.innerHTML = '';
+                            
+                            if (data.projects && data.projects.length > 0) {
+                                data.projects.forEach(project => {
+                                    const projectCard = createProjectCard(project);
+                                    container.appendChild(projectCard);
+                                });
+                                
+                                // Update count on dashboard
+                                document.getElementById('projectCount').textContent = data.projects.length;
+                            } else {
+                                container.innerHTML = '<div class="empty-state">No projects found. Members can start creating projects on their dashboard.</div>';
+                                document.getElementById('projectCount').textContent = '0';
+                            }
+                        })
+                        .catch(error => {
+                            container.innerHTML = '<div class="error-state">Error loading projects. Please try again.</div>';
+                            console.error('Error loading projects:', error);
+                        });
+                    }
+                    
+                    function createProjectCard(project) {
+                        const card = document.createElement('div');
+                        card.className = 'project-card';
+                        
+                        card.innerHTML = `
+                            <div class="project-header">
+                                <h3>${project.name}</h3>
+                                ${project.featured ? '<span class="featured-badge"><i class="fas fa-star"></i> Featured</span>' : ''}
+                            </div>
+                            <div class="project-body">
+                                <p>${project.description || 'No description available'}</p>
+                                <div class="project-meta">
+                                    <span><i class="fas fa-user"></i> ${project.owner.username}</span>
+                                    <span><i class="fas fa-calendar-alt"></i> ${new Date(project.updated_at).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                            <div class="project-actions">
+                                <a href="/project/${project.slug}" target="_blank" class="btn-primary btn-sm">View</a>
+                                ${project.featured ? 
+                                  `<button class="btn-secondary btn-sm" onclick="toggleProjectFeatured(${project.id}, false)"><i class="fas fa-star-half-alt"></i> Unfeature</button>` :
+                                  `<button class="btn-secondary btn-sm" onclick="toggleProjectFeatured(${project.id}, true)"><i class="fas fa-star"></i> Feature</button>`
+                                }
+                            </div>
+                        `;
+                        
+                        return card;
+                    }
+                    
+                    function toggleProjectFeatured(projectId, featured) {
+                        fetch(`/api/clubs/{{ club.id }}/projects/${projectId}/feature`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ featured: featured })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) {
+                                showToast('error', data.error);
+                            } else {
+                                showToast('success', featured ? 'Project featured successfully' : 'Project unfeatured successfully');
+                                loadProjects();
+                            }
+                        })
+                        .catch(error => {
+                            showToast('error', 'Failed to update project');
+                            console.error('Error:', error);
+                        });
+                    }
+                    
+                    // Search projects
+                    document.getElementById('project-search').addEventListener('input', function() {
+                        loadProjects();
+                    });
+                    
+                    // Toggle featured projects
+                    document.getElementById('toggle-featured').addEventListener('click', function() {
+                        const button = document.getElementById('toggle-featured');
+                        if (button.innerText.includes('Show Featured Only')) {
+                            button.innerHTML = '<i class="fas fa-list"></i> Show All Projects';
+                        } else {
+                            button.innerHTML = '<i class="fas fa-star"></i> Show Featured Only';
+                        }
+                        loadProjects();
+                    });
+                    
+                    // Load projects when the tab is shown
+                    document.querySelector('a[data-section="projects"]').addEventListener('click', function() {
+                        loadProjects();
+                    });
+                </script>
             </div>
         </section>
 
@@ -532,21 +1038,137 @@
                     </button>
                 </div>
 
-                <div class="resources-grid">
-                    <div class="resource-card">
-                        <div class="resource-icon">
-                            <i class="fas fa-book"></i>
-                        </div>
-                        <div class="resource-content">
-                            <h3>Sample Resource</h3>
-                            <p>This is an example resource that shows how your links will appear.</p>
-                        </div>
-                        <div class="resource-actions">
-                            <a href="#" class="btn-primary btn-sm">Visit</a>
-                            <button class="btn-icon"><i class="fas fa-ellipsis-v"></i></button>
-                        </div>
+                <div class="resources-grid" id="resources-container">
+                    <div class="loading-state">
+                        <div class="loading-spinner"></div>
+                        <p>Loading resources...</p>
                     </div>
                 </div>
+                
+                <script>
+                    function loadResources() {
+                        const container = document.getElementById('resources-container');
+                        container.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading resources...</p></div>';
+                        
+                        fetch(`/api/clubs/{{ club.id }}/resources`)
+                        .then(response => response.json())
+                        .then(data => {
+                            container.innerHTML = '';
+                            
+                            if (data.resources && data.resources.length > 0) {
+                                data.resources.forEach(resource => {
+                                    const resourceCard = createResourceCard(resource);
+                                    container.appendChild(resourceCard);
+                                });
+                            } else {
+                                container.innerHTML = '<div class="empty-state">No resources yet. Add your first resource!</div>';
+                            }
+                        })
+                        .catch(error => {
+                            container.innerHTML = '<div class="error-state">Error loading resources. Please try again.</div>';
+                            console.error('Error loading resources:', error);
+                        });
+                    }
+                    
+                    function createResourceCard(resource) {
+                        const card = document.createElement('div');
+                        card.className = 'resource-card';
+                        
+                        let iconClass = 'book';
+                        if (resource.icon) {
+                            iconClass = resource.icon;
+                        }
+                        
+                        card.innerHTML = `
+                            <div class="resource-icon">
+                                <i class="fas fa-${iconClass}"></i>
+                            </div>
+                            <div class="resource-content">
+                                <h3>${resource.title}</h3>
+                                <p>${resource.description || ''}</p>
+                            </div>
+                            <div class="resource-actions">
+                                <a href="${resource.url}" target="_blank" class="btn-primary btn-sm">Visit</a>
+                                <button class="btn-icon" onclick="deleteResource(${resource.id})"><i class="fas fa-trash"></i></button>
+                            </div>
+                        `;
+                        
+                        return card;
+                    }
+                    
+                    function addResource() {
+                        const title = document.getElementById('resourceTitle').value;
+                        const url = document.getElementById('resourceUrl').value;
+                        const description = document.getElementById('resourceDescription').value;
+                        const icon = document.getElementById('resourceIcon').value;
+                        
+                        if (!title || !url) {
+                            showToast('error', 'Please fill out all required fields');
+                            return;
+                        }
+                        
+                        // Add proper URL protocol if missing
+                        let formattedUrl = url;
+                        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                            formattedUrl = 'https://' + url;
+                        }
+                        
+                        const resourceData = {
+                            title: title,
+                            url: formattedUrl,
+                            description: description,
+                            icon: icon
+                        };
+                        
+                        fetch(`/api/clubs/{{ club.id }}/resources`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(resourceData)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) {
+                                showToast('error', data.error);
+                            } else {
+                                showToast('success', 'Resource added successfully');
+                                closeAddResourceModal();
+                                loadResources();
+                            }
+                        })
+                        .catch(error => {
+                            showToast('error', 'Failed to add resource');
+                            console.error('Error:', error);
+                        });
+                    }
+                    
+                    function deleteResource(resourceId) {
+                        if (confirm('Are you sure you want to delete this resource?')) {
+                            fetch(`/api/clubs/{{ club.id }}/resources/${resourceId}`, {
+                                method: 'DELETE'
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.error) {
+                                    showToast('error', data.error);
+                                } else {
+                                    showToast('success', 'Resource deleted successfully');
+                                    loadResources();
+                                }
+                            })
+                            .catch(error => {
+                                showToast('error', 'Failed to delete resource');
+                                console.error('Error:', error);
+                            });
+                        }
+                    }
+                    
+                    // Load resources when the tab is shown
+                    document.querySelector('a[data-section="resources"]').addEventListener('click', function() {
+                        loadResources();
+                    });
+                </script>
             </div>
         </section>
 
@@ -595,22 +1217,196 @@
                 <div class="meetings-list">
                     <h4>Upcoming Meetings</h4>
                     <div id="upcoming-meetings">
-                        <div class="upcoming-meeting">
-                            <div class="meeting-date">
-                                <span class="date-num">24</span>
-                                <span class="date-month">Apr</span>
-                            </div>
-                            <div class="meeting-details">
-                                <h4>Weekly Club Meeting</h4>
-                                <p><i class="fas fa-clock"></i> 4:00 PM - 5:30 PM</p>
-                                <p><i class="fas fa-map-marker-alt"></i> Room 203</p>
-                            </div>
-                            <div class="meeting-actions">
-                                <button class="btn-icon"><i class="fas fa-edit"></i></button>
-                                <button class="btn-icon"><i class="fas fa-trash"></i></button>
-                            </div>
+                        <div class="loading-state">
+                            <div class="loading-spinner"></div>
+                            <p>Loading meetings...</p>
                         </div>
                     </div>
+                    
+                    <script>
+                        function loadMeetings() {
+                            const container = document.getElementById('upcoming-meetings');
+                            container.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading meetings...</p></div>';
+                            
+                            fetch(`/api/clubs/{{ club.id }}/meetings`)
+                            .then(response => response.json())
+                            .then(data => {
+                                container.innerHTML = '';
+                                
+                                if (data.meetings && data.meetings.length > 0) {
+                                    data.meetings.forEach(meeting => {
+                                        const meetingElement = createMeetingElement(meeting);
+                                        container.appendChild(meetingElement);
+                                    });
+                                } else {
+                                    container.innerHTML = '<div class="empty-state">No upcoming meetings. Schedule your first meeting!</div>';
+                                }
+                                
+                                // Also update the calendar view
+                                updateCalendarWithMeetings(data.meetings);
+                            })
+                            .catch(error => {
+                                container.innerHTML = '<div class="error-state">Error loading meetings. Please try again.</div>';
+                                console.error('Error loading meetings:', error);
+                            });
+                        }
+                        
+                        function createMeetingElement(meeting) {
+                            const meetingDate = new Date(meeting.meeting_date);
+                            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            
+                            const element = document.createElement('div');
+                            element.className = 'upcoming-meeting';
+                            
+                            let timeDisplay = meeting.start_time;
+                            if (meeting.end_time) {
+                                timeDisplay += ` - ${meeting.end_time}`;
+                            }
+                            
+                            element.innerHTML = `
+                                <div class="meeting-date">
+                                    <span class="date-num">${meetingDate.getDate()}</span>
+                                    <span class="date-month">${monthNames[meetingDate.getMonth()]}</span>
+                                </div>
+                                <div class="meeting-details">
+                                    <h4>${meeting.title}</h4>
+                                    <p><i class="fas fa-clock"></i> ${timeDisplay}</p>
+                                    <p><i class="fas fa-map-marker-alt"></i> ${meeting.location || 'No location set'}</p>
+                                    ${meeting.meeting_link ? `<p><i class="fas fa-link"></i> <a href="${meeting.meeting_link}" target="_blank">Meeting Link</a></p>` : ''}
+                                </div>
+                                <div class="meeting-actions">
+                                    <button class="btn-icon" onclick="editMeeting(${meeting.id})"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-icon" onclick="deleteMeeting(${meeting.id})"><i class="fas fa-trash"></i></button>
+                                </div>
+                            `;
+                            
+                            return element;
+                        }
+                        
+                        function updateCalendarWithMeetings(meetings) {
+                            // This function will update the calendar with meeting events
+                            const calendarBody = document.getElementById('calendar-body');
+                            if (!calendarBody) return;
+                            
+                            // Get all day cells in the calendar
+                            const dayCells = calendarBody.querySelectorAll('.calendar-day');
+                            
+                            // Clear existing events
+                            dayCells.forEach(cell => {
+                                const events = cell.querySelectorAll('.calendar-event');
+                                events.forEach(event => event.remove());
+                            });
+                            
+                            // Add meeting events to the appropriate days
+                            meetings.forEach(meeting => {
+                                const meetingDate = new Date(meeting.meeting_date);
+                                const dayNumber = meetingDate.getDate();
+                                
+                                // Find the cell for this day
+                                for (let i = 0; i < dayCells.length; i++) {
+                                    const dayNumberElement = dayCells[i].querySelector('.day-number');
+                                    if (dayNumberElement && parseInt(dayNumberElement.textContent) === dayNumber) {
+                                        // Create event element
+                                        const event = document.createElement('div');
+                                        event.className = 'calendar-event';
+                                        event.textContent = meeting.title;
+                                        event.style.backgroundColor = 'rgba(236, 55, 80, 0.1)';
+                                        event.style.color = '#ec3750';
+                                        event.style.padding = '3px 6px';
+                                        event.style.borderRadius = '4px';
+                                        event.style.fontSize = '12px';
+                                        event.style.marginTop = '3px';
+                                        event.style.cursor = 'pointer';
+                                        
+                                        event.addEventListener('click', () => {
+                                            alert(`${meeting.title}\nTime: ${meeting.start_time}${meeting.end_time ? ` - ${meeting.end_time}` : ''}\nLocation: ${meeting.location || 'Not specified'}`);
+                                        });
+                                        
+                                        dayCells[i].appendChild(event);
+                                        break;
+                                    }
+                                }
+                            });
+                        }
+                        
+                        function createMeeting() {
+                            const title = document.getElementById('meetingTitle').value;
+                            const description = document.getElementById('meetingDescription').value;
+                            const date = document.getElementById('meetingDate').value;
+                            const startTime = document.getElementById('startTime').value;
+                            const endTime = document.getElementById('endTime').value;
+                            const location = document.getElementById('meetingLocation').value;
+                            const meetingLink = document.getElementById('meetingLink').value;
+                            
+                            if (!title || !date || !startTime) {
+                                showToast('error', 'Please fill out all required fields');
+                                return;
+                            }
+                            
+                            const meetingData = {
+                                title: title,
+                                description: description,
+                                meeting_date: date,
+                                start_time: startTime,
+                                end_time: endTime,
+                                location: location,
+                                meeting_link: meetingLink
+                            };
+                            
+                            fetch(`/api/clubs/{{ club.id }}/meetings`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(meetingData)
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.error) {
+                                    showToast('error', data.error);
+                                } else {
+                                    showToast('success', 'Meeting scheduled successfully');
+                                    closeCreateMeetingModal();
+                                    loadMeetings();
+                                }
+                            })
+                            .catch(error => {
+                                showToast('error', 'Failed to schedule meeting');
+                                console.error('Error:', error);
+                            });
+                        }
+                        
+                        function editMeeting(meetingId) {
+                            // Implementation can be added later
+                            showToast('info', 'Edit meeting functionality coming soon');
+                        }
+                        
+                        function deleteMeeting(meetingId) {
+                            if (confirm('Are you sure you want to delete this meeting?')) {
+                                fetch(`/api/clubs/{{ club.id }}/meetings/${meetingId}`, {
+                                    method: 'DELETE'
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.error) {
+                                        showToast('error', data.error);
+                                    } else {
+                                        showToast('success', 'Meeting deleted successfully');
+                                        loadMeetings();
+                                    }
+                                })
+                                .catch(error => {
+                                    showToast('error', 'Failed to delete meeting');
+                                    console.error('Error:', error);
+                                });
+                            }
+                        }
+                        
+                        // Load meetings when the schedule tab is shown
+                        document.querySelector('a[data-section="schedule"]').addEventListener('click', function() {
+                            loadMeetings();
+                        });
+                    </script>
                 </div>
             </div>
         </section>
@@ -729,6 +1525,110 @@
                             <button type="button" onclick="updateClub()" class="btn-primary">
                                 <i class="fas fa-save"></i> Save Changes
                             </button>
+                            
+                            <script>
+                                function updateClub() {
+                                    const clubName = document.getElementById('editClubName').value;
+                                    const clubLocation = document.getElementById('editClubLocation').value;
+                                    const clubDescription = document.getElementById('editClubDescription').value;
+                                    
+                                    if (!clubName) {
+                                        showToast('error', 'Please enter a club name');
+                                        return;
+                                    }
+                                    
+                                    const clubData = {
+                                        name: clubName,
+                                        location: clubLocation,
+                                        description: clubDescription
+                                    };
+                                    
+                                    fetch(`/api/clubs/{{ club.id }}`, {
+                                        method: 'PUT',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify(clubData)
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.error) {
+                                            showToast('error', data.error);
+                                        } else {
+                                            showToast('success', 'Club updated successfully!');
+                                            // Update the UI
+                                            document.querySelector('.navbar-title h1').textContent = clubName;
+                                        }
+                                    })
+                                    .catch(error => {
+                                        showToast('error', 'Failed to update club');
+                                        console.error('Error:', error);
+                                    });
+                                }
+                                
+                                function updateClubFromModal() {
+                                    // Transfer values from modal to settings form
+                                    const modalName = document.getElementById('modalEditClubName').value;
+                                    const modalLocation = document.getElementById('modalEditClubLocation').value;
+                                    const modalDescription = document.getElementById('modalEditClubDescription').value;
+                                    
+                                    document.getElementById('editClubName').value = modalName;
+                                    document.getElementById('editClubLocation').value = modalLocation;
+                                    document.getElementById('editClubDescription').value = modalDescription;
+                                    
+                                    // Update the club via API
+                                    const clubData = {
+                                        name: modalName,
+                                        location: modalLocation,
+                                        description: modalDescription
+                                    };
+                                    
+                                    fetch(`/api/clubs/{{ club.id }}`, {
+                                        method: 'PUT',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify(clubData)
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.error) {
+                                            showToast('error', data.error);
+                                        } else {
+                                            showToast('success', 'Club updated successfully!');
+                                            closeEditClubModal();
+                                            // Update UI elements
+                                            document.querySelector('.navbar-title h1').innerHTML = `<i class="fas fa-users"></i> ${modalName}`;
+                                        }
+                                    })
+                                    .catch(error => {
+                                        showToast('error', 'Failed to update club');
+                                        console.error('Error:', error);
+                                    });
+                                }
+                                
+                                function openDeleteClubModal() {
+                                    if (confirm('Are you sure you want to delete this club? This action cannot be undone.')) {
+                                        fetch(`/api/clubs/{{ club.id }}`, {
+                                            method: 'DELETE'
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.error) {
+                                                showToast('error', data.error);
+                                            } else {
+                                                showToast('success', 'Club deleted successfully');
+                                                // Redirect to the main dashboard
+                                                window.location.href = '/welcome';
+                                            }
+                                        })
+                                        .catch(error => {
+                                            showToast('error', 'Failed to delete club');
+                                            console.error('Error:', error);
+                                        });
+                                    }
+                                }
+                            </script>
                         </form>
                     </div>
 
@@ -745,6 +1645,50 @@
         {% endif %}
     </div>
 </div>
+
+<script>
+    // Initialize dashboard data when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if club %}
+        // Initialize the main dashboard stats and data
+        fetch(`/api/clubs/{{ club.id }}/stats`)
+            .then(response => response.json())
+            .then(data => {
+                if (!data.error) {
+                    document.getElementById('projectCount').textContent = data.project_count || 0;
+                    document.getElementById('assignmentCount').textContent = data.active_assignments || 0;
+                    
+                    // Update member count if needed
+                    const memberCountElement = document.querySelector('.dashboard-stats .stat-info h3:first-child');
+                    if (memberCountElement) {
+                        memberCountElement.textContent = data.member_count || '{{ club.members|length }}';
+                    }
+                }
+            })
+            .catch(error => console.error('Error loading dashboard stats:', error));
+        
+        // Load data for the currently active section
+        const activeSection = document.querySelector('.club-section.active');
+        if (activeSection) {
+            const sectionId = activeSection.id;
+            
+            if (sectionId === 'stream') {
+                loadPosts();
+            } else if (sectionId === 'assignments') {
+                loadAssignments();
+            } else if (sectionId === 'members') {
+                // Members are loaded server-side
+            } else if (sectionId === 'projects') {
+                loadProjects();
+            } else if (sectionId === 'resources') {
+                loadResources();
+            } else if (sectionId === 'schedule') {
+                loadMeetings();
+            }
+        }
+        {% endif %}
+    });
+</script>
 
 <!-- Modals -->
 <!-- Create Club Modal -->
