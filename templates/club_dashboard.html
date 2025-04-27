@@ -25,59 +25,10 @@
 
 <style>
     /* Calendar event styling */
-    .calendar {
-        border-collapse: collapse;
-        width: 100%;
-        table-layout: fixed;
-    }
-    
-    .calendar-header {
-        background-color: #f8f9fa;
-        font-weight: 600;
-    }
-    
-    .calendar-header div {
-        padding: 10px;
-        text-align: center;
-        border-bottom: 2px solid #e2e8f0;
-    }
-    
-    .calendar-body {
-        background-color: white;
-    }
-    
-    .calendar-day {
-        position: relative;
-        height: 110px;
-        vertical-align: top;
-        border: 1px solid #e2e8f0;
-        padding: 6px;
-        overflow-y: auto;
-    }
-    
-    .day-number {
-        font-weight: 600;
-        font-size: 14px;
-        margin-bottom: 4px;
-        display: block;
-        color: #1f2937;
-    }
-    
-    .current-day {
-        display: inline-block;
-        width: 24px;
-        height: 24px;
-        background-color: #ec3750;
-        color: white;
-        border-radius: 50%;
-        text-align: center;
-        line-height: 24px;
-    }
-    
     .calendar-event {
-        margin: 3px 0;
-        padding: 3px 6px;
-        border-radius: 4px;
+        margin: 2px 0;
+        padding: 2px 4px;
+        border-radius: 3px;
         font-size: 11px;
         background-color: rgba(236, 55, 80, 0.1);
         color: #ec3750;
@@ -87,67 +38,26 @@
         text-overflow: ellipsis;
         border-left: 3px solid #ec3750;
         transition: all 0.2s ease;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        display: block;
     }
     
     .calendar-event:hover {
         background-color: rgba(236, 55, 80, 0.2);
         transform: translateY(-1px);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .calendar-day {
+        min-height: 60px;
+        max-height: 100px;
+        overflow-y: auto;
     }
     
     .calendar-day::-webkit-scrollbar {
-        width: 3px;
+        width: 4px;
     }
     
     .calendar-day::-webkit-scrollbar-thumb {
         background: rgba(0, 0, 0, 0.1);
-        border-radius: 3px;
-    }
-    
-    .calendar-day::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    
-    .empty-day {
-        background-color: #f8f9fa;
-    }
-    
-    .calendar-nav {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-        padding: 10px;
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    }
-    
-    .calendar-nav h3 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 600;
-        color: #333;
-    }
-    
-    .calendar-nav button {
-        background-color: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 6px;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    
-    .calendar-nav button:hover {
-        background-color: #f8f9fa;
-        border-color: #cbd5e1;
+        border-radius: 4px;
     }
     
     /* Event modal styling */
@@ -209,20 +119,11 @@
         
         // Show edit button only if user has permission (can be enhanced later)
         const editBtn = document.getElementById('eventModalEditBtn');
-        const isClubLeader = {{ 'true' if club and current_user.id == club.leader_id else 'false' }};
-        const isCoLeader = {{ 'true' if membership and membership.role == 'co-leader' else 'false' }};
+        editBtn.style.display = 'inline-block';
         
-        if (isClubLeader || isCoLeader) {
-            editBtn.style.display = 'inline-block';
-        } else {
-            editBtn.style.display = 'none';
-        }
-        
-        // Open modal with animation
+        // Open modal
         const modal = document.getElementById('eventDetailsModal');
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
-        
+        modal.style.display = 'block';
         setTimeout(() => {
             modal.classList.add('show');
         }, 10);
@@ -231,12 +132,9 @@
     function closeEventModal() {
         const modal = document.getElementById('eventDetailsModal');
         modal.classList.remove('show');
-        
         setTimeout(() => {
             modal.style.display = 'none';
-            document.body.style.overflow = ''; // Restore background scrolling
         }, 300);
-        
         currentEventId = null;
     }
     
@@ -253,24 +151,6 @@
             return dateStr;
         }
     }
-    
-    // Close modal if user clicks outside of it
-    document.addEventListener('click', function(event) {
-        const modal = document.getElementById('eventDetailsModal');
-        if (event.target === modal) {
-            closeEventModal();
-        }
-    });
-    
-    // Add keyboard support for closing modal with Escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            const modal = document.getElementById('eventDetailsModal');
-            if (modal.classList.contains('show')) {
-                closeEventModal();
-            }
-        }
-    });
 </script>
 
                     <a href="#chat" class="nav-link" data-section="chat">
@@ -393,67 +273,6 @@
         </div>
     </div>
 </div>
-
-<style>
-    /* Enhanced Event Modal Styling */
-    #eventDetailsModal .modal-content {
-        max-width: 500px;
-        border-radius: 12px;
-    }
-    
-    #eventDetailsModal .modal-header {
-        border-bottom: 1px solid #e2e8f0;
-        padding: 15px 20px;
-    }
-    
-    #eventDetailsModal .modal-header h3 {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: #ec3750;
-    }
-    
-    #eventDetailsModal .modal-body {
-        padding: 20px;
-    }
-    
-    .event-details {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-    
-    .event-detail-row {
-        display: flex;
-        align-items: flex-start;
-    }
-    
-    .event-detail-label {
-        font-weight: 500;
-        width: 120px;
-        color: #64748b;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .event-detail-label i {
-        width: 16px;
-        color: #ec3750;
-    }
-    
-    #eventModalDescription {
-        margin: 0;
-        line-height: 1.5;
-    }
-    
-    #eventDetailsModal .modal-footer {
-        border-top: 1px solid #e2e8f0;
-        padding: 15px 20px;
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-    }
-</style>
 
                         showToast('error', 'Please enter a club name');
                         return;
@@ -1519,22 +1338,20 @@
                         </button>
                     </div>
 
-                    <table class="calendar">
-                        <thead class="calendar-header">
-                            <tr>
-                                <div>Sun</div>
-                                <div>Mon</div>
-                                <div>Tue</div>
-                                <div>Wed</div>
-                                <div>Thu</div>
-                                <div>Fri</div>
-                                <div>Sat</div>
-                            </tr>
-                        </thead>
-                        <tbody class="calendar-body" id="calendar-body">
+                    <div class="calendar">
+                        <div class="calendar-header">
+                            <div>Sun</div>
+                            <div>Mon</div>
+                            <div>Tue</div>
+                            <div>Wed</div>
+                            <div>Thu</div>
+                            <div>Fri</div>
+                            <div>Sat</div>
+                        </div>
+                        <div class="calendar-body" id="calendar-body">
                             <!-- Calendar will be filled dynamically with JS -->
-                        </tbody>
-                    </table>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="meetings-list">
@@ -1566,7 +1383,6 @@
                                 }
                                 
                                 // Also update the calendar view
-                                generateCalendar();
                                 updateCalendarWithMeetings(data.meetings);
                             })
                             .catch(error => {
@@ -1607,82 +1423,13 @@
                             return element;
                         }
                         
-                        // Calendar generation logic
-                        function generateCalendar() {
-                            const calendarBody = document.getElementById('calendar-body');
-                            if (!calendarBody) return;
-                            
-                            // Clear existing calendar
-                            calendarBody.innerHTML = '';
-                            
-                            // Get current month and year
-                            const now = new Date();
-                            const currentMonth = now.getMonth();
-                            const currentYear = now.getFullYear();
-                            const currentDay = now.getDate();
-                            
-                            // Update month display
-                            const monthDisplay = document.getElementById('currentMonth');
-                            if (monthDisplay) {
-                                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                                monthDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
-                            }
-                            
-                            // Get first day of month and total days
-                            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-                            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-                            
-                            // Create blank cells for days before first of month
-                            for (let i = 0; i < firstDay; i++) {
-                                const cell = document.createElement('div');
-                                cell.className = 'calendar-day empty-day';
-                                calendarBody.appendChild(cell);
-                            }
-                            
-                            // Create cells for days in month
-                            for (let i = 1; i <= daysInMonth; i++) {
-                                const cell = document.createElement('div');
-                                cell.className = 'calendar-day';
-                                
-                                // Add day number
-                                const dayNumber = document.createElement('div');
-                                dayNumber.className = 'day-number';
-                                
-                                // Highlight current day
-                                if (i === currentDay) {
-                                    dayNumber.className += ' current-day';
-                                }
-                                
-                                dayNumber.textContent = i;
-                                cell.appendChild(dayNumber);
-                                
-                                calendarBody.appendChild(cell);
-                            }
-                            
-                            // Add navigation events
-                            const prevMonth = document.getElementById('prevMonth');
-                            const nextMonth = document.getElementById('nextMonth');
-                            
-                            if (prevMonth) {
-                                prevMonth.addEventListener('click', () => {
-                                    showToast('info', 'Previous month navigation coming soon');
-                                });
-                            }
-                            
-                            if (nextMonth) {
-                                nextMonth.addEventListener('click', () => {
-                                    showToast('info', 'Next month navigation coming soon');
-                                });
-                            }
-                        }
-                        
                         function updateCalendarWithMeetings(meetings) {
                             // This function will update the calendar with meeting events
                             const calendarBody = document.getElementById('calendar-body');
                             if (!calendarBody) return;
                             
                             // Get all day cells in the calendar
-                            const dayCells = calendarBody.querySelectorAll('.calendar-day:not(.empty-day)');
+                            const dayCells = calendarBody.querySelectorAll('.calendar-day');
                             
                             // Clear existing events
                             dayCells.forEach(cell => {
@@ -1690,74 +1437,33 @@
                                 events.forEach(event => event.remove());
                             });
                             
-                            // Group meetings by date
-                            const meetingsByDate = {};
+                            // Add meeting events to the appropriate days
                             meetings.forEach(meeting => {
                                 const meetingDate = new Date(meeting.meeting_date);
                                 const dayNumber = meetingDate.getDate();
                                 
-                                if (!meetingsByDate[dayNumber]) {
-                                    meetingsByDate[dayNumber] = [];
-                                }
-                                meetingsByDate[dayNumber].push(meeting);
-                            });
-                            
-                            // Add meeting events to the appropriate days
-                            Object.keys(meetingsByDate).forEach(dayNumber => {
-                                const meetings = meetingsByDate[dayNumber];
-                                const index = parseInt(dayNumber) - 1;
-                                
-                                if (index >= 0 && index < dayCells.length) {
-                                    const cell = dayCells[index];
-                                    
-                                    // Add up to 3 events, with a "+X more" indicator if there are more
-                                    const displayCount = Math.min(meetings.length, 3);
-                                    
-                                    for (let i = 0; i < displayCount; i++) {
-                                        const meeting = meetings[i];
+                                // Find the cell for this day
+                                for (let i = 0; i < dayCells.length; i++) {
+                                    const dayNumberElement = dayCells[i].querySelector('.day-number');
+                                    if (dayNumberElement && parseInt(dayNumberElement.textContent) === dayNumber) {
+                                        // Create event element
                                         const event = document.createElement('div');
                                         event.className = 'calendar-event';
-                                        
-                                        // Truncate long titles
-                                        let title = meeting.title;
-                                        if (title.length > 20) {
-                                            title = title.substring(0, 17) + '...';
-                                        }
-                                        
-                                        event.textContent = title;
-                                        
-                                        // Store meeting data for modal display
-                                        event.dataset.eventId = meeting.id;
-                                        event.dataset.eventTitle = meeting.title;
-                                        event.dataset.eventDate = meeting.meeting_date;
-                                        event.dataset.eventTime = meeting.start_time + (meeting.end_time ? ` - ${meeting.end_time}` : '');
-                                        event.dataset.eventLocation = meeting.location || 'Not specified';
-                                        event.dataset.eventDescription = meeting.description || 'No description provided';
+                                        event.textContent = meeting.title;
+                                        event.style.backgroundColor = 'rgba(236, 55, 80, 0.1)';
+                                        event.style.color = '#ec3750';
+                                        event.style.padding = '3px 6px';
+                                        event.style.borderRadius = '4px';
+                                        event.style.fontSize = '12px';
+                                        event.style.marginTop = '3px';
+                                        event.style.cursor = 'pointer';
                                         
                                         event.addEventListener('click', () => {
-                                            openEventModal(event.dataset);
+                                            alert(`${meeting.title}\nTime: ${meeting.start_time}${meeting.end_time ? ` - ${meeting.end_time}` : ''}\nLocation: ${meeting.location || 'Not specified'}`);
                                         });
                                         
-                                        cell.appendChild(event);
-                                    }
-                                    
-                                    // Add a "+X more" indicator if there are more than 3 events
-                                    if (meetings.length > 3) {
-                                        const moreIndicator = document.createElement('div');
-                                        moreIndicator.className = 'calendar-event';
-                                        moreIndicator.style.textAlign = 'center';
-                                        moreIndicator.style.background = 'rgba(108, 117, 125, 0.1)';
-                                        moreIndicator.style.color = '#6c757d';
-                                        moreIndicator.style.border = 'none';
-                                        moreIndicator.style.fontWeight = '500';
-                                        moreIndicator.textContent = `+${meetings.length - 3} more`;
-                                        
-                                        moreIndicator.addEventListener('click', () => {
-                                            // Could show a modal with all events for this day
-                                            showToast('info', `${meetings.length} events on day ${dayNumber}`);
-                                        });
-                                        
-                                        cell.appendChild(moreIndicator);
+                                        dayCells[i].appendChild(event);
+                                        break;
                                     }
                                 }
                             });
