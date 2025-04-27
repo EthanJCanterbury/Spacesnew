@@ -392,18 +392,13 @@
             display: none;
             width: 100%;
             padding: 0.5rem;
-            opacity: 0;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
             min-height: 300px; /* Ensure minimum height so it's visible */
             position: relative; /* Create a new stacking context */
             z-index: 1; /* Ensure it's above any potential overlapping elements */
-            visibility: hidden;
         }
 
         .tab-pane.active {
             display: block !important; /* Use !important to override any other styles */
-            opacity: 1 !important;
-            visibility: visible !important;
             z-index: 2; /* Higher than inactive tabs */
         }
         
@@ -465,6 +460,14 @@
             background-color: transparent;
             color: var(--text);
             border: 1px solid var(--border);
+        }
+        
+        /* Fix buttons in modals */
+        .modal-actions button {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 0.5rem;
         }
 
         .modal-content {
@@ -1997,8 +2000,6 @@ function openTab(tabName) {
     tabPanes.forEach(function(pane) {
         pane.classList.remove('active');
         pane.style.display = 'none';
-        pane.style.opacity = '0';
-        pane.style.visibility = 'hidden';
     });
 
     // Deactivate all tab links
@@ -2007,50 +2008,38 @@ function openTab(tabName) {
         link.classList.remove('active');
     });
 
-    // Force a small delay for DOM updates to process
-    setTimeout(() => {
-        // Activate selected tab with all necessary styling
-        selectedTab.classList.add('active');
-        selectedTab.style.display = 'block';
-        selectedTab.style.visibility = 'visible';
-        
-        // Force a reflow
-        void selectedTab.offsetHeight;
-        
-        // Then set opacity
-        selectedTab.style.opacity = '1';
-        
-        console.log('Tab activated and visible:', tabName);
-        
-        // Activate the correct nav link
-        const selectedLink = document.getElementById(tabName + '-tab');
-        if (selectedLink) {
-            selectedLink.classList.add('active');
-        } else if (tabName === 'dashboard') {
-            // Special case for dashboard
-            document.getElementById('dashboard-tab').classList.add('active');
-        }
+    // Activate selected tab immediately
+    selectedTab.classList.add('active');
+    selectedTab.style.display = 'block';
     
-        // Load data for active tab with proper error handling
-        try {
-            if (tabName === 'stream') {
-                typeof loadPosts === 'function' && loadPosts();
-            } else if (tabName === 'assignments') {
-                typeof loadAssignments === 'function' && loadAssignments();
-            } else if (tabName === 'resources') {
-                typeof loadResources === 'function' && loadResources();
-            } else if (tabName === 'chat') {
-                typeof loadChatChannels === 'function' && loadChatChannels();
-            } else if (tabName === 'schedule') {
-                typeof loadMeetings === 'function' && loadMeetings();
-            } else if (tabName === 'projects') {
-                typeof loadProjects === 'function' && loadProjects();
-            }
-        } catch (error) {
-            console.error('Error loading tab data:', error);
-            showToast('error', 'Failed to load tab content');
+    // Activate the correct nav link
+    const selectedLink = document.getElementById(tabName + '-tab');
+    if (selectedLink) {
+        selectedLink.classList.add('active');
+    } else if (tabName === 'dashboard') {
+        // Special case for dashboard
+        document.getElementById('dashboard-tab').classList.add('active');
+    }
+
+    // Load data for active tab with proper error handling
+    try {
+        if (tabName === 'stream') {
+            typeof loadPosts === 'function' && loadPosts();
+        } else if (tabName === 'assignments') {
+            typeof loadAssignments === 'function' && loadAssignments();
+        } else if (tabName === 'resources') {
+            typeof loadResources === 'function' && loadResources();
+        } else if (tabName === 'chat') {
+            typeof loadChatChannels === 'function' && loadChatChannels();
+        } else if (tabName === 'schedule') {
+            typeof loadMeetings === 'function' && loadMeetings();
+        } else if (tabName === 'projects') {
+            typeof loadProjects === 'function' && loadProjects();
         }
-    }, 20);
+    } catch (error) {
+        console.error('Error loading tab data:', error);
+        showToast('error', 'Failed to load tab content');
+    }
 }
 
 // Mobile sidebar toggle
