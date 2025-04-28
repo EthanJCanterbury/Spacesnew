@@ -663,7 +663,12 @@ def run_python(site_id):
             r'compile\s*\(', r'open\s*\(', r'os\.system\s*\(', r'subprocess',
             r'count\s*\(', r'while\s+True',
             r'for\s+.*\s+in\s+range\s*\(\s*[0-9]{7,}\s*\)',
-            r'set\s*\(\s*.*\.count\(\s*0\s*\)\s*\)'
+            r'set\s*\(\s*.*\.count\(\s*0\s*\)\s*\)',
+            r'sys\.modules', r'\.modules',
+            r'__dict__', r'__class__',
+            r'__bases__', r'__subclasses__',
+            r'__mro__', r'__getattribute__',
+            r'importlib', r'imp'
         ]
 
         for pattern in dangerous_patterns:
@@ -767,7 +772,16 @@ def run_python(site_id):
             for module_name in allowed:
                 try:
                     module = __import__(module_name)
-                    restricted_globals[module_name] = module
+                    # Create a safe version of sys without access to modules
+                    if module_name == 'sys':
+                        import types
+                        safe_sys = types.ModuleType('sys')
+                        for attr in dir(module):
+                            if attr != 'modules':
+                                setattr(safe_sys, attr, getattr(module, attr))
+                        restricted_globals[module_name] = safe_sys
+                    else:
+                        restricted_globals[module_name] = module
                 except ImportError:
                     pass
 
