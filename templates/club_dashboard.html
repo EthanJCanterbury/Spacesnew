@@ -1510,6 +1510,138 @@
                     </div>
                 </div>
                 
+                <style>
+                    .projects-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                        gap: 20px;
+                        margin-top: 20px;
+                    }
+                    
+                    .project-card {
+                        background-color: white;
+                        border-radius: 10px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                        overflow: hidden;
+                        transition: transform 0.2s ease, box-shadow 0.2s ease;
+                        display: flex;
+                        flex-direction: column;
+                        border: 1px solid #eee;
+                    }
+                    
+                    .project-card:hover {
+                        transform: translateY(-5px);
+                        box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+                    }
+                    
+                    .project-header {
+                        padding: 15px;
+                        border-bottom: 1px solid #f0f0f0;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+                    
+                    .project-header h3 {
+                        margin: 0;
+                        font-size: 18px;
+                        font-weight: 600;
+                        color: #333;
+                    }
+                    
+                    .featured-badge {
+                        background-color: #fff4e6;
+                        color: #ff9800;
+                        font-size: 12px;
+                        font-weight: 500;
+                        padding: 4px 8px;
+                        border-radius: 4px;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                    }
+                    
+                    .project-body {
+                        padding: 15px;
+                        flex: 1;
+                    }
+                    
+                    .project-body p {
+                        margin: 0 0 15px;
+                        color: #666;
+                        font-size: 14px;
+                    }
+                    
+                    .project-meta {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                        margin-bottom: 15px;
+                        font-size: 13px;
+                        color: #777;
+                    }
+                    
+                    .project-meta span {
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                    }
+                    
+                    .project-meta i {
+                        color: #ec3750;
+                    }
+                    
+                    .project-actions {
+                        display: flex;
+                        justify-content: space-between;
+                        padding: 15px;
+                        border-top: 1px solid #f0f0f0;
+                        background-color: #fafafa;
+                    }
+                    
+                    .btn-sm {
+                        padding: 6px 12px;
+                        font-size: 13px;
+                        font-weight: 500;
+                    }
+                    
+                    .view-button {
+                        display: block;
+                        text-align: center;
+                        background-color: #ec3750;
+                        color: white;
+                        text-decoration: none;
+                        padding: 8px 16px;
+                        border-radius: 6px;
+                        font-weight: 500;
+                        font-size: 14px;
+                        transition: background-color 0.2s;
+                    }
+                    
+                    .view-button:hover {
+                        background-color: #d63146;
+                    }
+                    
+                    .feature-button {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        background-color: transparent;
+                        border: 1px solid #ddd;
+                        color: #555;
+                        padding: 6px 12px;
+                        border-radius: 6px;
+                        font-size: 13px;
+                        font-weight: 500;
+                        cursor: pointer;
+                        transition: background-color 0.2s;
+                    }
+                    
+                    .feature-button:hover {
+                        background-color: #f0f0f0;
+                    }
+                </style>
+                
                 <script>
                     function loadProjects() {
                         const container = document.getElementById('projects-container');
@@ -1573,10 +1705,10 @@
                                 </div>
                             </div>
                             <div class="project-actions">
-                                <a href="/project/${project.slug}" target="_blank" class="btn-primary btn-sm">View</a>
+                                <a href="/project/${project.slug}" target="_blank" class="view-button">View</a>
                                 ${project.featured ? 
-                                  `<button class="btn-secondary btn-sm" onclick="toggleProjectFeatured(${project.id}, false)"><i class="fas fa-star-half-alt"></i> Unfeature</button>` :
-                                  `<button class="btn-secondary btn-sm" onclick="toggleProjectFeatured(${project.id}, true)"><i class="fas fa-star"></i> Feature</button>`
+                                  `<button class="feature-button" onclick="toggleProjectFeatured(${project.id}, false)"><i class="fas fa-star-half-alt"></i> Unfeature</button>` :
+                                  `<button class="feature-button" onclick="toggleProjectFeatured(${project.id}, true)"><i class="fas fa-star"></i> Feature</button>`
                                 }
                             </div>
                         `;
