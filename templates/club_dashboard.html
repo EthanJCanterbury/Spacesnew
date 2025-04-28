@@ -60,10 +60,10 @@
         text-align: center;
     }
     
-    /* Font replacements for Google Fonts (to avoid CSP issues) */
+    /* System fonts only (to avoid CSP issues) */
     :root {
-        --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        --font-mono: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+        --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+        --font-mono: SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace;
     }
     
     body, button, input, select, textarea {
@@ -583,12 +583,13 @@
                 });
 
                 function loadMiniDashboards() {
-                    // Load upcoming meetings mini dashboard
-                    fetch(`/api/clubs/{{ club.id }}/meetings?limit=2&upcoming=true`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const container = document.getElementById('upcoming-meetings-mini');
-                        if (!container) return;
+                    try {
+                        // Load upcoming meetings mini dashboard
+                        fetch(`/api/clubs/{{ club.id }}/meetings?limit=2&upcoming=true`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const container = document.getElementById('upcoming-meetings-mini');
+                            if (!container) return;
                         
                         container.innerHTML = '';
                         
@@ -623,8 +624,12 @@
                             container.innerHTML = '<div class="error-state">Failed to load meetings.</div>';
                         }
                     });
+                    } catch (err) {
+                        console.log("Error loading mini dashboards:", err);
+                    }
                     
-                    // Load active assignments mini dashboard
+                    try {
+                        // Load active assignments mini dashboard
                     fetch(`/api/clubs/{{ club.id }}/assignments?limit=2&active=true`)
                     .then(response => response.json())
                     .then(data => {
@@ -664,6 +669,9 @@
                             container.innerHTML = '<div class="error-state">Failed to load assignments.</div>';
                         }
                     });
+                    } catch (err) {
+                        console.log("Error loading assignments dashboard:", err);
+                    }
                 }
             </script>
 
@@ -1234,9 +1242,13 @@
                                 
                                 // Update count on dashboard safely
                                 const activeAssignments = data.assignments.filter(a => a.status === 'active').length;
-                                const assignmentCountEl = document.getElementById('assignmentCount');
-                                if (assignmentCountEl) {
-                                    assignmentCountEl.textContent = activeAssignments;
+                                try {
+                                    const assignmentCountEl = document.getElementById('assignmentCount');
+                                    if (assignmentCountEl) {
+                                        assignmentCountEl.textContent = activeAssignments;
+                                    }
+                                } catch (err) {
+                                    console.log("Assignment count element not available");
                                 }
                             } else {
                                 container.innerHTML = '<div class="empty-state">No assignments yet. Create your first assignment!</div>';
@@ -1671,9 +1683,13 @@
                                 });
                                 
                                 // Update count on dashboard safely
-                                const projectCountEl = document.getElementById('projectCount');
-                                if (projectCountEl) {
-                                    projectCountEl.textContent = data.projects.length;
+                                try {
+                                    const projectCountEl = document.getElementById('projectCount');
+                                    if (projectCountEl) {
+                                        projectCountEl.textContent = data.projects.length;
+                                    }
+                                } catch (err) {
+                                    console.log("Project count element not available");
                                 }
                             } else {
                                 container.innerHTML = '<div class="empty-state">No projects found. Members can start creating projects on their dashboard.</div>';
@@ -2612,13 +2628,19 @@ if (navbarTitle) {
         // Prevent the error from showing in console
         event.preventDefault();
         
-        // You can add custom error handling here if needed
-        // For example, showing a toast message for critical errors
-        if (event.error && event.error.message && 
-            (event.error.message.includes('null') || 
-             event.error.message.includes('undefined'))) {
-            // This is likely a DOM element not found error
-            // We can safely ignore these in most cases
+        // Custom error handling
+        if (event.error && event.error.message) {
+            if (event.error.message.includes('null') || 
+                event.error.message.includes('undefined') ||
+                event.error.message.includes('Cannot set properties')) {
+                // DOM element not found errors
+                console.log("DOM interaction error - element may not exist:", event.error.message);
+            } else {
+                // Show toast for other errors if toast function exists
+                if (typeof showToast === 'function') {
+                    showToast('error', 'An error occurred. Please refresh the page.');
+                }
+            }
         }
     });
     
@@ -5508,9 +5530,21 @@ document.addEventListener('DOMContentLoaded', function() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     };
     
-    // Initialize stats counters
-    document.getElementById('projectCount').textContent = Math.floor(Math.random() * 20) + 5;
-    document.getElementById('assignmentCount').textContent = Math.floor(Math.random() * 10) + 1;
+    // Initialize stats counters safely
+    try {
+        const projectCounter = document.getElementById('projectCount');
+        const assignmentCounter = document.getElementById('assignmentCount');
+        
+        if (projectCounter) {
+            projectCounter.textContent = Math.floor(Math.random() * 20) + 5;
+        }
+        
+        if (assignmentCounter) {
+            assignmentCounter.textContent = Math.floor(Math.random() * 10) + 1;
+        }
+    } catch (err) {
+        console.log("Could not initialize counters");
+    }
 });
 </script>
 
