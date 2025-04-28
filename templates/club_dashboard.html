@@ -570,6 +570,12 @@
                 </div>
             </div>
 
+            <!-- Hidden counters for dashboard stats -->
+            <div style="display: none;">
+                <span id="projectCount">0</span>
+                <span id="assignmentCount">0</span>
+            </div>
+
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     // Load mini dashboards when the dashboard is active
@@ -1225,12 +1231,18 @@
                                     container.appendChild(assignmentCard);
                                 });
                                 
-                                // Update count on dashboard
+                                // Update count on dashboard safely
                                 const activeAssignments = data.assignments.filter(a => a.status === 'active').length;
-                                document.getElementById('assignmentCount').textContent = activeAssignments;
+                                const assignmentCountEl = document.getElementById('assignmentCount');
+                                if (assignmentCountEl) {
+                                    assignmentCountEl.textContent = activeAssignments;
+                                }
                             } else {
                                 container.innerHTML = '<div class="empty-state">No assignments yet. Create your first assignment!</div>';
-                                document.getElementById('assignmentCount').textContent = '0';
+                                const assignmentCountEl = document.getElementById('assignmentCount');
+                                if (assignmentCountEl) {
+                                    assignmentCountEl.textContent = '0';
+                                }
                             }
                         })
                         .catch(error => {
@@ -1525,11 +1537,17 @@
                                     container.appendChild(projectCard);
                                 });
                                 
-                                // Update count on dashboard
-                                document.getElementById('projectCount').textContent = data.projects.length;
+                                // Update count on dashboard safely
+                                const projectCountEl = document.getElementById('projectCount');
+                                if (projectCountEl) {
+                                    projectCountEl.textContent = data.projects.length;
+                                }
                             } else {
                                 container.innerHTML = '<div class="empty-state">No projects found. Members can start creating projects on their dashboard.</div>';
-                                document.getElementById('projectCount').textContent = '0';
+                                const projectCountEl = document.getElementById('projectCount');
+                                if (projectCountEl) {
+                                    projectCountEl.textContent = '0';
+                                }
                             }
                         })
                         .catch(error => {
@@ -2497,8 +2515,15 @@ if (navbarTitle) {
             .then(response => response.json())
             .then(data => {
                 if (!data.error) {
-                    document.getElementById('projectCount').textContent = data.project_count || 0;
-                    document.getElementById('assignmentCount').textContent = data.active_assignments || 0;
+                    const projectCountEl = document.getElementById('projectCount');
+                    const assignmentCountEl = document.getElementById('assignmentCount');
+                    
+                    if (projectCountEl) {
+                        projectCountEl.textContent = data.project_count || 0;
+                    }
+                    if (assignmentCountEl) {
+                        assignmentCountEl.textContent = data.active_assignments || 0;
+                    }
                     
                     // Update member count if needed
                     const memberCountElement = document.querySelector('.dashboard-stats .stat-info h3:first-child');
