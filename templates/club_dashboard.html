@@ -238,6 +238,12 @@
                     </a>
                 </li>
                 <li>
+                    <a href="javascript:void(0)" class="nav-link external-link" data-external-url="https://toolbox.hackclub.com">
+                        <i class="fas fa-tools"></i>
+                        <span>Toolbox</span>
+                    </a>
+                </li>
+                <li>
                     <a href="#settings" class="nav-link" data-section="settings">
                         <i class="fas fa-cogs"></i>
                         <span>Settings</span>
@@ -2120,29 +2126,63 @@
                         }
                         
                         function createMeeting() {
-                            const title = document.getElementById('meetingTitle').value;
-                            const description = document.getElementById('meetingDescription').value;
+                            const form = document.getElementById('createMeetingForm');
+                            if (!form.checkValidity()) {
+                                form.reportValidity();
+                                return;
+                            }
+
+                            const title = document.getElementById('meetingTitle').value.trim();
+                            const description = document.getElementById('meetingDescription').value.trim();
                             const date = document.getElementById('meetingDate').value;
                             const startTime = document.getElementById('startTime').value;
                             const endTime = document.getElementById('endTime').value;
-                            const location = document.getElementById('meetingLocation').value;
-                            const meetingLink = document.getElementById('meetingLink').value;
-                            
+                            const location = document.getElementById('meetingLocation').value.trim();
+                            const meetingLink = document.getElementById('meetingLink').value.trim();
+
+                            // Basic validation
                             if (!title || !date || !startTime) {
-                                showToast('error', 'Please fill out all required fields');
+                                showToast('error', 'Please fill in all required fields');
                                 return;
                             }
-                            
+
+                            // Validate meeting date is not in the past
+                            const meetingDate = new Date(date);
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            if (meetingDate < today) {
+                                showToast('error', 'Meeting date cannot be in the past');
+                                return;
+                            }
+
+                            // Validate end time is after start time if provided
+                            if (endTime) {
+                                const startDateTime = new Date(`${date}T${startTime}`);
+                                const endDateTime = new Date(`${date}T${endTime}`);
+                                if (endDateTime <= startDateTime) {
+                                    showToast('error', 'End time must be after start time');
+                                    return;
+                                }
+                            }
+
+                            // Create meeting data object
                             const meetingData = {
                                 title: title,
-                                description: description,
+                                description: description || null,
                                 meeting_date: date,
                                 start_time: startTime,
-                                end_time: endTime,
-                                location: location,
-                                meeting_link: meetingLink
+                                end_time: endTime || null,
+                                location: location || null,
+                                meeting_link: meetingLink || null
                             };
-                            
+
+                            // Show loading state
+                            const submitButton = document.querySelector('#createMeetingModal .btn-primary');
+                            const originalText = submitButton.textContent;
+                            submitButton.disabled = true;
+                            submitButton.textContent = 'Creating...';
+
+                            // Make API request to create meeting
                             fetch(`/api/clubs/{{ club.id }}/meetings`, {
                                 method: 'POST',
                                 headers: {
@@ -2150,15 +2190,68 @@
                                 },
                                 body: JSON.stringify(meetingData)
                             })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.error) {
-                                    showToast('error', data.error);
-                                } else {
-                                    showToast('success', 'Meeting scheduled successfully');
-                                    closeCreateMeetingModal();
-                                    loadMeetings();
+                            .then(async response => {
+                                const data = await response.json();
+                                if (!response.ok) {
+                                    throw new Error(data.error || 'Failed to create meeting');
                                 }
+                                
+                                // Show success message
+                                showToast('success', 'Meeting created successfully!');
+                                
+                                // Close the modal
+                                closeModal('createMeetingModal');
+                                document.getElementById('createMeetingForm').reset();
+                                
+                                // Reset button state
+                                submitButton.disabled = false;
+                                submitButton.textContent = originalText;
+                                
+                                if (data.meeting) {
+                                    // Add to all meetings list
+                                    const allMeetingsContainer = document.getElementById('meetings-list');
+                                    if (allMeetingsContainer) {
+                                        // If empty state is showing, clear it
+                                        if (allMeetingsContainer.querySelector('.meetings-list-empty')) {
+                                            allMeetingsContainer.innerHTML = '';
+                                        }
+                                        
+                                        const meetingItem = document.createElement('div');
+                                        meetingItem.className = 'meeting-item';
+                                        
+                                        const meetingDate = new Date(data.meeting.meeting_date);
+                                        const formattedDate = meetingDate.toLocaleDateString('en-US', { 
+                                            weekday: 'short', 
+                                            month: 'short', 
+                                            day: 'numeric', 
+                                            year: 'numeric' 
+                                        });
+                                        
+                                        meetingItem.innerHTML = `
+                                            <h3>${data.meeting.title}</h3>
+                                            <div class="meeting-meta">
+                                                <span><i class="fas fa-calendar"></i> ${formattedDate}</span>
+                                                <span><i class="fas fa-clock"></i> ${data.meeting.start_time}${data.meeting.end_time ? ` - ${data.meeting.end_time}` : ''}</span>
+                                                <span><i class="fas fa-map-marker-alt"></i> ${data.meeting.location || 'No location set'}</span>
+                                            </div>
+                                            <div class="meeting-actions">
+                                                <button class="btn-icon" onclick="viewMeeting(${data.meeting.id})"><i class="fas fa-eye"></i></button>
+                                                <button class="btn-icon" onclick="editMeeting(${data.meeting.id})"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-icon" onclick="deleteMeeting(${data.meeting.id})"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                        `;
+                                        
+                                        // Add at the beginning of the list (newest first)
+                                        if (allMeetingsContainer.firstChild) {
+                                            allMeetingsContainer.insertBefore(meetingItem, allMeetingsContainer.firstChild);
+                                        } else {
+                                            allMeetingsContainer.appendChild(meetingItem);
+                                        }
+                                    }
+                                }
+                                
+                                // Also refresh upcoming meetings
+                                loadMeetings();
                             })
                             .catch(error => {
                                 showToast('error', 'Failed to schedule meeting');
@@ -4704,8 +4797,20 @@ if (navbarTitle) {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Handle external links that look like tabs
+    const externalLinks = document.querySelectorAll('.nav-link.external-link');
+    externalLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const externalUrl = link.getAttribute('data-external-url');
+            if (externalUrl) {
+                window.open(externalUrl, '_blank');
+            }
+        });
+    });
+    
     // Navigation between tabs
-    const navLinks = document.querySelectorAll('.nav-link');
+    const navLinks = document.querySelectorAll('.nav-link:not(.external-link)');
     const sections = document.querySelectorAll('.club-section');
 
     navLinks.forEach(link => {
@@ -5271,35 +5376,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 1500);
     };
     
-    window.createMeeting = function() {
-        const titleElement = document.getElementById('meetingTitle');
-        const dateElement = document.getElementById('meetingDate');
-        const startTimeElement = document.getElementById('startTime');
-        
-        if (!titleElement || !dateElement || !startTimeElement) {
-            console.error('Meeting form elements not found');
-            showToast('error', 'Form elements not found');
-            return;
-        }
-        
-        const title = titleElement.value;
-        const date = dateElement.value;
-        const startTime = startTimeElement.value;
-        
-        if (!title || !date || !startTime) {
-            showToast('error', 'Please fill out all required fields');
-            return;
-        }
-        
-        // Simulate API call
-        showToast('info', 'Scheduling meeting...');
-        
-        setTimeout(() => {
-            showToast('success', 'Meeting scheduled successfully!');
-            closeCreateMeetingModal();
-            // In a real app, we'd update the UI and regenerate calendar
-        }, 1500);
-    };
+    // Note: The proper createMeeting implementation exists earlier in the file
     
     window.viewClub = function(clubId) {
         // In a real app, we'd navigate to the club page
