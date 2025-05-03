@@ -21,6 +21,9 @@ def get_club_hackatime_members(club_id):
         # Get all users in the club with Hackatime API keys
         members = []
         
+        # Track processed user IDs to avoid duplicates
+        processed_user_ids = set()
+        
         # Get leader
         leader = User.query.get(club.leader_id)
         if leader and leader.wakatime_api_key:
@@ -34,10 +37,15 @@ def get_club_hackatime_members(club_id):
                 'avatar': leader.avatar,
                 'stats': leader_stats
             })
+            processed_user_ids.add(leader.id)
         
         # Get members
         memberships = ClubMembership.query.filter_by(club_id=club_id).all()
         for membership in memberships:
+            # Skip if we already processed this user (e.g., if leader is also listed as a member)
+            if membership.user_id in processed_user_ids:
+                continue
+                
             member = User.query.get(membership.user_id)
             if member and member.wakatime_api_key:
                 # Get basic stats summary
@@ -50,6 +58,7 @@ def get_club_hackatime_members(club_id):
                     'avatar': member.avatar,
                     'stats': member_stats
                 })
+                processed_user_ids.add(member.id)
         
         return jsonify({'members': members})
     except Exception as e:

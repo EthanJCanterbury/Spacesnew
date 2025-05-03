@@ -2916,15 +2916,20 @@
                 function showMemberProjects(userId, username) {
                     selectedMemberId = userId;
                     
-                    // Show projects panel
-                    document.getElementById('hackatime-members-wrapper').style.display = 'none';
-                    document.getElementById('hackatime-projects-wrapper').style.display = 'block';
+                    // Show projects panel - safely access DOM elements
+                    const membersWrapper = document.getElementById('hackatime-members-wrapper');
+                    const projectsWrapper = document.getElementById('hackatime-projects-wrapper');
+                    const projectsTitle = document.getElementById('hackatime-projects-title');
+                    const searchInput = document.getElementById('project-search-input');
+                    
+                    if (membersWrapper) membersWrapper.style.display = 'none';
+                    if (projectsWrapper) projectsWrapper.style.display = 'block';
                     
                     // Update title
-                    document.getElementById('hackatime-projects-title').textContent = `${username}'s Projects`;
+                    if (projectsTitle) projectsTitle.textContent = `${username}'s Projects`;
                     
                     // Clear search
-                    document.getElementById('project-search-input').value = '';
+                    if (searchInput) searchInput.value = '';
                     
                     // Load projects
                     loadMemberProjects();
