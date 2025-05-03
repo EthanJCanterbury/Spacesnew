@@ -176,6 +176,20 @@
                 <li>
 
 <script>
+    // Check if user is a club leader or co-leader
+    const isClubAdmin = {% if current_user.id == club.leader_id %}true{% else %}{% for membership in club.members %}{% if membership.user_id == current_user.id and membership.role == 'co-leader' %}true{% endif %}{% endfor %}{% endif %} || false;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hide admin-only features based on user role
+        if (!isClubAdmin) {
+            // Hide all edit buttons and admin-only features
+            const adminElements = document.querySelectorAll('.admin-only');
+            adminElements.forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+    });
+    
     let currentEventId = null;
     
     function openEventModal(eventData) {
@@ -237,13 +251,13 @@
                         <span>Rewards</span>
                     </a>
                 </li>
-                <li>
+                <li class="admin-only">
                     <a href="#hackatime" class="nav-link" data-section="hackatime">
                         <i class="fas fa-clock"></i>
                         <span>Hackatime</span>
                     </a>
                 </li>
-                <li>
+                <li class="admin-only">
                     <a href="#settings" class="nav-link" data-section="settings">
                         <i class="fas fa-cogs"></i>
                         <span>Settings</span>
@@ -272,10 +286,10 @@
             </div>
             <div class="navbar-actions">
                 {% if club %}
-                <button class="btn-edit" onclick="openEditClubModal()">
+                <button class="btn-edit admin-only" onclick="openEditClubModal()">
                     <i class="fas fa-edit"></i> Edit Club
                 </button>
-                <button class="btn-join-code" onclick="generateJoinCode()">
+                <button class="btn-join-code admin-only" onclick="generateJoinCode()">
                     <i class="fas fa-key"></i> Join Code: <span id="join-code-display">{{ club.join_code }}</span>
                 </button>
                 {% endif %}
@@ -1037,7 +1051,7 @@
             </div>
 
             <div class="stream-container">
-                <div class="post-composer">
+                <div class="post-composer admin-only">
                     <div class="composer-header">
                         <h3><i class="fas fa-pen"></i> Create Announcement</h3>
                     </div>
@@ -1213,7 +1227,7 @@
             <div class="assignments-container">
                 <div class="assignments-header">
                     <h3>Club Assignments</h3>
-                    <button class="btn-primary" onclick="openCreateAssignmentModal()">
+                    <button class="btn-primary admin-only" onclick="openCreateAssignmentModal()">
                         <i class="fas fa-plus"></i> New Assignment
                     </button>
                 </div>
@@ -1383,7 +1397,7 @@
             <div class="members-container">
                 <div class="members-header">
                     <h3>Club Members</h3>
-                    <button class="btn-primary" onclick="openAddMemberModal()">
+                    <button class="btn-primary admin-only" onclick="openAddMemberModal()">
                         <i class="fas fa-user-plus"></i> Add Member
                     </button>
                     <script>
@@ -1480,12 +1494,14 @@
                                     <td>{{ membership.joined_at.strftime('%Y-%m-%d') }}</td>
                                     <td>
                                         <div class="action-buttons">
+                                            {% if current_user.id == club.leader_id or (membership in club.members and membership.user_id == current_user.id and membership.role == 'co-leader') %}
                                             <button class="btn-icon" onclick="openChangeRoleModal({{ membership.id }}, '{{ membership.user.username }}', '{{ membership.role }}')">
                                                 <i class="fas fa-user-tag"></i>
                                             </button>
                                             <button class="btn-icon delete-action" onclick="openRemoveMemberModal({{ membership.id }}, '{{ membership.user.username }}')">
                                                 <i class="fas fa-user-minus"></i>
                                             </button>
+                                            {% endif %}
                                         </div>
                                     </td>
                                 </tr>
@@ -1724,10 +1740,10 @@
                             </div>
                             <div class="project-actions">
                                 <a href="/project/${project.slug}" target="_blank" class="view-button">View</a>
-                                ${project.featured ? 
+                                ${isClubAdmin ? (project.featured ? 
                                   `<button class="feature-button" onclick="toggleProjectFeatured(${project.id}, false)"><i class="fas fa-star-half-alt"></i> Unfeature</button>` :
-                                  `<button class="feature-button" onclick="toggleProjectFeatured(${project.id}, true)"><i class="fas fa-star"></i> Feature</button>`
-                                }
+                                  `<button class="feature-button" onclick="toggleProjectFeatured(${project.id}, true)"><i class="fas fa-star"></i> Feature</button>`)
+                                  : ''}
                             </div>
                         `;
                         
@@ -1793,7 +1809,7 @@
             <div class="resources-container">
                 <div class="resources-header">
                     <h3>Quick Links & Resources</h3>
-                    <button class="btn-primary" onclick="openAddResourceModal()">
+                    <button class="btn-primary admin-only" onclick="openAddResourceModal()">
                         <i class="fas fa-plus"></i> Add Resource
                     </button>
                 </div>
@@ -1849,7 +1865,7 @@
                             </div>
                             <div class="resource-actions">
                                 <a href="${resource.url}" target="_blank" class="btn-primary btn-sm">Visit</a>
-                                <button class="btn-icon" onclick="deleteResource(${resource.id})"><i class="fas fa-trash"></i></button>
+                                ${isClubAdmin ? `<button class="btn-icon" onclick="deleteResource(${resource.id})"><i class="fas fa-trash"></i></button>` : ''}
                             </div>
                         `;
                         
@@ -1942,7 +1958,7 @@
             <div class="schedule-container">
                 <div class="schedule-header">
                     <h3>Club Meeting Schedule</h3>
-                    <button class="btn-primary" onclick="openCreateMeetingModal()">
+                    <button class="btn-primary admin-only" onclick="openCreateMeetingModal()">
                         <i class="fas fa-plus"></i> New Meeting
                     </button>
                 </div>
@@ -2066,8 +2082,10 @@
                                 </div>
                                 <div class="meeting-actions">
                                     <button class="btn-icon" onclick="viewMeeting(${meeting.id})"><i class="fas fa-eye"></i></button>
+                                    ${isClubAdmin ? `
                                     <button class="btn-icon" onclick="editMeeting(${meeting.id})"><i class="fas fa-edit"></i></button>
                                     <button class="btn-icon" onclick="deleteMeeting(${meeting.id})"><i class="fas fa-trash"></i></button>
+                                    ` : ''}
                                 </div>
                             `;
                             
