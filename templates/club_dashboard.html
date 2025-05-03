@@ -2145,8 +2145,10 @@
                                     </div>
                                     <div class="meeting-actions">
                                         <button class="btn-icon" onclick="viewMeeting(${meeting.id})"><i class="fas fa-eye"></i></button>
+                                        {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
                                         <button class="btn-icon" onclick="editMeeting(${meeting.id})"><i class="fas fa-edit"></i></button>
                                         <button class="btn-icon" onclick="deleteMeeting(${meeting.id})"><i class="fas fa-trash"></i></button>
+                                        {% endif %}
                                     </div>
                                 `;
                                 
@@ -5920,14 +5922,37 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Simulate API call
         showToast('info', 'Creating assignment...');
         
-        setTimeout(() => {
+        const assignmentData = {
+            title: title,
+            description: description,
+            due_date: dueDate || null
+        };
+        
+        fetch(`/api/clubs/{{ club.id }}/assignments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify(assignmentData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
             showToast('success', 'Assignment created successfully!');
             closeCreateAssignmentModal();
-            // In a real app, we'd update the UI
-        }, 1500);
+            loadAssignments(); // Refresh the assignments list
+        })
+        .catch(error => {
+            console.error('Error creating assignment:', error);
+            showToast('error', 'Failed to create assignment');
+        });
     };
     
     window.addResource = function() {
@@ -5940,14 +5965,37 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Simulate API call
         showToast('info', 'Adding resource...');
         
-        setTimeout(() => {
+        const resourceData = {
+            title: title,
+            url: url,
+            description: description
+        };
+        
+        fetch(`/api/clubs/{{ club.id }}/resources`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify(resourceData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
             showToast('success', 'Resource added successfully!');
             closeAddResourceModal();
-            // In a real app, we'd update the UI
-        }, 1500);
+            loadResources(); // Refresh the resources list
+        })
+        .catch(error => {
+            console.error('Error adding resource:', error);
+            showToast('error', 'Failed to add resource');
+        });
     };
     
     window.createChannel = function() {
@@ -5972,6 +6020,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const titleElement = document.getElementById('meetingTitle');
         const dateElement = document.getElementById('meetingDate');
         const startTimeElement = document.getElementById('startTime');
+        const endTimeElement = document.getElementById('endTime');
+        const locationElement = document.getElementById('meetingLocation');
+        const linkElement = document.getElementById('meetingLink');
+        const descriptionElement = document.getElementById('meetingDescription');
         
         if (!titleElement || !dateElement || !startTimeElement) {
             console.error('Meeting form elements not found');
@@ -5982,21 +6034,69 @@ document.addEventListener('DOMContentLoaded', function() {
         const title = titleElement.value;
         const date = dateElement.value;
         const startTime = startTimeElement.value;
+        const endTime = endTimeElement ? endTimeElement.value : null;
+        const location = locationElement ? locationElement.value : null;
+        const link = linkElement ? linkElement.value : null;
+        const description = descriptionElement ? descriptionElement.value : null;
         
         if (!title || !date || !startTime) {
             showToast('error', 'Please fill out all required fields');
             return;
         }
         
-        // Simulate API call
         showToast('info', 'Scheduling meeting...');
         
-        setTimeout(() => {
+        const meetingData = {
+            title: title,
+            meeting_date: date,
+            start_time: startTime,
+            end_time: endTime || null,
+            location: location || null,
+            meeting_link: link || null,
+            description: description || null
+        };
+        
+        fetch(`/api/clubs/{{ club.id }}/meetings`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify(meetingData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
             showToast('success', 'Meeting scheduled successfully!');
             closeCreateMeetingModal();
-            // In a real app, we'd update the UI and regenerate calendar
-        }, 1500);
+            loadMeetings(); // Refresh the meetings list
+        })
+        .catch(error => {
+            console.error('Error scheduling meeting:', error);
+            showToast('error', 'Failed to schedule meeting');
+        });
     };
+    
+    // Function to get CSRF token from cookies
+    function getCsrfToken() {
+        const name = 'csrftoken';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
     
     window.viewClub = function(clubId) {
         // In a real app, we'd navigate to the club page
