@@ -35,6 +35,7 @@ def slugify(text):
 
 from github_routes import github_bp
 from slack_routes import slack_bp
+from routes.hackatime_routes import hackatime_bp
 from groq import Groq
 
 load_dotenv()
@@ -460,6 +461,7 @@ login_manager.login_view = 'login'
 
 app.register_blueprint(github_bp)
 app.register_blueprint(slack_bp)
+app.register_blueprint(hackatime_bp)
 
 
 def check_db_connection():

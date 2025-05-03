@@ -243,6 +243,12 @@
                     </a>
                 </li>
                 <li>
+                    <a href="#hackatime" class="nav-link" data-section="hackatime">
+                        <i class="fas fa-clock"></i>
+                        <span>Hackatime</span>
+                    </a>
+                </li>
+                <li>
                     <a href="#settings" class="nav-link" data-section="settings">
                         <i class="fas fa-cogs"></i>
                         <span>Settings</span>
@@ -2466,6 +2472,664 @@
                     </div>
                 </div>
             </div>
+        </section>
+
+        <!-- Hackatime Tab Content -->
+        <section id="hackatime" class="club-section">
+            <div class="section-header">
+                <h2><i class="fas fa-clock"></i> Hackatime</h2>
+                <p>View club members' coding activity and projects</p>
+            </div>
+
+            <div class="hackatime-container">
+                <div class="hackatime-header">
+                    <h3>Club Coding Stats</h3>
+                    <div class="hackatime-actions">
+                        <a href="https://hackatime.hackclub.com/" target="_blank" class="btn-secondary">
+                            <i class="fas fa-external-link-alt"></i> Hackatime Dashboard
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Members with Hackatime section -->
+                <div class="hackatime-members-wrapper">
+                    <div class="hackatime-panel-header">
+                        <h3>Members with Hackatime</h3>
+                        <p>Click on a member to view their coding projects</p>
+                    </div>
+                    
+                    <div class="hackatime-members" id="hackatime-members-list">
+                        <div class="loading-state">
+                            <div class="loading-spinner"></div>
+                            <p>Loading members with Hackatime...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Member's projects section (shown when a member is selected) -->
+                <div class="hackatime-projects-wrapper" id="hackatime-projects-wrapper" style="display: none;">
+                    <div class="hackatime-panel-header">
+                        <div class="panel-header-left">
+                            <h3 id="hackatime-projects-title">Projects</h3>
+                            <button class="btn-back" onclick="hideProjectsPanel()">
+                                <i class="fas fa-arrow-left"></i> Back to Members
+                            </button>
+                        </div>
+                        <div class="panel-header-right">
+                            <div class="search-box">
+                                <input type="text" id="project-search-input" placeholder="Search projects...">
+                                <i class="fas fa-search"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="hackatime-member-stats" id="hackatime-member-stats">
+                        <!-- Stats will be loaded here -->
+                    </div>
+                    
+                    <div class="hackatime-projects" id="hackatime-projects-list">
+                        <div class="loading-state">
+                            <div class="loading-spinner"></div>
+                            <p>Loading projects...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty state for when no members have Hackatime -->
+                <div class="hackatime-empty-state" id="hackatime-empty-state" style="display: none;">
+                    <div class="empty-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>No Hackatime Data Available</h3>
+                    <p>None of your club members have connected their Hackatime accounts yet.</p>
+                    <a href="https://hackatime.hackclub.com/" target="_blank" class="btn-primary">
+                        Learn About Hackatime
+                    </a>
+                </div>
+            </div>
+
+            <style>
+                .hackatime-container {
+                    background-color: white;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    overflow: hidden;
+                    margin-bottom: 20px;
+                }
+                
+                .hackatime-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 20px;
+                    border-bottom: 1px solid #eee;
+                }
+                
+                .hackatime-actions {
+                    display: flex;
+                    gap: 10px;
+                }
+                
+                .hackatime-members-wrapper, 
+                .hackatime-projects-wrapper {
+                    padding: 20px;
+                }
+                
+                .hackatime-panel-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 15px;
+                }
+                
+                .panel-header-left {
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
+                }
+                
+                .btn-back {
+                    background: none;
+                    border: none;
+                    color: #ec3750;
+                    cursor: pointer;
+                    font-size: 14px;
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                }
+                
+                .hackatime-members {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                    gap: 15px;
+                    margin-top: 15px;
+                }
+                
+                .member-card {
+                    background-color: #f8f9fa;
+                    border-radius: 8px;
+                    padding: 15px;
+                    cursor: pointer;
+                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                    display: flex;
+                    flex-direction: column;
+                    border: 1px solid #eee;
+                }
+                
+                .member-card:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                }
+                
+                .member-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    margin-bottom: 10px;
+                }
+                
+                .member-avatar {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    background-color: #ec3750;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-size: 18px;
+                }
+                
+                .member-info h4 {
+                    margin: 0;
+                    font-size: 16px;
+                }
+                
+                .member-role {
+                    font-size: 12px;
+                    color: #666;
+                }
+                
+                .member-stats {
+                    margin-top: 10px;
+                }
+                
+                .stats-row {
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 13px;
+                    margin-bottom: 5px;
+                }
+                
+                .stats-label {
+                    color: #666;
+                }
+                
+                .stats-value {
+                    font-weight: 500;
+                }
+                
+                .language-tag {
+                    display: inline-block;
+                    background-color: #e9ecef;
+                    padding: 3px 8px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    margin-top: 5px;
+                }
+                
+                .hackatime-member-stats {
+                    background-color: #f8f9fa;
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin-bottom: 20px;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 20px;
+                }
+                
+                .stat-box {
+                    flex: 1;
+                    min-width: 150px;
+                    padding: 15px;
+                    background-color: white;
+                    border-radius: 6px;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                    text-align: center;
+                }
+                
+                .stat-value {
+                    font-size: 24px;
+                    font-weight: 700;
+                    color: #ec3750;
+                    margin-bottom: 5px;
+                }
+                
+                .stat-label {
+                    font-size: 14px;
+                    color: #666;
+                }
+                
+                .search-box {
+                    position: relative;
+                    width: 250px;
+                }
+                
+                .search-box input {
+                    width: 100%;
+                    padding: 8px 12px 8px 35px;
+                    border-radius: 20px;
+                    border: 1px solid #ddd;
+                    font-size: 14px;
+                }
+                
+                .search-box i {
+                    position: absolute;
+                    left: 12px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: #999;
+                }
+                
+                .hackatime-projects {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                    gap: 15px;
+                }
+                
+                .project-card {
+                    background-color: white;
+                    border-radius: 8px;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                    overflow: hidden;
+                    border: 1px solid #eee;
+                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                }
+                
+                .project-card:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                }
+                
+                .project-header {
+                    padding: 15px;
+                    border-bottom: 1px solid #f0f0f0;
+                    background-color: #f8f9fa;
+                }
+                
+                .project-header h4 {
+                    margin: 0;
+                    font-size: 16px;
+                    color: #333;
+                }
+                
+                .project-body {
+                    padding: 15px;
+                }
+                
+                .project-stats {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                    margin-bottom: 10px;
+                }
+                
+                .project-stat {
+                    flex: 1;
+                    min-width: 100px;
+                    padding: 8px;
+                    background-color: #f8f9fa;
+                    border-radius: 4px;
+                    text-align: center;
+                }
+                
+                .project-stat-value {
+                    font-weight: 500;
+                    font-size: 14px;
+                }
+                
+                .project-stat-label {
+                    font-size: 12px;
+                    color: #666;
+                }
+                
+                .hackatime-empty-state {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 40px 20px;
+                    text-align: center;
+                }
+                
+                .empty-icon {
+                    font-size: 40px;
+                    color: #ec3750;
+                    opacity: 0.6;
+                    margin-bottom: 20px;
+                }
+                
+                .hackatime-empty-state h3 {
+                    margin-top: 0;
+                }
+                
+                .hackatime-empty-state p {
+                    color: #666;
+                    margin-bottom: 20px;
+                }
+                
+                .language-chart {
+                    height: 200px;
+                    margin-top: 20px;
+                }
+            </style>
+
+            <script>
+                let selectedMemberId = null;
+                let currentHackatimeMembers = [];
+                
+                // Load Hackatime members when tab is active
+                document.querySelector('a[data-section="hackatime"]').addEventListener('click', function() {
+                    loadHackatimeMembers();
+                });
+                
+                function loadHackatimeMembers() {
+                    const membersContainer = document.getElementById('hackatime-members-list');
+                    const emptyState = document.getElementById('hackatime-empty-state');
+                    
+                    membersContainer.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading members with Hackatime...</p></div>';
+                    
+                    fetch(`/api/hackatime/club/{{ club.id }}/members`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) {
+                                throw new Error(data.error);
+                            }
+                            
+                            currentHackatimeMembers = data.members || [];
+                            
+                            if (currentHackatimeMembers.length === 0) {
+                                document.querySelector('.hackatime-members-wrapper').style.display = 'none';
+                                emptyState.style.display = 'flex';
+                                return;
+                            }
+                            
+                            document.querySelector('.hackatime-members-wrapper').style.display = 'block';
+                            emptyState.style.display = 'none';
+                            
+                            membersContainer.innerHTML = '';
+                            
+                            currentHackatimeMembers.forEach(member => {
+                                const memberCard = createMemberCard(member);
+                                membersContainer.appendChild(memberCard);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error loading Hackatime members:', error);
+                            membersContainer.innerHTML = `<div class="error-state">Error loading members: ${error.message}</div>`;
+                        });
+                }
+                
+                function createMemberCard(member) {
+                    const card = document.createElement('div');
+                    card.className = 'member-card';
+                    card.onclick = () => showMemberProjects(member.id, member.username);
+                    
+                    // Get first letter of username for avatar
+                    const firstLetter = member.username.charAt(0).toUpperCase();
+                    
+                    // Create avatar element (use member.avatar if available)
+                    let avatarHtml;
+                    if (member.avatar) {
+                        avatarHtml = `<img src="${member.avatar}" alt="${member.username}" class="member-avatar">`;
+                    } else {
+                        avatarHtml = `<div class="member-avatar">${firstLetter}</div>`;
+                    }
+                    
+                    card.innerHTML = `
+                        <div class="member-header">
+                            ${avatarHtml}
+                            <div class="member-info">
+                                <h4>${member.username}</h4>
+                                <div class="member-role">${member.role}</div>
+                            </div>
+                        </div>
+                        <div class="member-stats">
+                            <div class="stats-row">
+                                <span class="stats-label">Total coding time:</span>
+                                <span class="stats-value">${member.stats.human_readable_total || '0 hrs'}</span>
+                            </div>
+                            <div class="stats-row">
+                                <span class="stats-label">Daily average:</span>
+                                <span class="stats-value">${member.stats.human_readable_daily_average || '0 mins'}</span>
+                            </div>
+                            ${member.stats.top_language ? 
+                              `<div class="language-tag"><i class="fas fa-code"></i> ${member.stats.top_language}</div>` : 
+                              ''}
+                        </div>
+                    `;
+                    
+                    return card;
+                }
+                
+                function showMemberProjects(userId, username) {
+                    selectedMemberId = userId;
+                    
+                    // Show projects panel
+                    document.getElementById('hackatime-members-wrapper').style.display = 'none';
+                    document.getElementById('hackatime-projects-wrapper').style.display = 'block';
+                    
+                    // Update title
+                    document.getElementById('hackatime-projects-title').textContent = `${username}'s Projects`;
+                    
+                    // Clear search
+                    document.getElementById('project-search-input').value = '';
+                    
+                    // Load projects
+                    loadMemberProjects();
+                }
+                
+                function hideProjectsPanel() {
+                    document.getElementById('hackatime-members-wrapper').style.display = 'block';
+                    document.getElementById('hackatime-projects-wrapper').style.display = 'none';
+                    selectedMemberId = null;
+                }
+                
+                function loadMemberProjects(searchQuery = '') {
+                    if (!selectedMemberId) return;
+                    
+                    const projectsContainer = document.getElementById('hackatime-projects-list');
+                    const statsContainer = document.getElementById('hackatime-member-stats');
+                    
+                    projectsContainer.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading projects...</p></div>';
+                    statsContainer.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading stats...</p></div>';
+                    
+                    let url = `/api/hackatime/user/${selectedMemberId}/projects`;
+                    if (searchQuery) {
+                        url += `?q=${encodeURIComponent(searchQuery)}`;
+                    }
+                    
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) {
+                                throw new Error(data.error);
+                            }
+                            
+                            // Render stats summary
+                            statsContainer.innerHTML = '';
+                            
+                            const statBoxes = [
+                                {
+                                    label: 'Total Time',
+                                    value: data.human_readable_total || '0 hrs'
+                                },
+                                {
+                                    label: 'Daily Average',
+                                    value: data.human_readable_daily_average || '0 mins'
+                                },
+                                {
+                                    label: 'Projects',
+                                    value: (data.projects || []).length
+                                }
+                            ];
+                            
+                            statBoxes.forEach(stat => {
+                                const box = document.createElement('div');
+                                box.className = 'stat-box';
+                                box.innerHTML = `
+                                    <div class="stat-value">${stat.value}</div>
+                                    <div class="stat-label">${stat.label}</div>
+                                `;
+                                statsContainer.appendChild(box);
+                            });
+                            
+                            // Add languages chart if available
+                            if (data.languages && data.languages.length > 0) {
+                                const languagesBox = document.createElement('div');
+                                languagesBox.className = 'stat-box';
+                                languagesBox.style.flex = '2';
+                                languagesBox.style.minWidth = '300px';
+                                
+                                let languagesHtml = '<div class="stat-label">Top Languages</div><div class="language-list">';
+                                
+                                data.languages.slice(0, 5).forEach(lang => {
+                                    const percent = Math.round(lang.percent) + '%';
+                                    languagesHtml += `
+                                        <div class="language-item">
+                                            <span>${lang.name}</span>
+                                            <div class="language-bar">
+                                                <div class="language-progress" style="width: ${percent}; background-color: ${getRandomColor(lang.name)}"></div>
+                                            </div>
+                                            <span>${percent}</span>
+                                        </div>
+                                    `;
+                                });
+                                
+                                languagesHtml += '</div>';
+                                languagesBox.innerHTML = languagesHtml;
+                                statsContainer.appendChild(languagesBox);
+                            }
+                            
+                            // Render projects
+                            projectsContainer.innerHTML = '';
+                            
+                            if (!data.projects || data.projects.length === 0) {
+                                projectsContainer.innerHTML = '<div class="empty-state">No projects found.</div>';
+                                return;
+                            }
+                            
+                            data.projects.forEach(project => {
+                                const projectCard = createProjectCard(project);
+                                projectsContainer.appendChild(projectCard);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error loading projects:', error);
+                            projectsContainer.innerHTML = `<div class="error-state">Error loading projects: ${error.message}</div>`;
+                            statsContainer.innerHTML = `<div class="error-state">Error loading stats: ${error.message}</div>`;
+                        });
+                }
+                
+                function createProjectCard(project) {
+                    const card = document.createElement('div');
+                    card.className = 'project-card';
+                    
+                    const totalHours = project.total_seconds ? (project.total_seconds / 3600).toFixed(1) : '0';
+                    
+                    card.innerHTML = `
+                        <div class="project-header">
+                            <h4>${project.name}</h4>
+                        </div>
+                        <div class="project-body">
+                            <div class="project-stats">
+                                <div class="project-stat">
+                                    <div class="project-stat-value">${totalHours} hrs</div>
+                                    <div class="project-stat-label">Total Time</div>
+                                </div>
+                                <div class="project-stat">
+                                    <div class="project-stat-value">${project.text || '0'}</div>
+                                    <div class="project-stat-label">Text</div>
+                                </div>
+                            </div>
+                            <div class="project-dates">
+                                <div class="date-row">
+                                    <span class="date-label">Last activity:</span>
+                                    <span class="date-value">${formatDate(project.modified_at) || 'N/A'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    return card;
+                }
+                
+                // Helper: Format date
+                function formatDate(timestamp) {
+                    if (!timestamp) return '';
+                    const date = new Date(timestamp * 1000);
+                    return date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                }
+                
+                // Helper: Generate color from string
+                function getRandomColor(str) {
+                    let hash = 0;
+                    for (let i = 0; i < str.length; i++) {
+                        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                    }
+                    
+                    const hue = Math.abs(hash % 360);
+                    return `hsl(${hue}, 70%, 60%)`;
+                }
+                
+                // Set up project search
+                document.getElementById('project-search-input').addEventListener('input', function(e) {
+                    const searchQuery = e.target.value.trim();
+                    loadMemberProjects(searchQuery);
+                });
+                
+                // Add CSS for language bars
+                const styleElement = document.createElement('style');
+                styleElement.textContent = `
+                    .language-list {
+                        margin-top: 10px;
+                    }
+                    .language-item {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        margin-bottom: 6px;
+                        font-size: 12px;
+                    }
+                    .language-bar {
+                        height: 8px;
+                        width: 100px;
+                        background-color: #eee;
+                        border-radius: 4px;
+                        overflow: hidden;
+                        margin: 0 8px;
+                    }
+                    .language-progress {
+                        height: 100%;
+                        border-radius: 4px;
+                    }
+                    .date-row {
+                        font-size: 13px;
+                        margin-top: 10px;
+                        color: #666;
+                    }
+                    .date-label {
+                        font-weight: 500;
+                        margin-right: 5px;
+                    }
+                `;
+                document.head.appendChild(styleElement);
+            </script>
         </section>
 
         <!-- Settings Tab Content -->
