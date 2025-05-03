@@ -1484,7 +1484,7 @@ def admin_panel():
 @login_required
 @admin_required
 def delete_user(user_id):
-    from models import ClubPost, ClubPostLike, ClubResource, ClubAssignment
+    from models import ClubPost, ClubPostLike, ClubChatChannel, ClubChatMessage, ClubResource, ClubAssignment
     
     if user_id == current_user.id:
         return jsonify({'message': 'Cannot delete yourself'}), 400
@@ -1506,7 +1506,11 @@ def delete_user(user_id):
             ClubAssignment.query.filter_by(club_id=club.id).delete()
             # Delete club resources
             ClubResource.query.filter_by(club_id=club.id).delete()
-            
+            # Delete club chat channels and messages
+            channels = ClubChatChannel.query.filter_by(club_id=club.id).all()
+            for channel in channels:
+                ClubChatMessage.query.filter_by(channel_id=channel.id).delete()
+            ClubChatChannel.query.filter_by(club_id=club.id).delete()
             # Finally delete the club
             db.session.delete(club)
         

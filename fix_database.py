@@ -1,7 +1,7 @@
 
 from app import app, db
 from sqlalchemy import text
-from models import Club, ClubMembership, ClubPost, ClubResource
+from models import Club, ClubMembership, ClubPost, ClubResource, ClubChatChannel, ClubChatMessage
 
 def fix_database():
     """Fix database schema issues by adding missing columns."""
