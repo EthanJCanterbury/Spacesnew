@@ -237,18 +237,22 @@
                         <span>Rewards</span>
                     </a>
                 </li>
+                {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
                 <li>
                     <a href="#hackatime" class="nav-link" data-section="hackatime">
                         <i class="fas fa-clock"></i>
                         <span>Hackatime</span>
                     </a>
                 </li>
+                {% endif %}
+                {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
                 <li>
                     <a href="#settings" class="nav-link" data-section="settings">
                         <i class="fas fa-cogs"></i>
                         <span>Settings</span>
                     </a>
                 </li>
+                {% endif %}
             </ul>
         </nav>
 
@@ -272,12 +276,18 @@
             </div>
             <div class="navbar-actions">
                 {% if club %}
-                <button class="btn-edit" onclick="openEditClubModal()">
-                    <i class="fas fa-edit"></i> Edit Club
-                </button>
-                <button class="btn-join-code" onclick="generateJoinCode()">
-                    <i class="fas fa-key"></i> Join Code: <span id="join-code-display">{{ club.join_code }}</span>
-                </button>
+                    {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
+                        <button class="btn-edit" onclick="openEditClubModal()">
+                            <i class="fas fa-edit"></i> Edit Club
+                        </button>
+                        <button class="btn-join-code" onclick="generateJoinCode()">
+                            <i class="fas fa-key"></i> Join Code: <span id="join-code-display">{{ club.join_code }}</span>
+                        </button>
+                    {% else %}
+                        <div class="club-info">
+                            <span class="join-code-display-only"><i class="fas fa-users"></i> Member since: {{ current_user.club_memberships|selectattr('club_id', 'eq', club.id)|map(attribute='joined_at')|first|default('', true)|string|truncate(10, True, '') }}</span>
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>
@@ -1213,9 +1223,11 @@
             <div class="assignments-container">
                 <div class="assignments-header">
                     <h3>Club Assignments</h3>
+                    {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
                     <button class="btn-primary" onclick="openCreateAssignmentModal()">
                         <i class="fas fa-plus"></i> New Assignment
                     </button>
+                    {% endif %}
                 </div>
 
                 <div class="assignment-cards" id="assignments-container">
@@ -1383,9 +1395,11 @@
             <div class="members-container">
                 <div class="members-header">
                     <h3>Club Members</h3>
+                    {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
                     <button class="btn-primary" onclick="openAddMemberModal()">
                         <i class="fas fa-user-plus"></i> Add Member
                     </button>
+                    {% endif %}
                     <script>
                         function generateJoinCode() {
                             fetch(`/api/clubs/{{ club.id }}/join-code`, {
@@ -1480,12 +1494,14 @@
                                     <td>{{ membership.joined_at.strftime('%Y-%m-%d') }}</td>
                                     <td>
                                         <div class="action-buttons">
+                                            {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
                                             <button class="btn-icon" onclick="openChangeRoleModal({{ membership.id }}, '{{ membership.user.username }}', '{{ membership.role }}')">
                                                 <i class="fas fa-user-tag"></i>
                                             </button>
                                             <button class="btn-icon delete-action" onclick="openRemoveMemberModal({{ membership.id }}, '{{ membership.user.username }}')">
                                                 <i class="fas fa-user-minus"></i>
                                             </button>
+                                            {% endif %}
                                         </div>
                                     </td>
                                 </tr>
@@ -1724,9 +1740,11 @@
                             </div>
                             <div class="project-actions">
                                 <a href="/project/${project.slug}" target="_blank" class="view-button">View</a>
-                                ${project.featured ? 
-                                  `<button class="feature-button" onclick="toggleProjectFeatured(${project.id}, false)"><i class="fas fa-star-half-alt"></i> Unfeature</button>` :
-                                  `<button class="feature-button" onclick="toggleProjectFeatured(${project.id}, true)"><i class="fas fa-star"></i> Feature</button>`
+                                ${isClubLeaderOrCoLeader() ? 
+                                  (project.featured ? 
+                                    `<button class="feature-button" onclick="toggleProjectFeatured(${project.id}, false)"><i class="fas fa-star-half-alt"></i> Unfeature</button>` :
+                                    `<button class="feature-button" onclick="toggleProjectFeatured(${project.id}, true)"><i class="fas fa-star"></i> Feature</button>`) : 
+                                  ''
                                 }
                             </div>
                         `;
@@ -1793,9 +1811,11 @@
             <div class="resources-container">
                 <div class="resources-header">
                     <h3>Quick Links & Resources</h3>
+                    {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
                     <button class="btn-primary" onclick="openAddResourceModal()">
                         <i class="fas fa-plus"></i> Add Resource
                     </button>
+                    {% endif %}
                 </div>
 
                 <div class="resources-grid" id="resources-container">
@@ -1942,9 +1962,11 @@
             <div class="schedule-container">
                 <div class="schedule-header">
                     <h3>Club Meeting Schedule</h3>
+                    {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
                     <button class="btn-primary" onclick="openCreateMeetingModal()">
                         <i class="fas fa-plus"></i> New Meeting
                     </button>
+                    {% endif %}
                 </div>
 
                 <div class="meetings-container">
@@ -2066,8 +2088,10 @@
                                 </div>
                                 <div class="meeting-actions">
                                     <button class="btn-icon" onclick="viewMeeting(${meeting.id})"><i class="fas fa-eye"></i></button>
+                                    ${isClubLeaderOrCoLeader() ? `
                                     <button class="btn-icon" onclick="editMeeting(${meeting.id})"><i class="fas fa-edit"></i></button>
                                     <button class="btn-icon" onclick="deleteMeeting(${meeting.id})"><i class="fas fa-trash"></i></button>
+                                    ` : ''}
                                 </div>
                             `;
                             
@@ -6072,3 +6096,14 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 {% endblock %}
+
+<script>
+    // Helper function to check if current user is a club leader or co-leader
+    function isClubLeaderOrCoLeader() {
+        {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
+            return true;
+        {% else %}
+            return false;
+        {% endif %}
+    }
+</script>
