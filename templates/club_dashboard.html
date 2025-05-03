@@ -443,15 +443,15 @@
                     <div class="card-content">
                         <div class="card-header">
                             <h3>Club Members</h3>
-                            <span class="card-subtitle">Manage Members</span>
+                            <span class="card-subtitle">{% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}Manage Members{% else %}View Members{% endif %}</span>
                         </div>
                         <div class="card-metric">
                             <span class="metric-value">{{ club.members|length + 1 }}</span> total members
                         </div>
-                        <p class="card-description">View and manage all your club members</p>
+                        <p class="card-description">{% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}View and manage all your club members{% else %}View club members{% endif %}</p>
                         <div class="card-action">
                             <a href="#members" class="btn-action" onclick="openTab('members')">
-                                <i class="fas fa-plus"></i> Add & View Members
+                                <i class="fas fa-{% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}plus{% else %}users{% endif %}"></i> {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}Add & View Members{% else %}View Members{% endif %}
                             </a>
                         </div>
                     </div>
@@ -465,18 +465,19 @@
                     <div class="card-content">
                         <div class="card-header">
                             <h3>Club Meetings</h3>
-                            <span class="card-subtitle">Schedule Meetings</span>
+                            <span class="card-subtitle">{% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}Schedule Meetings{% else %}View Meetings{% endif %}</span>
                         </div>
-                        <p class="card-description">Planning your next club meeting</p>
+                        <p class="card-description">{% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}Planning your next club meeting{% else %}View upcoming club meetings{% endif %}</p>
                         <div class="card-action">
                             <a href="#schedule" class="btn-action" onclick="openTab('schedule')">
-                                <i class="fas fa-plus"></i> Schedule Meeting
+                                <i class="fas fa-{% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}plus{% else %}calendar-alt{% endif %}"></i> {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}Schedule Meeting{% else %}View Meetings{% endif %}
                             </a>
                         </div>
                     </div>
                 </div>
 
-                <!-- Club Budget Card -->
+                {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
+                <!-- Club Budget Card (Leaders Only) -->
                 <div class="dashboard-feature-card">
                     <div class="card-icon budget-icon">
                         <i class="fas fa-dollar-sign"></i>
@@ -494,6 +495,7 @@
                         </div>
                     </div>
                 </div>
+                {% endif %}
 
                 <!-- Club Tasks Card -->
                 <div class="dashboard-feature-card">
@@ -503,12 +505,12 @@
                     <div class="card-content">
                         <div class="card-header">
                             <h3>Club Tasks</h3>
-                            <span class="card-subtitle">Manage Tasks</span>
+                            <span class="card-subtitle">{% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}Manage Tasks{% else %}View Tasks{% endif %}</span>
                         </div>
-                        <p class="card-description">Assign coding challenges to members</p>
+                        <p class="card-description">{% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}Assign coding challenges to members{% else %}View assigned coding challenges{% endif %}</p>
                         <div class="card-action">
                             <a href="#assignments" class="btn-action" onclick="openTab('assignments')">
-                                <i class="fas fa-plus"></i> Create Task
+                                <i class="fas fa-{% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}plus{% else %}list-ul{% endif %}"></i> {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}Create Task{% else %}View Tasks{% endif %}
                             </a>
                         </div>
                     </div>
@@ -533,14 +535,14 @@
                     </div>
                 </div>
 
-                <!-- Leader Resources Card -->
+                <!-- Resources Card -->
                 <div class="dashboard-feature-card">
                     <div class="card-icon resources-icon">
                         <i class="fas fa-book"></i>
                     </div>
                     <div class="card-content">
                         <div class="card-header">
-                            <h3>Leader Resources</h3>
+                            <h3>{% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}Leader Resources{% else %}Club Resources{% endif %}</h3>
                             <span class="card-subtitle">Hack Club Resources</span>
                         </div>
                         <p class="card-description">Access Hack Club workshops and resources</p>
@@ -1297,8 +1299,10 @@
                             </div>
                             <div class="assignment-actions">
                                 <button class="btn-primary btn-sm" onclick="viewAssignment(${assignment.id})"><i class="fas fa-eye"></i> View</button>
+                                {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
                                 <button class="btn-secondary btn-sm" onclick="editAssignment(${assignment.id})"><i class="fas fa-edit"></i> Edit</button>
                                 <button class="btn-danger btn-sm" onclick="deleteAssignment(${assignment.id})"><i class="fas fa-trash"></i></button>
+                                {% endif %}
                             </div>
                         `;
                         
@@ -1869,7 +1873,9 @@
                             </div>
                             <div class="resource-actions">
                                 <a href="${resource.url}" target="_blank" class="btn-primary btn-sm">Visit</a>
+                                {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
                                 <button class="btn-icon" onclick="deleteResource(${resource.id})"><i class="fas fa-trash"></i></button>
+                                {% endif %}
                             </div>
                         `;
                         
@@ -2088,10 +2094,10 @@
                                 </div>
                                 <div class="meeting-actions">
                                     <button class="btn-icon" onclick="viewMeeting(${meeting.id})"><i class="fas fa-eye"></i></button>
-                                    ${isClubLeaderOrCoLeader() ? `
+                                    {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
                                     <button class="btn-icon" onclick="editMeeting(${meeting.id})"><i class="fas fa-edit"></i></button>
                                     <button class="btn-icon" onclick="deleteMeeting(${meeting.id})"><i class="fas fa-trash"></i></button>
-                                    ` : ''}
+                                    {% endif %}
                                 </div>
                             `;
                             
