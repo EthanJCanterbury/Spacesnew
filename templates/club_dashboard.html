@@ -3172,6 +3172,8 @@
                                         return;
                                     }
                                     
+                                    showToast('info', 'Saving changes...');
+                                    
                                     const clubData = {
                                         name: clubName,
                                         location: clubLocation,
@@ -3187,7 +3189,7 @@
                                     })
                                     .then(response => {
                                         if (!response.ok) {
-                                            throw new Error('Network response was not ok');
+                                            throw new Error(`HTTP error! Status: ${response.status}`);
                                         }
                                         return response.json();
                                     })
@@ -3196,14 +3198,21 @@
                                             showToast('error', data.error);
                                         } else {
                                             showToast('success', 'Club updated successfully!');
+                                            
                                             // Update the UI elements
                                             const navbarTitle = document.querySelector('.navbar-title h1');
                                             if (navbarTitle) {
                                                 navbarTitle.innerHTML = `<i class="fas fa-users"></i> ${clubName}`;
                                             }
+                                            
                                             const clubBadge = document.querySelector('.club-profile .profile-info h3');
                                             if (clubBadge) {
                                                 clubBadge.textContent = clubName;
+                                            }
+                                            
+                                            // Update page title if applicable
+                                            if (document.title.includes('{{ club.name }}')) {
+                                                document.title = document.title.replace('{{ club.name }}', clubName);
                                             }
                                         }
                                     })
