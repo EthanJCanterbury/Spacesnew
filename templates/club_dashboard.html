@@ -2496,6 +2496,7 @@
                     <div class="hackatime-panel-header">
                         <h3>Members with Hackatime</h3>
                         <p>Click on a member to view their coding projects</p>
+                        <p class="info-note"><i class="fas fa-info-circle"></i> Only members with Hackatime connected will appear here. Ask your members to visit the Integrations page to connect their account.</p>
                     </div>
                     
                     <div class="hackatime-members" id="hackatime-members-list">
@@ -2518,7 +2519,6 @@
                         <div class="panel-header-right">
                             <div class="search-box">
                                 <input type="text" id="project-search-input" placeholder="Search projects...">
-                                <i class="fas fa-search"></i>
                             </div>
                         </div>
                     </div>
@@ -2542,6 +2542,7 @@
                     </div>
                     <h3>No Hackatime Data Available</h3>
                     <p>None of your club members have connected their Hackatime accounts yet.</p>
+                    <p>Only members with Hackatime connected will appear here. Please tell your members to visit the <strong>Integrations</strong> page to connect their Hackatime account.</p>
                     <a href="https://hackatime.hackclub.com/" target="_blank" class="btn-primary">
                         Learn About Hackatime
                     </a>
@@ -3131,6 +3132,20 @@
                     .date-label {
                         font-weight: 500;
                         margin-right: 5px;
+                    }
+                    .info-note {
+                        background-color: rgba(var(--primary-rgb), 0.05);
+                        border-radius: 6px;
+                        padding: 8px 12px;
+                        font-size: 13px;
+                        color: #666;
+                        margin-top: 10px;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+                    .info-note i {
+                        color: var(--primary);
                     }
                 `;
                 document.head.appendChild(styleElement);
