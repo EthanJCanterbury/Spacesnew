@@ -277,9 +277,34 @@
             <div class="navbar-actions">
                 {% if club %}
                     {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
-                        <button class="btn-edit" onclick="openEditClubModal()">
+                        <button class="btn-edit" onclick="openClubSettings()">
                             <i class="fas fa-edit"></i> Edit Club
                         </button>
+                        <script>
+                            function openClubSettings() {
+                                // Switch to the settings tab
+                                const settingsTab = document.querySelector('a[href="#settings"]');
+                                if (settingsTab) {
+                                    settingsTab.click();
+                                } else {
+                                    // Fallback if tab navigation doesn't work
+                                    const settingsSection = document.getElementById('settings');
+                                    if (settingsSection) {
+                                        // Hide all sections
+                                        document.querySelectorAll('.club-section').forEach(section => {
+                                            section.classList.remove('active');
+                                        });
+                                        // Show settings section
+                                        settingsSection.classList.add('active');
+                                        // Update nav links
+                                        document.querySelectorAll('.nav-link').forEach(link => {
+                                            link.classList.remove('active');
+                                        });
+                                        document.querySelector('a[href="#settings"]').classList.add('active');
+                                    }
+                                }
+                            }
+                        </script>
                         <button class="btn-join-code" onclick="generateJoinCode()">
                             <i class="fas fa-key"></i> Join Code: <span id="join-code-display">{{ club.join_code }}</span>
                         </button>
@@ -3144,156 +3169,102 @@
                 <div class="settings-card">
                     <div class="settings-section">
                         <h4>General Information</h4>
-                        <form id="editClubForm" onsubmit="event.preventDefault(); updateClub();">
-                            <div class="form-group">
-                                <label for="editClubName">Club Name <span class="required">*</span></label>
-                                <input type="text" id="editClubName" name="editClubName" value="{{ club.name }}" class="form-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="editClubLocation">Location</label>
-                                <input type="text" id="editClubLocation" name="editClubLocation" value="{{ club.location }}" class="form-input">
-                            </div>
-                            <div class="form-group">
-                                <label for="editClubDescription">Description</label>
-                                <textarea id="editClubDescription" name="editClubDescription" rows="4" class="form-textarea">{{ club.description }}</textarea>
-                            </div>
-                            <button type="submit" class="btn-primary">
-                                <i class="fas fa-save"></i> Save Changes
-                            </button>
-                            
-                            <script>
-                                function updateClub() {
-                                    const clubName = document.getElementById('editClubName').value;
-                                    const clubLocation = document.getElementById('editClubLocation').value;
-                                    const clubDescription = document.getElementById('editClubDescription').value;
-                                    
-                                    if (!clubName) {
-                                        showToast('error', 'Please enter a club name');
-                                        return;
-                                    }
-                                    
-                                    showToast('info', 'Saving changes...');
-                                    
-                                    const clubData = {
-                                        name: clubName,
-                                        location: clubLocation,
-                                        description: clubDescription
-                                    };
-                                    
-                                    fetch(`/api/clubs/{{ club.id }}`, {
-                                        method: 'PUT',
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify(clubData)
-                                    })
-                                    .then(response => {
-                                        if (!response.ok) {
-                                            throw new Error(`HTTP error! Status: ${response.status}`);
-                                        }
-                                        return response.json();
-                                    })
-                                    .then(data => {
-                                        if (data.error) {
-                                            showToast('error', data.error);
-                                        } else {
-                                            showToast('success', 'Club updated successfully!');
-                                            
-                                            // Update the UI elements
-                                            const navbarTitle = document.querySelector('.navbar-title h1');
-                                            if (navbarTitle) {
-                                                navbarTitle.innerHTML = `<i class="fas fa-users"></i> ${clubName}`;
-                                            }
-                                            
-                                            const clubBadge = document.querySelector('.club-profile .profile-info h3');
-                                            if (clubBadge) {
-                                                clubBadge.textContent = clubName;
-                                            }
-                                            
-                                            // Update page title if applicable
-                                            if (document.title.includes('{{ club.name }}')) {
-                                                document.title = document.title.replace('{{ club.name }}', clubName);
-                                            }
-                                        }
-                                    })
-                                    .catch(error => {
-                                        showToast('error', 'Failed to update club: ' + error.message);
-                                        console.error('Error:', error);
-                                    });
+                        <div class="form-group">
+                            <label for="editClubName">Club Name <span class="required">*</span></label>
+                            <input type="text" id="editClubName" name="editClubName" value="{{ club.name }}" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editClubLocation">Location</label>
+                            <input type="text" id="editClubLocation" name="editClubLocation" value="{{ club.location }}" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="editClubDescription">Description</label>
+                            <textarea id="editClubDescription" name="editClubDescription" rows="4" class="form-textarea">{{ club.description }}</textarea>
+                        </div>
+                        <button type="button" class="btn-primary" id="directUpdateButton">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                        
+                        <script>
+                            // Add the event listener directly
+                            document.getElementById('directUpdateButton').addEventListener('click', function() {
+                                // Debug output to verify the function is called
+                                console.log('Save button clicked!');
+                                
+                                // Get the form values
+                                var name = document.getElementById('editClubName').value;
+                                var location = document.getElementById('editClubLocation').value;
+                                var description = document.getElementById('editClubDescription').value;
+                                
+                                // Validation
+                                if (!name || name.trim() === '') {
+                                    showToast('error', 'Please enter a club name');
+                                    return;
                                 }
                                 
-                                function updateClubFromModal() {
-                                    // Transfer values from modal to settings form
-                                    const modalName = document.getElementById('modalEditClubName').value;
-                                    const modalLocation = document.getElementById('modalEditClubLocation').value;
-                                    const modalDescription = document.getElementById('modalEditClubDescription').value;
-                                    
-                                    if (!modalName) {
-                                        showToast('error', 'Please enter a club name');
-                                        return;
+                                console.log('Preparing to send club update: ', {
+                                    name: name,
+                                    location: location,
+                                    description: description
+                                });
+                                
+                                // Show saving toast
+                                showToast('info', 'Saving changes...');
+                                
+                                // Create a very simple direct XMLHttpRequest
+                                var xhr = new XMLHttpRequest();
+                                xhr.open('PUT', '/api/clubs/current', true);
+                                xhr.setRequestHeader('Content-Type', 'application/json');
+                                
+                                // Handle response
+                                xhr.onload = function() {
+                                    if (xhr.status >= 200 && xhr.status < 300) {
+                                        console.log('Success! Response:', xhr.responseText);
+                                        showToast('success', 'Club updated successfully!');
+                                        // Wait a moment for user to see toast then reload
+                                        setTimeout(function() {
+                                            window.location.reload();
+                                        }, 1500);
+                                    } else {
+                                        console.error('Error:', xhr.status, xhr.statusText, xhr.responseText);
+                                        showToast('error', 'Error updating club: ' + xhr.status + ' ' + xhr.statusText);
                                     }
-                                    
-                                    document.getElementById('editClubName').value = modalName;
-                                    document.getElementById('editClubLocation').value = modalLocation;
-                                    document.getElementById('editClubDescription').value = modalDescription;
-                                    
-                                    // Update the club via API
-                                    const clubData = {
-                                        name: modalName,
-                                        location: modalLocation,
-                                        description: modalDescription
-                                    };
-                                    
-                                    showToast('info', 'Saving changes...');
+                                };
+                                
+                                // Handle network errors
+                                xhr.onerror = function() {
+                                    console.error('Network Error');
+                                    showToast('error', 'Network error while trying to update club. Please check your connection.');
+                                };
+                                
+                                // Send the data
+                                var data = JSON.stringify({
+                                    name: name,
+                                    location: location,
+                                    description: description
+                                });
+                                
+                                console.log('Sending data:', data);
+                                xhr.send(data);
+                                console.log('Request sent!');
+                            });
+                        </script>
+                    </div>
+
+                    <div class="settings-section danger-zone">
+                        <h4>Danger Zone</h4>
+                        <p>Deleting a club is permanent and will remove all members, posts, and assignments.</p>
+                        <button class="btn-danger" onclick="openDeleteClubModal()">
+                            <i class="fas fa-trash"></i> Delete Club
+                        </button>
+                        
+                        <script>
+                            function openDeleteClubModal() {
+                                if (confirm('Are you sure you want to delete this club? This action cannot be undone.')) {
+                                    console.log('Deleting club...');
+                                    alert('Deleting club... Please wait.');
                                     
                                     fetch(`/api/clubs/{{ club.id }}`, {
-                                        method: 'PUT',
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify(clubData)
-                                    })
-                                    .then(response => {
-                                        if (!response.ok) {
-                                            throw new Error(`HTTP error! Status: ${response.status}`);
-                                        }
-                                        return response.json();
-                                    })
-                                    .then(data => {
-                                        if (data.error) {
-                                            showToast('error', data.error);
-                                        } else {
-                                            showToast('success', 'Club updated successfully!');
-                                            closeEditClubModal();
-                                            
-                                            // Update all UI elements that show the club name
-                                            const navbarTitle = document.querySelector('.navbar-title h1');
-                                            if (navbarTitle) {
-                                                navbarTitle.innerHTML = `<i class="fas fa-users"></i> ${modalName}`;
-                                            }
-                                            
-                                            const clubBadge = document.querySelector('.club-profile .profile-info h3');
-                                            if (clubBadge) {
-                                                clubBadge.textContent = modalName;
-                                            }
-                                            
-                                            // Update page title if applicable
-                                            if (document.title.includes('{{ club.name }}')) {
-                                                document.title = document.title.replace('{{ club.name }}', modalName);
-                                            }
-                                        }
-                                    })
-                                    .catch(error => {
-                                        showToast('error', 'Failed to update club');
-                                        console.error('Error:', error);
-                                    });
-                                }
-                                
-                                function openDeleteClubModal() {
-                                    if (confirm('Are you sure you want to delete this club? This action cannot be undone.')) {
-                                        showToast('info', 'Deleting club...');
-                                        
-                                        fetch(`/api/clubs/{{ club.id }}`, {
                                             method: 'DELETE',
                                             headers: {
                                                 'Content-Type': 'application/json'
@@ -3324,18 +3295,9 @@
                                             showToast('error', error.message || 'Failed to delete club');
                                             console.error('Error:', error);
                                         });
-                                    }
                                 }
-                            </script>
-                        </form>
-                    </div>
-
-                    <div class="settings-section danger-zone">
-                        <h4>Danger Zone</h4>
-                        <p>Deleting a club is permanent and will remove all members, posts, and assignments.</p>
-                        <button class="btn-danger" onclick="openDeleteClubModal()">
-                            <i class="fas fa-trash"></i> Delete Club
-                        </button>
+                            }
+                        </script>
                     </div>
                 </div>
             </div>
@@ -3384,6 +3346,45 @@
             console.error('Modal element not found:', modalId);
         }
     };
+    
+    // Function to load/reload club data
+    function loadClubData() {
+        console.log('Loading club data...');
+        {% if club %}
+        // Fetch club data from API
+        fetch('/api/clubs/current', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Club data loaded:', data);
+            if (!data.error && data.club) {
+                // Update form fields
+                const nameField = document.getElementById('editClubName');
+                const locationField = document.getElementById('editClubLocation');
+                const descriptionField = document.getElementById('editClubDescription');
+                
+                if (nameField && data.club.name) nameField.value = data.club.name;
+                if (locationField) locationField.value = data.club.location || '';
+                if (descriptionField) descriptionField.value = data.club.description || '';
+                
+                console.log('Form fields updated with fresh data');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading club data:', error);
+        });
+        {% endif %}
+    }
     
     // Initialize dashboard when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
@@ -4100,7 +4101,7 @@
     border-radius: 12px;
     padding: 1.5rem;
     margin-bottom: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     display: none;
     animation: fadeIn 0.3s ease;
 }
