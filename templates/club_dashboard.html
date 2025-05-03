@@ -3144,10 +3144,10 @@
                 <div class="settings-card">
                     <div class="settings-section">
                         <h4>General Information</h4>
-                        <form id="editClubForm">
+                        <form id="editClubForm" onsubmit="event.preventDefault(); updateClub();">
                             <div class="form-group">
                                 <label for="editClubName">Club Name <span class="required">*</span></label>
-                                <input type="text" id="editClubName" name="editClubName" value="{{ club.name }}" class="form-input">
+                                <input type="text" id="editClubName" name="editClubName" value="{{ club.name }}" class="form-input" required>
                             </div>
                             <div class="form-group">
                                 <label for="editClubLocation">Location</label>
@@ -3157,7 +3157,7 @@
                                 <label for="editClubDescription">Description</label>
                                 <textarea id="editClubDescription" name="editClubDescription" rows="4" class="form-textarea">{{ club.description }}</textarea>
                             </div>
-                            <button type="button" onclick="updateClub()" class="btn-primary">
+                            <button type="submit" class="btn-primary">
                                 <i class="fas fa-save"></i> Save Changes
                             </button>
                             
@@ -3217,7 +3217,7 @@
                                         }
                                     })
                                     .catch(error => {
-                                        showToast('error', 'Failed to update club');
+                                        showToast('error', 'Failed to update club: ' + error.message);
                                         console.error('Error:', error);
                                     });
                                 }
