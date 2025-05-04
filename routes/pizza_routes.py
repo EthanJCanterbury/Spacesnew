@@ -48,10 +48,10 @@ def submit_pizza_grant(club_id):
         except ValueError:
             return jsonify({'success': False, 'message': 'Invalid coding hours'}), 400
         
-        # Get Airtable API key from environment
-        airtable_api_key = os.environ.get('AIRTABLE_API_KEY')
-        if not airtable_api_key:
-            return jsonify({'success': False, 'message': 'Airtable API key not configured'}), 500
+        # Get Airtable personal access token from environment
+        airtable_token = os.environ.get('AIRTABLE_PERSONAL_TOKEN')
+        if not airtable_token:
+            return jsonify({'success': False, 'message': 'Airtable personal access token not configured'}), 500
             
         # Get Airtable base ID and table name
         airtable_base_id = os.environ.get('AIRTABLE_PIZZA_BASE_ID')
@@ -79,7 +79,7 @@ def submit_pizza_grant(club_id):
         # Send to Airtable
         airtable_url = f"https://api.airtable.com/v0/{airtable_base_id}/{airtable_table_name}"
         headers = {
-            "Authorization": f"Bearer {airtable_api_key}",
+            "Authorization": f"Bearer {airtable_token}",
             "Content-Type": "application/json"
         }
         
@@ -127,10 +127,10 @@ def get_pizza_grants(club_id):
             if not membership:
                 return jsonify({'error': 'Permission denied'}), 403
         
-        # Get Airtable API key from environment
-        airtable_api_key = os.environ.get('AIRTABLE_API_KEY')
-        if not airtable_api_key:
-            return jsonify({'error': 'Airtable API key not configured'}), 500
+        # Get Airtable personal access token from environment
+        airtable_token = os.environ.get('AIRTABLE_PERSONAL_TOKEN')
+        if not airtable_token:
+            return jsonify({'error': 'Airtable personal access token not configured'}), 500
             
         # Get Airtable base ID and table name
         airtable_base_id = os.environ.get('AIRTABLE_PIZZA_BASE_ID')
@@ -142,7 +142,7 @@ def get_pizza_grants(club_id):
         # Query Airtable for submissions from this club
         airtable_url = f"https://api.airtable.com/v0/{airtable_base_id}/{airtable_table_name}"
         headers = {
-            "Authorization": f"Bearer {airtable_api_key}"
+            "Authorization": f"Bearer {airtable_token}"
         }
         
         # Filter by club name - adjust if you have a better club identifier in Airtable
