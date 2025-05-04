@@ -3566,6 +3566,11 @@ def hackatime_connect():
         })
 
 
+# Register Pizza routes
+from routes.pizza_routes import pizza_bp
+app.register_blueprint(pizza_bp)
+
+
 @app.route('/hackatime/disconnect', methods=['POST'])
 @login_required
 def hackatime_disconnect():
