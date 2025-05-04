@@ -62,7 +62,10 @@ def get_club_hackatime_members(club_id):
         
         return jsonify({'members': members})
     except Exception as e:
-        return jsonify({'error': f'Failed to get club hackatime members: {str(e)}'}), 500
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Error in get_club_hackatime_members: {str(e)}\n{error_details}")
+        return jsonify({'error': f'Failed to get club hackatime members: {str(e)}', 'members': []}), 500
 
 @hackatime_bp.route('/user/<int:user_id>/projects', methods=['GET'])
 @login_required

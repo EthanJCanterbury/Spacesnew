@@ -3194,6 +3194,51 @@
                     </div>
                 </div>
 
+                <script>
+                    // Load Hackatime members when the pizza tab is shown
+                    document.querySelector('a[href="#pizza"]').addEventListener('click', function() {
+                        loadHackatimeMembers();
+                    });
+                    
+                    // Function to populate the members dropdown
+                    async function loadHackatimeMembersDropdown() {
+                        const memberSelect = document.getElementById('pizza-member-select');
+                        
+                        try {
+                            const response = await fetch(`/api/hackatime/club/{{ club.id }}/members`);
+                            const data = await response.json();
+                            
+                            if (data.error) {
+                                showToast('error', data.error);
+                                return;
+                            }
+                            
+                            const members = data.members || [];
+                            
+                            // Clear dropdown
+                            memberSelect.innerHTML = '<option value="">Select a member...</option>';
+                            
+                            // Add members to dropdown
+                            members.forEach(member => {
+                                const option = document.createElement('option');
+                                option.value = member.id;
+                                option.textContent = member.username;
+                                memberSelect.appendChild(option);
+                            });
+                            
+                            if (members.length === 0) {
+                                memberSelect.innerHTML = '<option value="">No members with Hackatime found</option>';
+                                memberSelect.disabled = true;
+                            } else {
+                                memberSelect.disabled = false;
+                            }
+                        } catch (error) {
+                            console.error('Error loading Hackatime members for dropdown:', error);
+                            showToast('error', 'Failed to load members with Hackatime');
+                        }
+                    }
+                </script>
+
                 <div id="member-projects-container" style="display: none;">
                     <div class="pizza-section-header">
                         <h3>Member Projects</h3>
@@ -3551,6 +3596,17 @@
                 document.querySelector('a[data-section="pizza"]').addEventListener('click', function() {
                     loadHackatimeMembers();
                     loadSubmissionHistory();
+                    console.log("Pizza tab clicked - loading members to dropdown");
+                });
+                
+                // Also try to load when document is ready for the active tab
+                document.addEventListener('DOMContentLoaded', function() {
+                    // If pizza section is already active on page load, load members
+                    if (document.querySelector('#pizza.club-section.active')) {
+                        loadHackatimeMembers();
+                        loadSubmissionHistory();
+                        console.log("Pizza tab is active on load - initializing members dropdown");
+                    }
                 });
                 
                 // Function to load members with Hackatime
@@ -3569,24 +3625,56 @@
                         hackatimeMembers = data.members || [];
                         
                         // Clear dropdown
-                        memberSelect.innerHTML = '<option value="">Select a member...</option>';
+                        if (memberSelect) {
+                            memberSelect.innerHTML = '<option value="">Select a member...</option>';
+                            
+                            // Add members to dropdown
+                            hackatimeMembers.forEach(member => {
+                                const option = document.createElement('option');
+                                option.value = member.id;
+                                option.textContent = member.username;
+                                memberSelect.appendChild(option);
+                            });
+                            
+                            if (hackatimeMembers.length === 0) {
+                                memberSelect.innerHTML = '<option value="">No members with Hackatime found</option>';
+                                memberSelect.disabled = true;
+                            } else {
+                                memberSelect.disabled = false;
+                            }
+                        }
                         
-                        // Add members to dropdown
-                        hackatimeMembers.forEach(member => {
-                            const option = document.createElement('option');
-                            option.value = member.id;
-                            option.textContent = member.username;
-                            memberSelect.appendChild(option);
-                        });
+                        // Also load members for display in the hackatime tab if needed
+                        const membersContainer = document.getElementById('hackatime-members-list');
+                        const emptyState = document.getElementById('hackatime-empty-state');
                         
-                        if (hackatimeMembers.length === 0) {
-                            memberSelect.innerHTML = '<option value="">No members with Hackatime found</option>';
-                            memberSelect.disabled = true;
-                        } else {
-                            memberSelect.disabled = false;
+                        if (membersContainer && emptyState) {
+                            if (hackatimeMembers.length === 0) {
+                                if (document.querySelector('.hackatime-members-wrapper')) {
+                                    document.querySelector('.hackatime-members-wrapper').style.display = 'none';
+                                }
+                                emptyState.style.display = 'flex';
+                                return;
+                            }
+                            
+                            if (document.querySelector('.hackatime-members-wrapper')) {
+                                document.querySelector('.hackatime-members-wrapper').style.display = 'block';
+                            }
+                            emptyState.style.display = 'none';
+                            
+                            membersContainer.innerHTML = '';
+                            
+                            hackatimeMembers.forEach(member => {
+                                const memberCard = createMemberCard(member);
+                                membersContainer.appendChild(memberCard);
+                            });
                         }
                     } catch (error) {
                         console.error('Error loading Hackatime members:', error);
+                        if (memberSelect) {
+                            memberSelect.innerHTML = '<option value="">Error loading members</option>';
+                            memberSelect.disabled = true;
+                        }
                         showToast('error', 'Failed to load members with Hackatime');
                     }
                 }
