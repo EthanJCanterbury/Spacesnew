@@ -3188,7 +3188,11 @@
                     <h3>Select Member</h3>
                     <p>Choose a member to view their eligible projects:</p>
                     <div class="member-dropdown-container">
-                        <select id="pizza-member-select" class="form-select">
+                        <div id="member-dropdown-loading" class="dropdown-loading">
+                            <div class="loading-spinner-small"></div>
+                            <span>Loading members...</span>
+                        </div>
+                        <select id="pizza-member-select" class="form-select" style="display:none;">
                             <option value="">Select a member...</option>
                         </select>
                     </div>
@@ -3196,48 +3200,125 @@
 
                 <script>
                     // Load Hackatime members when the pizza tab is shown
-                    document.querySelector('a[href="#pizza"]').addEventListener('click', function() {
-                        loadHackatimeMembers();
+                    document.querySelector('a[data-section="pizza"]').addEventListener('click', function() {
+                        loadHackatimeMembersDropdown();
                     });
                     
                     // Function to populate the members dropdown
                     async function loadHackatimeMembersDropdown() {
                         const memberSelect = document.getElementById('pizza-member-select');
+                        const loadingIndicator = document.getElementById('member-dropdown-loading');
+                        
+                        // Show loading indicator
+                        if (loadingIndicator) loadingIndicator.style.display = 'flex';
+                        if (memberSelect) memberSelect.style.display = 'none';
                         
                         try {
-                            const response = await fetch(`/api/hackatime/club/{{ club.id }}/members`);
+                            // Use the pizza-specific endpoint for members
+                            const response = await fetch(`/api/clubs/{{ club.id }}/hackatime-members`);
                             const data = await response.json();
+                            
+                            // Hide loading indicator and show dropdown
+                            if (loadingIndicator) loadingIndicator.style.display = 'none';
+                            if (memberSelect) memberSelect.style.display = 'block';
                             
                             if (data.error) {
                                 showToast('error', data.error);
+                                if (memberSelect) {
+                                    memberSelect.innerHTML = '<option value="">Error loading members</option>';
+                                    memberSelect.disabled = true;
+                                }
                                 return;
                             }
                             
                             const members = data.members || [];
                             
                             // Clear dropdown
-                            memberSelect.innerHTML = '<option value="">Select a member...</option>';
-                            
-                            // Add members to dropdown
-                            members.forEach(member => {
-                                const option = document.createElement('option');
-                                option.value = member.id;
-                                option.textContent = member.username;
-                                memberSelect.appendChild(option);
-                            });
-                            
-                            if (members.length === 0) {
-                                memberSelect.innerHTML = '<option value="">No members with Hackatime found</option>';
-                                memberSelect.disabled = true;
-                            } else {
-                                memberSelect.disabled = false;
+                            if (memberSelect) {
+                                memberSelect.innerHTML = '<option value="">Select a member...</option>';
+                                
+                                // Add members to dropdown
+                                members.forEach(member => {
+                                    const option = document.createElement('option');
+                                    option.value = member.id;
+                                    option.textContent = member.username;
+                                    memberSelect.appendChild(option);
+                                });
+                                
+                                if (members.length === 0) {
+                                    memberSelect.innerHTML = '<option value="">No members with Hackatime found</option>';
+                                    memberSelect.disabled = true;
+                                    
+                                    // Show informative message
+                                    const container = document.querySelector('.member-dropdown-container');
+                                    if (container) {
+                                        const infoMsg = document.createElement('div');
+                                        infoMsg.className = 'empty-message';
+                                        infoMsg.innerHTML = `
+                                            <i class="fas fa-info-circle"></i>
+                                            <p>No members have connected their Hackatime accounts. Members need to connect Hackatime in their settings to be eligible for pizza grants.</p>
+                                        `;
+                                        container.appendChild(infoMsg);
+                                    }
+                                } else {
+                                    memberSelect.disabled = false;
+                                }
                             }
                         } catch (error) {
                             console.error('Error loading Hackatime members for dropdown:', error);
+                            
+                            // Hide loading indicator and show dropdown with error
+                            if (loadingIndicator) loadingIndicator.style.display = 'none';
+                            if (memberSelect) {
+                                memberSelect.style.display = 'block';
+                                memberSelect.innerHTML = '<option value="">Error loading members</option>';
+                                memberSelect.disabled = true;
+                            }
+                            
                             showToast('error', 'Failed to load members with Hackatime');
                         }
                     }
                 </script>
+
+                <style>
+                    .dropdown-loading {
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        padding: 8px 0;
+                        color: #666;
+                    }
+                    
+                    .loading-spinner-small {
+                        width: 16px;
+                        height: 16px;
+                        border: 2px solid rgba(236, 55, 80, 0.2);
+                        border-radius: 50%;
+                        border-top-color: #ec3750;
+                        animation: spin 1s linear infinite;
+                    }
+                    
+                    .empty-message {
+                        margin-top: 10px;
+                        padding: 10px;
+                        background-color: #fff8e1;
+                        border-radius: 6px;
+                        display: flex;
+                        align-items: flex-start;
+                        gap: 10px;
+                    }
+                    
+                    .empty-message i {
+                        color: #ffa000;
+                        margin-top: 2px;
+                    }
+                    
+                    .empty-message p {
+                        margin: 0;
+                        font-size: 13px;
+                        color: #5d4037;
+                    }
+                </style>
 
                 <div id="member-projects-container" style="display: none;">
                     <div class="pizza-section-header">
@@ -3680,29 +3761,57 @@
                 }
                 
                 // Event listener for member selection
-                document.getElementById('pizza-member-select').addEventListener('change', function(e) {
-                    const memberId = e.target.value;
-                    if (memberId) {
-                        selectedMemberId = memberId;
-                        const selectedMember = hackatimeMembers.find(m => m.id.toString() === memberId);
-                        document.getElementById('member-id').value = memberId;
-                        document.getElementById('member-name').value = selectedMember.username;
-                        loadMemberProjects(memberId);
-                        document.getElementById('member-projects-container').style.display = 'block';
-                    } else {
-                        document.getElementById('member-projects-container').style.display = 'none';
-                        document.getElementById('submission-form-container').style.display = 'none';
-                        selectedMemberId = null;
-                    }
-                });
+                const memberSelectElement = document.getElementById('pizza-member-select');
+                if (memberSelectElement) {
+                    memberSelectElement.addEventListener('change', function(e) {
+                        const memberId = e.target.value;
+                        if (memberId) {
+                            selectedMemberId = memberId;
+                            // Get the selected option text directly from the dropdown
+                            const selectedOptionText = this.options[this.selectedIndex].text;
+                            
+                            // Update hidden fields
+                            const memberIdInput = document.getElementById('member-id');
+                            const memberNameInput = document.getElementById('member-name');
+                            
+                            if (memberIdInput) memberIdInput.value = memberId;
+                            if (memberNameInput) memberNameInput.value = selectedOptionText;
+                            
+                            // Load member projects
+                            loadMemberProjects(memberId);
+                            
+                            // Show projects container
+                            const projectsContainer = document.getElementById('member-projects-container');
+                            if (projectsContainer) projectsContainer.style.display = 'block';
+                        } else {
+                            // Hide containers when no member is selected
+                            const projectsContainer = document.getElementById('member-projects-container');
+                            const submissionContainer = document.getElementById('submission-form-container');
+                            
+                            if (projectsContainer) projectsContainer.style.display = 'none';
+                            if (submissionContainer) submissionContainer.style.display = 'none';
+                            
+                            selectedMemberId = null;
+                        }
+                    });
+                }
                 
                 // Function to load member projects
                 async function loadMemberProjects(userId) {
+                    if (!userId) return;
+                    
                     const projectsContainer = document.getElementById('member-projects-list');
+                    if (!projectsContainer) return;
+                    
                     projectsContainer.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading member projects...</p></div>';
                     
                     try {
                         const response = await fetch(`/api/hackatime/user/${userId}/projects`);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        
                         const data = await response.json();
                         
                         if (data.error) {
@@ -3720,14 +3829,26 @@
                         // Sort projects by total time (descending)
                         const sortedProjects = data.projects.sort((a, b) => (b.total_seconds || 0) - (a.total_seconds || 0));
                         
+                        let hasEligibleProjects = false;
+                        
                         sortedProjects.forEach(project => {
                             const hoursSpent = (project.total_seconds || 0) / 3600;
                             const isEligible = hoursSpent >= 1;
                             const grantAmount = hoursSpent >= 2 ? '$10' : '$5';
                             
+                            if (isEligible) hasEligibleProjects = true;
+                            
                             const projectCard = document.createElement('div');
                             projectCard.className = `pizza-project-card ${isEligible ? 'eligible' : ''}`;
-                            projectCard.onclick = () => selectProject(project, hoursSpent, grantAmount);
+                            
+                            // Only make eligible projects clickable
+                            if (isEligible) {
+                                projectCard.onclick = () => selectProject(project, hoursSpent, grantAmount);
+                                projectCard.style.cursor = 'pointer';
+                            } else {
+                                projectCard.style.cursor = 'default';
+                                projectCard.style.opacity = '0.7';
+                            }
                             
                             projectCard.innerHTML = `
                                 <h4>${project.name}</h4>
@@ -3749,9 +3870,30 @@
                             
                             projectsContainer.appendChild(projectCard);
                         });
+                        
+                        // Add a note if no eligible projects
+                        if (!hasEligibleProjects) {
+                            const noteDiv = document.createElement('div');
+                            noteDiv.className = 'empty-message';
+                            noteDiv.style.gridColumn = '1 / -1';
+                            noteDiv.innerHTML = `
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>This member doesn't have any projects with at least 1 hour of coding time. 
+                                Projects must have a minimum of 1 hour tracked in Hackatime to be eligible for pizza grants.</p>
+                            `;
+                            projectsContainer.prepend(noteDiv);
+                        }
                     } catch (error) {
                         console.error('Error loading member projects:', error);
-                        projectsContainer.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load projects.</p></div>';
+                        projectsContainer.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <p>Failed to load projects: ${error.message || 'Unknown error'}</p>
+                                <button class="btn-secondary btn-sm" onclick="loadMemberProjects('${userId}')">
+                                    <i class="fas fa-sync"></i> Retry
+                                </button>
+                            </div>
+                        `;
                     }
                 }
                 
