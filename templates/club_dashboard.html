@@ -3761,40 +3761,83 @@
                 }
                 
                 // Event listener for member selection
-                const memberSelectElement = document.getElementById('pizza-member-select');
-                if (memberSelectElement) {
-                    memberSelectElement.addEventListener('change', function(e) {
-                        const memberId = e.target.value;
-                        if (memberId) {
-                            selectedMemberId = memberId;
-                            // Get the selected option text directly from the dropdown
-                            const selectedOptionText = this.options[this.selectedIndex].text;
+                document.addEventListener('DOMContentLoaded', function() {
+                    const memberSelectElement = document.getElementById('pizza-member-select');
+                    console.log("Member select element found:", !!memberSelectElement);
+                    
+                    if (memberSelectElement) {
+                        memberSelectElement.addEventListener('change', function(e) {
+                            console.log("Member selection changed");
+                            const memberId = e.target.value;
+                            console.log("Selected member ID:", memberId);
                             
-                            // Update hidden fields
-                            const memberIdInput = document.getElementById('member-id');
-                            const memberNameInput = document.getElementById('member-name');
-                            
-                            if (memberIdInput) memberIdInput.value = memberId;
-                            if (memberNameInput) memberNameInput.value = selectedOptionText;
-                            
-                            // Load member projects
-                            loadMemberProjects(memberId);
-                            
-                            // Show projects container
-                            const projectsContainer = document.getElementById('member-projects-container');
-                            if (projectsContainer) projectsContainer.style.display = 'block';
-                        } else {
-                            // Hide containers when no member is selected
-                            const projectsContainer = document.getElementById('member-projects-container');
-                            const submissionContainer = document.getElementById('submission-form-container');
-                            
-                            if (projectsContainer) projectsContainer.style.display = 'none';
-                            if (submissionContainer) submissionContainer.style.display = 'none';
-                            
-                            selectedMemberId = null;
+                            if (memberId) {
+                                selectedMemberId = memberId;
+                                // Get the selected option text directly from the dropdown
+                                const selectedOptionText = this.options[this.selectedIndex].text;
+                                console.log("Selected member name:", selectedOptionText);
+                                
+                                // Update hidden fields
+                                const memberIdInput = document.getElementById('member-id');
+                                const memberNameInput = document.getElementById('member-name');
+                                
+                                if (memberIdInput) memberIdInput.value = memberId;
+                                if (memberNameInput) memberNameInput.value = selectedOptionText;
+                                
+                                // Load member projects
+                                loadMemberProjects(memberId);
+                                
+                                // Show projects container
+                                const projectsContainer = document.getElementById('member-projects-container');
+                                if (projectsContainer) {
+                                    projectsContainer.style.display = 'block';
+                                    console.log("Projects container displayed");
+                                }
+                            } else {
+                                // Hide containers when no member is selected
+                                const projectsContainer = document.getElementById('member-projects-container');
+                                const submissionContainer = document.getElementById('submission-form-container');
+                                
+                                if (projectsContainer) projectsContainer.style.display = 'none';
+                                if (submissionContainer) submissionContainer.style.display = 'none';
+                                
+                                selectedMemberId = null;
+                                console.log("No member selected, containers hidden");
+                            }
+                        });
+                    } else {
+                        console.error("Pizza member select element not found!");
+                    }
+                });
+                
+                // Also set up the event listener when the pizza tab is shown
+                document.querySelector('a[data-section="pizza"]').addEventListener('click', function() {
+                    setTimeout(function() {
+                        const memberSelectElement = document.getElementById('pizza-member-select');
+                        if (memberSelectElement && !memberSelectElement._hasChangeListener) {
+                            memberSelectElement._hasChangeListener = true;
+                            memberSelectElement.addEventListener('change', function(e) {
+                                console.log("Member selection changed (from tab listener)");
+                                const memberId = e.target.value;
+                                if (memberId) {
+                                    selectedMemberId = memberId;
+                                    // Get the selected option text directly from the dropdown
+                                    const selectedOptionText = this.options[this.selectedIndex].text;
+                                    
+                                    // Update hidden fields
+                                    const memberIdInput = document.getElementById('member-id');
+                                    const memberNameInput = document.getElementById('member-name');
+                                    
+                                    if (memberIdInput) memberIdInput.value = memberId;
+                                    if (memberNameInput) memberNameInput.value = selectedOptionText;
+                                    
+                                    // Load member projects
+                                    loadMemberProjects(memberId);
+                                }
+                            });
                         }
-                    });
-                }
+                    }, 500); // Small delay to ensure the DOM is ready
+                });
                 
                 // Function to load member projects
                 async function loadMemberProjects(userId) {
@@ -3802,6 +3845,15 @@
                     
                     const projectsContainer = document.getElementById('member-projects-list');
                     if (!projectsContainer) return;
+                    
+                    // Show the container with member projects
+                    const memberProjectsContainer = document.getElementById('member-projects-container');
+                    if (memberProjectsContainer) {
+                        memberProjectsContainer.style.display = 'block';
+                    }
+                    
+                    // Log for debugging
+                    console.log("Loading projects for user ID:", userId);
                     
                     projectsContainer.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading member projects...</p></div>';
                     
@@ -3813,6 +3865,7 @@
                         }
                         
                         const data = await response.json();
+                        console.log("Projects data received:", data);
                         
                         if (data.error) {
                             projectsContainer.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Error: ${data.error}</p></div>`;
