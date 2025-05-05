@@ -244,8 +244,13 @@
                         <span>Hackatime</span>
                     </a>
                 </li>
-
                 {% endif %}
+                <li>
+                    <a href="#pizza" class="nav-link" data-section="pizza">
+                        <i class="fas fa-pizza-slice"></i>
+                        <span>Pizza Grants</span>
+                    </a>
+                </li>
                 {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
                 <li>
                     <a href="#settings" class="nav-link" data-section="settings">
@@ -3153,6 +3158,570 @@
 
 
 
+            </script>
+        </section>
+
+        <!-- Pizza Grants Tab Content -->
+        <section id="pizza" class="club-section">
+            <div class="section-header" style="text-align: center; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <h2 style="text-align: center;"><i class="fas fa-pizza-slice"></i> Pizza Grants</h2>
+                <p style="text-align: center; width: 100%;">Submit your coding projects for pizza grants</p>
+            </div>
+
+            <div class="pizza-container">
+                <div class="pizza-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-info-circle"></i> Pizza Grants Info</h3>
+                    </div>
+                    <div class="card-content">
+                        <p>Hack Club offers pizza grants for projects completed during club meetings:</p>
+                        <ul class="pizza-info-list">
+                            <li><i class="fas fa-dollar-sign"></i> <strong>$5 per person</strong> who ships a 1-hour project</li>
+                            <li><i class="fas fa-dollar-sign"></i><i class="fas fa-dollar-sign"></i> <strong>$10 per person</strong> who ships a 2+ hour project</li>
+                        </ul>
+                        <div class="info-box">
+                            <i class="fas fa-lightbulb"></i>
+                            <p>Projects must be tracked on Hackatime to qualify for grants. Make sure to connect your Hackatime account in your profile settings.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pizza-form-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-file-alt"></i> Submit Project for Grant</h3>
+                    </div>
+                    <div class="card-content">
+                        <div id="pizza-grant-form">
+                            <div class="form-group">
+                                <label for="project-select">Select Your Project <span class="required">*</span></label>
+                                <select id="project-select" class="form-input" required>
+                                    <option value="" disabled selected>Loading your projects...</option>
+                                </select>
+                                <div class="hint">Only projects tracked on Hackatime are shown here</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="project-description">Project Description <span class="required">*</span></label>
+                                <textarea id="project-description" class="form-textarea" rows="3" placeholder="Briefly describe what you built and what you learned" required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="project-url">Project URL (if available)</label>
+                                <input type="url" id="project-url" class="form-input" placeholder="https://example.com">
+                            </div>
+                            
+                            <div class="form-group" id="project-details" style="display: none;">
+                                <div class="info-card">
+                                    <h4>Project Details</h4>
+                                    <div class="project-info-row">
+                                        <span class="info-label">Total Time:</span>
+                                        <span id="project-time" class="info-value">0 hrs</span>
+                                    </div>
+                                    <div class="project-info-row">
+                                        <span class="info-label">Grant Amount:</span>
+                                        <span id="grant-amount" class="info-value">$0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="button" class="btn-primary" id="submit-project-btn">
+                                <i class="fas fa-paper-plane"></i> Submit Project
+                            </button>
+                        </div>
+                        
+                        <div id="pizza-no-hackatime" style="display: none;">
+                            <div class="empty-state">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <h4>Hackatime Not Connected</h4>
+                                <p>You need to connect your Hackatime account to submit projects for pizza grants.</p>
+                                <a href="/hackatime" class="btn-primary">
+                                    <i class="fas fa-link"></i> Connect Hackatime
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div id="pizza-success" style="display: none;">
+                            <div class="success-state">
+                                <i class="fas fa-check-circle"></i>
+                                <h4>Project Submitted!</h4>
+                                <p>Your project has been submitted for a pizza grant. We'll review it and get back to you soon.</p>
+                                <button type="button" class="btn-secondary" id="submit-another-btn">
+                                    <i class="fas fa-plus"></i> Submit Another Project
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pizza-history-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-history"></i> Submission History</h3>
+                    </div>
+                    <div class="card-content">
+                        <div id="pizza-history-list">
+                            <!-- Submissions will be listed here -->
+                            <div class="loading-state">
+                                <div class="loading-spinner"></div>
+                                <p>Loading your submissions...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                .pizza-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 20px;
+                }
+                
+                .pizza-card,
+                .pizza-form-card,
+                .pizza-history-card {
+                    background-color: white;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                    overflow: hidden;
+                    border: 1px solid #eee;
+                }
+                
+                .pizza-info-list {
+                    padding-left: 20px;
+                    margin: 15px 0;
+                }
+                
+                .pizza-info-list li {
+                    margin-bottom: 10px;
+                }
+                
+                .info-box {
+                    background-color: rgba(var(--primary-rgb), 0.05);
+                    border-radius: 8px;
+                    padding: 15px;
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 12px;
+                    margin-top: 15px;
+                }
+                
+                .info-box i {
+                    color: var(--primary);
+                    font-size: 20px;
+                    margin-top: 2px;
+                }
+                
+                .empty-state,
+                .success-state {
+                    text-align: center;
+                    padding: 30px 20px;
+                }
+                
+                .empty-state i,
+                .success-state i {
+                    font-size: 40px;
+                    margin-bottom: 15px;
+                }
+                
+                .empty-state i {
+                    color: #f39c12;
+                }
+                
+                .success-state i {
+                    color: #2ecc71;
+                }
+                
+                .empty-state h4,
+                .success-state h4 {
+                    margin: 0 0 10px;
+                    font-size: 18px;
+                }
+                
+                .empty-state p,
+                .success-state p {
+                    margin: 0 0 20px;
+                    color: #666;
+                }
+                
+                .project-info-row {
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 10px 0;
+                    border-bottom: 1px solid #eee;
+                }
+                
+                .project-info-row:last-child {
+                    border-bottom: none;
+                }
+                
+                .info-label {
+                    font-weight: 500;
+                    color: #555;
+                }
+                
+                .info-value {
+                    font-weight: 600;
+                }
+                
+                .info-card {
+                    background-color: #f8f9fa;
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin-top: 15px;
+                }
+                
+                .info-card h4 {
+                    margin: 0 0 10px;
+                    font-size: 16px;
+                    font-weight: 600;
+                }
+                
+                .submission-item {
+                    background-color: #f8f9fa;
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin-bottom: 15px;
+                }
+                
+                .submission-item:last-child {
+                    margin-bottom: 0;
+                }
+                
+                .submission-header {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 10px;
+                }
+                
+                .submission-title {
+                    font-weight: 600;
+                    font-size: 16px;
+                    margin: 0;
+                }
+                
+                .submission-date {
+                    font-size: 13px;
+                    color: #777;
+                }
+                
+                .submission-status {
+                    display: inline-block;
+                    padding: 3px 8px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    margin-bottom: 10px;
+                }
+                
+                .status-pending {
+                    background-color: #fff3cd;
+                    color: #856404;
+                }
+                
+                .status-approved {
+                    background-color: #d4edda;
+                    color: #155724;
+                }
+                
+                .status-rejected {
+                    background-color: #f8d7da;
+                    color: #721c24;
+                }
+                
+                .submission-details {
+                    font-size: 14px;
+                    color: #555;
+                }
+                
+                .submission-amount {
+                    font-weight: 600;
+                    color: #2ecc71;
+                }
+            </style>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Load projects and submissions when the tab is shown
+                    document.querySelector('a[data-section="pizza"]').addEventListener('click', function() {
+                        loadPizzaTab();
+                    });
+                    
+                    // Setup form submission
+                    document.getElementById('submit-project-btn').addEventListener('click', submitPizzaGrant);
+                    
+                    // Setup submit another button
+                    document.getElementById('submit-another-btn').addEventListener('click', resetPizzaForm);
+                    
+                    // Setup project selection change
+                    document.getElementById('project-select').addEventListener('change', updateProjectDetails);
+                });
+                
+                function loadPizzaTab() {
+                    // Check if user has Hackatime connected
+                    checkHackatimeConnection();
+                    
+                    // Load user's projects
+                    loadUserProjects();
+                    
+                    // Load submission history
+                    loadSubmissionHistory();
+                }
+                
+                function checkHackatimeConnection() {
+                    // This check should be based on the current user's wakatime_api_key status
+                    const hasHackatime = {% if current_user.wakatime_api_key %}true{% else %}false{% endif %};
+                    
+                    if (hasHackatime) {
+                        document.getElementById('pizza-grant-form').style.display = 'block';
+                        document.getElementById('pizza-no-hackatime').style.display = 'none';
+                    } else {
+                        document.getElementById('pizza-grant-form').style.display = 'none';
+                        document.getElementById('pizza-no-hackatime').style.display = 'block';
+                    }
+                }
+                
+                function loadUserProjects() {
+                    // Get current user ID
+                    const userId = {{ current_user.id }};
+                    
+                    // Use the same API as Hackatime tab
+                    fetch(`/api/hackatime/user/${userId}/projects`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const projectSelect = document.getElementById('project-select');
+                        
+                        // Clear existing options
+                        projectSelect.innerHTML = '';
+                        
+                        // Add default option
+                        const defaultOption = document.createElement('option');
+                        defaultOption.value = '';
+                        defaultOption.textContent = 'Select your project';
+                        defaultOption.disabled = true;
+                        defaultOption.selected = true;
+                        projectSelect.appendChild(defaultOption);
+                        
+                        // Check if we have projects
+                        if (data.projects && data.projects.length > 0) {
+                            // Sort projects by time spent (descending)
+                            data.projects.sort((a, b) => (b.total_seconds || 0) - (a.total_seconds || 0));
+                            
+                            // Add projects to select
+                            data.projects.forEach(project => {
+                                const hours = Math.round((project.total_seconds || 0) / 36) / 100; // Convert seconds to hours with 2 decimal places
+                                const option = document.createElement('option');
+                                option.value = project.name;
+                                option.textContent = `${project.name} (${hours} hrs)`;
+                                option.dataset.time = project.total_seconds || 0;
+                                option.dataset.hours = hours;
+                                projectSelect.appendChild(option);
+                            });
+                        } else {
+                            // No projects found
+                            const noProjectsOption = document.createElement('option');
+                            noProjectsOption.value = '';
+                            noProjectsOption.textContent = 'No projects found';
+                            noProjectsOption.disabled = true;
+                            projectSelect.appendChild(noProjectsOption);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading projects:', error);
+                        const projectSelect = document.getElementById('project-select');
+                        projectSelect.innerHTML = '<option value="" disabled selected>Error loading projects</option>';
+                    });
+                }
+                
+                function updateProjectDetails() {
+                    const projectSelect = document.getElementById('project-select');
+                    const selectedOption = projectSelect.options[projectSelect.selectedIndex];
+                    
+                    if (selectedOption && selectedOption.value) {
+                        // Show project details
+                        document.getElementById('project-details').style.display = 'block';
+                        
+                        // Get project time in hours
+                        const hours = parseFloat(selectedOption.dataset.hours) || 0;
+                        
+                        // Update project time display
+                        document.getElementById('project-time').textContent = `${hours.toFixed(2)} hrs`;
+                        
+                        // Calculate grant amount
+                        let grantAmount = 0;
+                        if (hours >= 2) {
+                            grantAmount = 10; // $10 for 2+ hour projects
+                        } else if (hours >= 1) {
+                            grantAmount = 5;  // $5 for 1-hour projects
+                        }
+                        
+                        // Update grant amount display
+                        document.getElementById('grant-amount').textContent = `$${grantAmount}`;
+                        
+                        // Add grant amount class
+                        if (grantAmount > 0) {
+                            document.getElementById('grant-amount').classList.add('eligible');
+                        } else {
+                            document.getElementById('grant-amount').classList.remove('eligible');
+                        }
+                    } else {
+                        // Hide project details if no project selected
+                        document.getElementById('project-details').style.display = 'none';
+                    }
+                }
+                
+                function submitPizzaGrant() {
+                    // Get form values
+                    const projectSelect = document.getElementById('project-select');
+                    const projectDescription = document.getElementById('project-description');
+                    const projectUrl = document.getElementById('project-url');
+                    
+                    // Validate form
+                    if (!projectSelect.value) {
+                        showToast('error', 'Please select a project');
+                        return;
+                    }
+                    
+                    if (!projectDescription.value.trim()) {
+                        showToast('error', 'Please enter a project description');
+                        return;
+                    }
+                    
+                    // Get selected project details
+                    const selectedOption = projectSelect.options[projectSelect.selectedIndex];
+                    const hours = parseFloat(selectedOption.dataset.hours) || 0;
+                    
+                    // Calculate grant amount
+                    let grantAmount = 0;
+                    if (hours >= 2) {
+                        grantAmount = 10; // $10 for 2+ hour projects
+                    } else if (hours >= 1) {
+                        grantAmount = 5;  // $5 for 1-hour projects
+                    }
+                    
+                    // Prepare submission data
+                    const submissionData = {
+                        club_id: {{ club.id }},
+                        user_id: {{ current_user.id }},
+                        username: "{{ current_user.username }}",
+                        project_name: projectSelect.value,
+                        project_description: projectDescription.value.trim(),
+                        project_url: projectUrl.value.trim(),
+                        project_hours: hours,
+                        grant_amount: grantAmount,
+                        status: "pending",
+                        submitted_at: new Date().toISOString()
+                    };
+                    
+                    // Submit the grant request
+                    fetch('/api/pizza-grants/submit', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(submissionData)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            document.getElementById('pizza-grant-form').style.display = 'none';
+                            document.getElementById('pizza-success').style.display = 'block';
+                            
+                            // Reload submission history
+                            loadSubmissionHistory();
+                            
+                            showToast('success', 'Project submitted successfully');
+                        } else {
+                            showToast('error', data.message || 'Failed to submit project');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error submitting project:', error);
+                        showToast('error', 'An error occurred while submitting your project');
+                    });
+                }
+                
+                function resetPizzaForm() {
+                    // Reset form
+                    document.getElementById('project-select').value = '';
+                    document.getElementById('project-description').value = '';
+                    document.getElementById('project-url').value = '';
+                    document.getElementById('project-details').style.display = 'none';
+                    
+                    // Show form
+                    document.getElementById('pizza-grant-form').style.display = 'block';
+                    document.getElementById('pizza-success').style.display = 'none';
+                }
+                
+                function loadSubmissionHistory() {
+                    // Get submissions for current user
+                    fetch(`/api/pizza-grants/user/{{ current_user.id }}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const historyList = document.getElementById('pizza-history-list');
+                        
+                        if (data.submissions && data.submissions.length > 0) {
+                            // Sort submissions by date (newest first)
+                            data.submissions.sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
+                            
+                            // Clear and populate history list
+                            historyList.innerHTML = '';
+                            
+                            data.submissions.forEach(submission => {
+                                const submissionDate = new Date(submission.submitted_at);
+                                const formattedDate = submissionDate.toLocaleDateString('en-US', {
+                                    year: 'numeric', 
+                                    month: 'short', 
+                                    day: 'numeric'
+                                });
+                                
+                                // Create submission item
+                                const submissionItem = document.createElement('div');
+                                submissionItem.className = 'submission-item';
+                                
+                                // Set status class
+                                const statusClass = `status-${submission.status}`;
+                                
+                                submissionItem.innerHTML = `
+                                    <div class="submission-header">
+                                        <h4 class="submission-title">${submission.project_name}</h4>
+                                        <span class="submission-date">${formattedDate}</span>
+                                    </div>
+                                    <span class="submission-status ${statusClass}">${submission.status.charAt(0).toUpperCase() + submission.status.slice(1)}</span>
+                                    <div class="submission-details">
+                                        <p>${submission.project_description}</p>
+                                        <p>Time: <strong>${submission.project_hours.toFixed(2)} hrs</strong> | Grant: <span class="submission-amount">$${submission.grant_amount}</span></p>
+                                    </div>
+                                `;
+                                
+                                historyList.appendChild(submissionItem);
+                            });
+                        } else {
+                            // No submissions
+                            historyList.innerHTML = '<div class="empty-state">No submissions yet. Submit a project to get started!</div>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading submission history:', error);
+                        const historyList = document.getElementById('pizza-history-list');
+                        historyList.innerHTML = '<div class="error-state">Error loading submission history</div>';
+                    });
+                }
             </script>
         </section>
 
