@@ -1762,6 +1762,55 @@ function closeUserProfileModal() {
     }, 300);
 }
 
+function saveUserChanges() {
+    const userId = document.getElementById('editUserId').value;
+    const username = document.getElementById('editUsername').value;
+    const email = document.getElementById('editEmail').value;
+    const password = document.getElementById('resetPassword').value;
+    const isPublicProfile = document.getElementById('editIsPublicProfile').checked;
+
+    if (!userId) {
+        showToast('error', 'User ID is missing');
+        return;
+    }
+
+    const userData = {
+        username: username,
+        email: email,
+        is_profile_public: isPublicProfile
+    };
+
+    if (password) {
+        userData.password = password;
+    }
+
+    fetch(`/api/admin/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('success', 'User information updated successfully');
+            closeUserDetailModal();
+            
+            // Refresh the page after a short delay
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            showToast('error', data.message || 'Failed to update user information');
+        }
+    })
+    .catch(error => {
+        console.error('Error updating user:', error);
+        showToast('error', 'An error occurred while updating user information');
+    });
+}
+
 // Function to toggle action dropdown visibility
 function toggleActionDropdown(button) {
     // Safety check for the button
