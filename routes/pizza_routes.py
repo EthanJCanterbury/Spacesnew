@@ -138,10 +138,5 @@ def get_hackatime_members(club_id):
         return jsonify({'members': members})
     except Exception as e:
         import traceback
-        error_details = traceback.format_exc()
-        print(f"Error in get_hackatime_members: {str(e)}\n{error_details}")
-        return jsonify({
-            'error': f'Failed to get members: {str(e)}',
-            'members': [],
-            'debug_info': f"Club ID: {club_id}, User ID: {current_user.id}"
-        }), 500
+        print(f"Error in get_hackatime_members: {str(e)}\n{traceback.format_exc()}")
+        return jsonify({'error': f'Failed to get members: {str(e)}', 'members': []}), 500
