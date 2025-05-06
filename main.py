@@ -91,3 +91,45 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 3000))
     app.logger.info(f"Server running on http://0.0.0.0:{port}")
     app.run(host='0.0.0.0', port=port, debug=True)
+
+@app.route('/api/admin/users/<int:user_id>/staff-status', methods=['POST'])
+@login_required
+@admin_required
+def toggle_staff_status(user_id):
+    """Toggle a user's staff status."""
+    try:
+        user = User.query.get_or_404(user_id)
+        
+        if user.id == current_user.id:
+            return jsonify({
+                'success': False,
+                'message': 'You cannot change your own staff status'
+            }), 400
+        
+        data = request.get_json()
+        make_staff = data.get('is_staff', False)
+        
+        user.is_staff = make_staff
+        db.session.commit()
+        
+        # Record admin activity
+        activity = UserActivity(
+            activity_type="admin_action",
+            message=f"Admin {{username}} {'made' if make_staff else 'removed'} {user.username} {'as' if make_staff else 'from being'} HQ staff",
+            username=current_user.username,
+            user_id=current_user.id
+        )
+        db.session.add(activity)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Staff status for {user.username} has been {"granted" if make_staff else "revoked"}'
+        })
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error updating staff status: {str(e)}')
+        return jsonify({
+            'success': False,
+            'message': f'Failed to update staff status: {str(e)}'
+        }), 500
