@@ -3223,7 +3223,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="who-are-you">What did you learn about Repl? <span class="required">*</span></label>
+                                <label for="who-are-you">What did you learn about while making this project? <span class="required">*</span></label>
                                 <textarea id="who-are-you" class="form-textarea" rows="2" placeholder="Share what you learned while using Repl" required></textarea>
                             </div>
                             
@@ -3232,7 +3232,6 @@
                                 <input type="email" id="email" class="form-input" placeholder="Your email address" required>
                             </div>
                             
-                            <h4 class="section-subtitle">Shipping Address</h4>
                             
                             <div class="form-group">
                                 <label for="address1">Address Line 1 <span class="required">*</span></label>
@@ -3683,7 +3682,7 @@
                     }
 
                     if (!address1.value.trim() || !city.value.trim() || !state.value.trim() || !zip.value.trim() || !country.value.trim()) {
-                        showToast('error', 'Please fill in all required shipping address fields');
+                        showToast('error', 'Please fill in all required address fields');
                         return;
                     }
                     
