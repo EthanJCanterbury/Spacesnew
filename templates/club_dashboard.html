@@ -3672,16 +3672,6 @@
                         return;
                     }
                     
-                    // Get selected project details
-                    const selectedOption = projectSelect.options[projectSelect.selectedIndex];
-                    const hours = parseFloat(selectedOption.dataset.hours) || 0;
-                    
-                    // Validate minimum project hours
-                    if (hours < 1) {
-                        showToast('error', 'Project must be at least 1 hour to qualify for a pizza grant');
-                        return;
-                    }
-                    
                     if (!projectDescription.value.trim()) {
                         showToast('error', 'Please enter a project description');
                         return;
