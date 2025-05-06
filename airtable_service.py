@@ -111,7 +111,7 @@ class AirtableService:
             'What are we doing well?': submission_data.get('doing_well', ''),
             'How can we improve?': submission_data.get('improve', ''),
             'How did you hear about this?': 'Hack Club Spaces Pizza Grants',
-            'Hours': float(submission_data.get('project_hours', 0)),
+            'Hours': str(float(submission_data.get('project_hours', 0))),
             'Grant Amount': f"${submission_data.get('grant_amount', 0)}",
             'Address (Line 1)': address.get('address1', ''),
             'Address (Line 2)': address.get('address2', ''),
