@@ -81,6 +81,17 @@ def submit_pizza_grant():
             if field not in shipping_address or not shipping_address[field]:
                 return jsonify({'success': False, 'message': f'Missing required address field: {field}'}), 400
 
+        # Validate screenshot URL
+        screenshot_url = data.get('screenshot', '')
+        if not screenshot_url:
+            return jsonify({'success': False, 'message': 'Screenshot URL is required'}), 400
+            
+        # Check if the URL ends with an image extension
+        valid_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+        is_valid_image_url = any(screenshot_url.lower().endswith(ext) for ext in valid_extensions)
+        if not is_valid_image_url:
+            return jsonify({'success': False, 'message': 'Screenshot URL must point to an image file (with .jpg, .png, .gif, or similar extension)'}), 400
+            
         # Validate submitter is authorized (either submitting for self or as club leader/co-leader)
         is_authorized = False
         target_user_id = int(data['user_id'])
