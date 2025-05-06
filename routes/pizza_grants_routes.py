@@ -54,6 +54,10 @@ def submit_pizza_grant():
         for field in required_fields:
             if field not in data:
                 return jsonify({'success': False, 'message': f'Missing required field: {field}'}), 400
+                
+        # Validate project hours (must be at least 1 hour)
+        if float(data['project_hours']) < 1:
+            return jsonify({'success': False, 'message': 'Project must be at least 1 hour to qualify for a pizza grant'}), 400
         
         # Validate shipping address fields
         address_fields = ['address1', 'city', 'state', 'zip', 'country']
