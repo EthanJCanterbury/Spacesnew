@@ -95,7 +95,8 @@ def submit_pizza_grant():
             
         # Format screenshot URL as an array of objects for Airtable if it's a valid URL
         if is_valid_image_url:
-            data['screenshot'] = [{"url": screenshot_url}]
+            # Ensure we're creating the correct format for Airtable attachments
+            data['screenshot'] = {"url": screenshot_url}
             
         # Validate submitter is authorized (either submitting for self or as club leader/co-leader)
         is_authorized = False
