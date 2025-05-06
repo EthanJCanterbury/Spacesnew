@@ -1,0 +1,43 @@
+[2025-05-06 21:30:17] [INFO] 172.31.128.59 - - [06/May/2025 21:30:17] "GET /static/js/main.js HTTP/1.1" 304 -
+[2025-05-06 21:30:17] [INFO] 172.31.128.59 - - [06/May/2025 21:30:17] "GET /static/js/main.js HTTP/1.1" 304 -
+Available tables in base appSnnIu0BhjI3E1p: ['YSWS Project Submission', 'YSWS Config']
+Available fields in table YSWS Project Submission: ['Code URL', 'Playable URL', 'How did you hear about this?', 'What are we doing well?', 'How can we improve?', 'First Name', 'Last Name', 'Email', 'Screenshot', 'Description', 'GitHub Username', 'Address (Line 1)', 'Address (Line 2)', 'City', 'State / Province', 'Country', 'ZIP / Postal Code', 'Birthday', 'Optional - Override Hours Spent', 'Optional - Override Hours Spent Justification', 'Automation - Submit to Unified YSWS', 'Automation - Error', 'Automation - First Submitted At', 'Automation - YSWS Record ID', 'Automation - Status']
+Error logging to Airtable: 422 - {"error":{"type":"UNKNOWN_FIELD_NAME","message":"Unknown field name: "Project Name""}}
+Payload sent: {"records": [{"fields": {"Project Name": "PizzaForm", "GitHub Username": "EthanAtHackClub", "Description": "sdfsdfsdf", "Hours": 36.48, "Code URL": "sdfsdfsdf", "Playable URL": "sdfdfs", "What are we doing well?": "sdfsdf", "Email": "sdfsfd", "Automation - Status": "pending", "Automation - First Submitted At": "2025-05-06T21:30:25.560Z", "Club ID": "41", "Address (Line 1)": "sdfsdf", "Address (Line 2)": "sdfdfs", "City": "dfssdf", "State / Province": "sdfsdf", "ZIP / Postal Code": "sdffsd", "Country": "sdfsdf", "Optional - Override Hours Spent": 36.48, "How can we improve?": "Submitted via Pizza Grant Form"}}]}
+[2025-05-06 21:30:26] [INFO] 172.31.128.59 - - [06/May/2025 21:30:26] "POST /api/pizza-grants/submit HTTP/1.1" 200 -
+[2025-05-06 21:30:26] [INFO] 172.31.128.59 - - [06/May/2025 21:30:26] "GET /api/pizza-grants/user/149 HTTP/1.1" 200 -
+
+"name":"Automation - First Submitted At"
+"name":"Automation - Status"
+"name":"Automation - Submit to Unified YSWS"
+"name":"Automation - YSWS Record ID"
+"name":"Birthday"
+"name":"City"
+"name":"Code URL"
+"name":"Country"
+"name":"Description"
+"name":"Email"
+"name":"First Name"
+"name":"GitHub Username"
+"name":"Grid view"
+"name":"Grid View"
+"name":"How can we improve?"
+"name":"How did you hear about this?"
+"name":"Key"
+"name":"Last Name"
+"name":"local"
+"name":"local"
+"name":"Optional - Override Hours Spent"
+"name":"Optional - Override Hours Spent Justification"
+"name":"Pipeline View"
+"name":"Playable URL"
+"name":"Screenshot"
+"name":"State / Province"
+"name":"Value"
+"name":"What are we doing well?"
+"name":"YSWS Config"
+"name":"YSWS Project Submission"
+"name":"ZIP / Postal Code"
+"name":"Hackatime Project"
+
+Make sure All of the feilds get filled and if you dont have information, edit the form intself.
