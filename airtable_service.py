@@ -97,7 +97,7 @@ class AirtableService:
             'Description': submission_data.get('project_description'),
             'Code URL': submission_data.get('github_url'),
             'Playable URL': submission_data.get('live_url'),
-            'Screenshot': submission_data.get('screenshot') and [{"url": submission_data.get('screenshot')}],
+            'Screenshot': submission_data.get('screenshot', '') and [{"url": submission_data.get('screenshot', '')}],
             'What are we doing well?': submission_data.get('doing_well', ''),
             'How can we improve?': submission_data.get('improve', ''),
             'How did you hear about this?': 'Hack Club Spaces Pizza Grants',
