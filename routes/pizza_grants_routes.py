@@ -56,7 +56,7 @@ def submit_pizza_grant():
         
         # Validate submitter is authorized (either submitting for self or as club leader/co-leader)
         is_authorized = False
-        target_user_id = data['user_id']
+        target_user_id = int(data['user_id'])
         
         if target_user_id == current_user.id or current_user.is_admin:
             is_authorized = True

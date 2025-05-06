@@ -3191,6 +3191,19 @@
                     </div>
                     <div class="card-content">
                         <div id="pizza-grant-form">
+                            {% if current_user.id == club.leader_id or (club.members|selectattr('user_id', 'eq', current_user.id)|selectattr('role', 'eq', 'co-leader')|list|length > 0) %}
+                            <div class="form-group">
+                                <label for="member-select">Select Club Member <span class="required">*</span></label>
+                                <select id="member-select" class="form-input" required>
+                                    <option value="{{ current_user.id }}" data-username="{{ current_user.username }}">{{ current_user.username }} (You)</option>
+                                    {% for membership in club.members %}
+                                    <option value="{{ membership.user.id }}" data-username="{{ membership.user.username }}">{{ membership.user.username }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="hint">Club leaders can submit grants on behalf of members</div>
+                            </div>
+                            {% endif %}
+                            
                             <div class="form-group">
                                 <label for="project-select">Select Your Project <span class="required">*</span></label>
                                 <select id="project-select" class="form-input" required>
@@ -3453,6 +3466,14 @@
                     
                     // Setup project selection change
                     document.getElementById('project-select').addEventListener('change', updateProjectDetails);
+                    
+                    // Setup member selection change if exists
+                    const memberSelect = document.getElementById('member-select');
+                    if (memberSelect) {
+                        memberSelect.addEventListener('change', function() {
+                            loadUserProjects(this.value);
+                        });
+                    }
                 });
                 
                 function loadPizzaTab() {
@@ -3479,9 +3500,16 @@
                     }
                 }
                 
-                function loadUserProjects() {
-                    // Get current user ID
-                    const userId = {{ current_user.id }};
+                function loadUserProjects(userId = {{ current_user.id }}) {
+                    // Get selected user ID if member select exists
+                    const memberSelect = document.getElementById('member-select');
+                    if (memberSelect) {
+                        userId = memberSelect.value;
+                    }
+                    
+                    // Clear project selection
+                    const projectSelect = document.getElementById('project-select');
+                    projectSelect.innerHTML = '<option value="" disabled selected>Loading projects...</option>';
                     
                     // Use the same API as Hackatime tab
                     fetch(`/api/hackatime/user/${userId}/projects`)
@@ -3492,8 +3520,6 @@
                         return response.json();
                     })
                     .then(data => {
-                        const projectSelect = document.getElementById('project-select');
-                        
                         // Clear existing options
                         projectSelect.innerHTML = '';
                         
@@ -3528,10 +3554,12 @@
                             noProjectsOption.disabled = true;
                             projectSelect.appendChild(noProjectsOption);
                         }
+                        
+                        // Hide project details when changing projects
+                        document.getElementById('project-details').style.display = 'none';
                     })
                     .catch(error => {
                         console.error('Error loading projects:', error);
-                        const projectSelect = document.getElementById('project-select');
                         projectSelect.innerHTML = '<option value="" disabled selected>Error loading projects</option>';
                     });
                 }
@@ -3602,11 +3630,23 @@
                         grantAmount = 5;  // $5 for 1-hour projects
                     }
                     
+                    // Get user ID and username from form or default to current user
+                    let userId = {{ current_user.id }};
+                    let username = "{{ current_user.username }}";
+                    
+                    // If member select exists, use its value
+                    const memberSelect = document.getElementById('member-select');
+                    if (memberSelect) {
+                        userId = parseInt(memberSelect.value);
+                        const selectedOption = memberSelect.options[memberSelect.selectedIndex];
+                        username = selectedOption.dataset.username;
+                    }
+                    
                     // Prepare submission data
                     const submissionData = {
                         club_id: {{ club.id }},
-                        user_id: {{ current_user.id }},
-                        username: "{{ current_user.username }}",
+                        user_id: userId,
+                        username: username,
                         project_name: projectSelect.value,
                         project_description: projectDescription.value.trim(),
                         project_url: projectUrl.value.trim(),
