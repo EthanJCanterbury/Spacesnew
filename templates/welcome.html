@@ -675,11 +675,8 @@
         </div>
         
         <div class="bulk-actions-container">
-            <button id="bulkDeleteBtn" class="btn-danger" onclick="openBulkDeleteModal()" disabled>
+            <button id="bulkDeleteBtn" class="btn-danger" onclick="openBulkDeleteModal()" style="display: none;">
                 <i class="fas fa-trash-alt"></i> Delete Selected Spaces
-            </button>
-            <button id="selectAllBtn" class="btn-secondary" onclick="toggleSelectAll()">
-                <i class="fas fa-check-square"></i> Select All
             </button>
         </div>
 
@@ -1162,31 +1159,11 @@ function updateSelectedCount() {
     const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
     
     if (selectedCheckboxes.length > 0) {
-        bulkDeleteBtn.disabled = false;
+        bulkDeleteBtn.style.display = 'flex';
         bulkDeleteBtn.innerHTML = `<i class="fas fa-trash-alt"></i> Delete Selected (${selectedCheckboxes.length})`;
     } else {
-        bulkDeleteBtn.disabled = true;
-        bulkDeleteBtn.innerHTML = `<i class="fas fa-trash-alt"></i> Delete Selected`;
+        bulkDeleteBtn.style.display = 'none';
     }
-}
-
-function toggleSelectAll() {
-    const checkboxes = document.querySelectorAll('.space-select');
-    const selectAllBtn = document.getElementById('selectAllBtn');
-    
-    selectAllActive = !selectAllActive;
-    
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = selectAllActive;
-    });
-    
-    if (selectAllActive) {
-        selectAllBtn.innerHTML = '<i class="fas fa-times-square"></i> Deselect All';
-    } else {
-        selectAllBtn.innerHTML = '<i class="fas fa-check-square"></i> Select All';
-    }
-    
-    updateSelectedCount();
 }
 
 function openBulkDeleteModal() {
