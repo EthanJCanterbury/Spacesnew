@@ -1,4 +1,3 @@
-
 from flask import Blueprint, jsonify, request
 from flask_login import login_required, current_user
 import json
@@ -41,10 +40,10 @@ def submit_pizza_grant():
     """Submit a new pizza grant request"""
     try:
         from models import Club, ClubMembership
-        
+
         # Get request data
         data = request.get_json()
-        
+
         # Extract first and last name from username or user model if available
         if 'username' in data and ('first_name' not in data or 'last_name' not in data):
             from models import User
@@ -62,30 +61,30 @@ def submit_pizza_grant():
                 else:
                     data['first_name'] = data['username']
                     data['last_name'] = ''
-        
+
         # Validate required fields
         required_fields = [
             'club_id', 'user_id', 'username', 'project_name', 
             'project_description', 'project_hours', 'grant_amount',
-            'shipping_address', 'github_url', 'live_url', 'email'
+            'shipping_address', 'github_url', 'live_url', 'email', 'first_name', 'last_name', 'birthday'
         ]
-        
+
         for field in required_fields:
             if field not in data:
                 return jsonify({'success': False, 'message': f'Missing required field: {field}'}), 400
-        
+
         # Validate shipping address fields
         address_fields = ['address1', 'city', 'state', 'zip', 'country']
         shipping_address = data.get('shipping_address', {})
-        
+
         for field in address_fields:
             if field not in shipping_address or not shipping_address[field]:
                 return jsonify({'success': False, 'message': f'Missing required address field: {field}'}), 400
-        
+
         # Validate submitter is authorized (either submitting for self or as club leader/co-leader)
         is_authorized = False
         target_user_id = int(data['user_id'])
-        
+
         if target_user_id == current_user.id or current_user.is_admin:
             is_authorized = True
         else:
@@ -94,17 +93,17 @@ def submit_pizza_grant():
                 id=data['club_id'],
                 leader_id=current_user.id
             ).first()
-            
+
             if club:
                 # Verify target user is a member of this club
                 membership = ClubMembership.query.filter_by(
                     club_id=club.id,
                     user_id=target_user_id
                 ).first()
-                
+
                 if membership:
                     is_authorized = True
-            
+
             # If not a leader, check if co-leader
             if not is_authorized:
                 coleader_membership = ClubMembership.query.filter_by(
@@ -112,54 +111,54 @@ def submit_pizza_grant():
                     user_id=current_user.id,
                     role='co-leader'
                 ).first()
-                
+
                 if coleader_membership:
                     # Verify target user is a member of this club
                     membership = ClubMembership.query.filter_by(
                         club_id=data['club_id'],
                         user_id=target_user_id
                     ).first()
-                    
+
                     if membership:
                         is_authorized = True
-        
+
         if not is_authorized:
             return jsonify({'success': False, 'message': 'Unauthorized to submit for this user'}), 403
-        
+
         # Add additional metadata
         data['submitted_by'] = current_user.id
         data['submitted_by_username'] = current_user.username
-        
+
         # Add submission ID and timestamp if not provided
         if 'id' not in data:
             data['id'] = int(time.time() * 1000)  # Use timestamp as ID
-        
+
         if 'submitted_at' not in data:
             data['submitted_at'] = datetime.now().isoformat()
-        
+
         # Default status to pending if not provided
         if 'status' not in data:
             data['status'] = 'pending'
-        
+
         # Load existing submissions
         submissions = load_submissions()
-        
+
         # Add new submission
         submissions.append(data)
-        
+
         # Save updated submissions
         save_submissions(submissions)
-        
+
         # Log to Airtable
         airtable_result = airtable_service.log_pizza_grant(data)
-        
+
         return jsonify({
             'success': True, 
             'message': 'Pizza grant submitted successfully',
             'submission_id': data['id'],
             'airtable_logged': airtable_result is not None
         })
-    
+
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -171,11 +170,11 @@ def get_user_submissions(user_id):
     """Get all submissions for a specific user"""
     try:
         from models import Club, ClubMembership
-        
+
         # Validate that the requested user_id matches the current user
         # or current user is an admin/club leader
         is_authorized = False
-        
+
         if user_id == current_user.id or current_user.is_admin:
             is_authorized = True
         else:
@@ -190,14 +189,14 @@ def get_user_submissions(user_id):
                 if membership:
                     is_authorized = True
                     break
-                    
+
             # Check if current user is a co-leader
             if not is_authorized:
                 coleader_memberships = ClubMembership.query.filter_by(
                     user_id=current_user.id,
                     role='co-leader'
                 ).all()
-                
+
                 for membership in coleader_memberships:
                     # Check if requested user is a member of this club
                     user_membership = ClubMembership.query.filter_by(
@@ -207,21 +206,21 @@ def get_user_submissions(user_id):
                     if user_membership:
                         is_authorized = True
                         break
-        
+
         if not is_authorized:
             return jsonify({'success': False, 'message': 'Unauthorized to view these submissions'}), 403
-        
+
         # Load all submissions
         all_submissions = load_submissions()
-        
+
         # Filter submissions for the requested user
         user_submissions = [s for s in all_submissions if s.get('user_id') == user_id]
-        
+
         return jsonify({
             'success': True,
             'submissions': user_submissions
         })
-    
+
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -233,18 +232,18 @@ def get_club_submissions(club_id):
     """Get all submissions for a specific club"""
     try:
         # TODO: Check if current user is club leader or admin
-        
+
         # Load all submissions
         all_submissions = load_submissions()
-        
+
         # Filter submissions for the requested club
         club_submissions = [s for s in all_submissions if s.get('club_id') == club_id]
-        
+
         return jsonify({
             'success': True,
             'submissions': club_submissions
         })
-    
+
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error fetching club submissions: {str(e)}'}), 500
 
@@ -254,20 +253,20 @@ def update_submission_status(submission_id):
     """Update the status of a submission (admin/leader only)"""
     try:
         data = request.get_json()
-        
+
         if 'status' not in data:
             return jsonify({'success': False, 'message': 'Status is required'}), 400
-        
+
         # Valid statuses
         valid_statuses = ['pending', 'approved', 'rejected']
         if data['status'] not in valid_statuses:
             return jsonify({'success': False, 'message': f'Invalid status. Must be one of: {", ".join(valid_statuses)}'}), 400
-        
+
         # TODO: Check if current user is a club leader or admin
-        
+
         # Load all submissions
         submissions = load_submissions()
-        
+
         # Find and update the submission
         submission_found = False
         for submission in submissions:
@@ -277,17 +276,17 @@ def update_submission_status(submission_id):
                     submission['feedback'] = data['feedback']
                 submission_found = True
                 break
-        
+
         if not submission_found:
             return jsonify({'success': False, 'message': 'Submission not found'}), 404
-        
+
         # Save updated submissions
         save_submissions(submissions)
-        
+
         return jsonify({
             'success': True,
             'message': 'Submission status updated successfully'
         })
-    
+
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error updating submission status: {str(e)}'}), 500
