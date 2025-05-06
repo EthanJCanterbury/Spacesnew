@@ -95,6 +95,7 @@ if __name__ == '__main__':
 from flask import jsonify, request
 from flask_login import login_required, current_user
 from models import User, UserActivity, db
+from app import admin_required
 
 @app.route('/api/admin/users/<int:user_id>/staff-status', methods=['POST'])
 @login_required
