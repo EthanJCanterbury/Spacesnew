@@ -156,6 +156,14 @@ def submit_pizza_grant():
         # Default status to pending if not provided
         if 'status' not in data:
             data['status'] = 'pending'
+            
+        # Look up club name from database
+        from models import Club
+        club = Club.query.filter_by(id=data['club_id']).first()
+        if club:
+            data['club_name'] = club.name
+        else:
+            data['club_name'] = "Unknown Club"
 
         # Load existing submissions
         submissions = load_submissions()
