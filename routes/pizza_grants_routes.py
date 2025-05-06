@@ -50,6 +50,8 @@ def submit_pizza_grant():
             'project_description', 'project_hours', 'grant_amount',
             'shipping_address'
         ]
+        # These fields are optional but will be stored if provided
+        # 'project_url' becomes github_url, and we add live_url
         
         for field in required_fields:
             if field not in data:
