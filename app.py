@@ -2044,6 +2044,8 @@ def search_users():
                 user.is_suspended,
                 'is_admin':
                 user.is_admin,
+                'is_staff':
+                getattr(user, 'is_staff', False),
                 'is_club_leader':
                 is_club_leader
             })

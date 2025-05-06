@@ -1145,6 +1145,10 @@ function filterUsers() {
                                     <i class="fas fa-${user.is_admin ? 'user-minus' : 'user-shield'}"></i>
                                     <span>${user.is_admin ? 'Remove Admin' : 'Make Admin'}</span>
                                 </button>
+                                <button onclick="toggleStaffStatus(${user.id}, '${user.username}', ${!user.is_staff})" class="dropdown-item">
+                                    <i class="fas fa-${user.is_staff ? 'user-minus' : 'briefcase'}"></i>
+                                    <span>${user.is_staff ? 'Remove Staff' : 'Make Staff'}</span>
+                                </button>
                                 <button onclick="resetUserPassword(${user.id}, '${user.username}')" class="dropdown-item">
                                     <i class="fas fa-key"></i>
                                     <span>Reset Password</span>
