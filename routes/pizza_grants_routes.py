@@ -66,7 +66,8 @@ def submit_pizza_grant():
         required_fields = [
             'club_id', 'user_id', 'username', 'project_name', 
             'project_description', 'project_hours', 'grant_amount',
-            'shipping_address', 'github_url', 'live_url', 'screenshot', 'email', 'first_name', 'last_name', 'birthday'
+            'shipping_address', 'github_url', 'live_url', 'screenshot', 'email', 
+            'first_name', 'last_name', 'birthday', 'what_learned', 'doing_well', 'improve'
         ]
 
         for field in required_fields:

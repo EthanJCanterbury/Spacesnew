@@ -99,9 +99,11 @@ class AirtableService:
             'Code URL': submission_data.get('github_url'),
             'Playable URL': submission_data.get('live_url'),
             'Screenshot': submission_data.get('screenshot', '') and [{"url": submission_data.get('screenshot', '')}],
-            'What are we doing well?': submission_data.get('what_learned', ''),
-            'How can we improve?': 'Submitted via Pizza Grant Form',
+            'What are we doing well?': submission_data.get('doing_well', ''),
+            'How can we improve?': submission_data.get('improve', ''),
             'How did you hear about this?': 'Hack Club Spaces Pizza Grants',
+            'Total Hours': float(submission_data.get('project_hours', 0)),
+            'Grant Amount': f"${submission_data.get('grant_amount', 0)}",
             # Remove computed fields that cannot accept values
             # 'Automation - Status': 'pending',
             # 'Automation - First Submitted At': datetime.now().isoformat(),
