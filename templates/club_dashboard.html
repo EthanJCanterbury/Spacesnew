@@ -3229,7 +3229,14 @@
                             
                             <div class="form-group">
                                 <label for="screenshot">Screenshot URL <span class="required">*</span></label>
-                                <input type="url" id="screenshot" class="form-input" placeholder="https://example.com/your-screenshot.png" required>
+                                <input type="url" id="screenshot" class="form-input" placeholder="https://example.com/your-screenshot.png" required pattern=".*\.(jpg|jpeg|png|gif|webp)$">
+                                <div class="hint">Upload your screenshot to an image hosting service (like imgur.com) and paste the direct image URL here. The URL must end with an image extension (.png, .jpg, etc.)</div>
+                            </div>
+</old_str>
+<new_str>
+                            <div class="form-group">
+                                <label for="screenshot">Screenshot URL <span class="required">*</span></label>
+                                <input type="url" id="screenshot" class="form-input" placeholder="https://example.com/your-screenshot.png" required pattern=".*\.(jpg|jpeg|png|gif|webp)$">
                                 <div class="hint">Upload your screenshot to an image hosting service (like imgur.com) and paste the direct image URL here. The URL must end with an image extension (.png, .jpg, etc.)</div>
                             </div>
 
@@ -3698,11 +3705,24 @@
                     const state = document.getElementById('state');
                     const zip = document.getElementById('zip');
                     const country = document.getElementById('country');
+                    const screenshotUrl = document.getElementById('screenshot');
                     
                     // Validate form
                     if (!projectSelect.value) {
                         showToast('error', 'Please select a project');
                         return;
+                    }
+                    
+                    // Validate screenshot URL
+                    if (screenshotUrl.value) {
+                        const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+                        const isValidImageUrl = validExtensions.some(ext => screenshotUrl.value.toLowerCase().endsWith(ext));
+                        
+                        if (!isValidImageUrl) {
+                            showToast('error', 'Screenshot URL must end with a valid image extension (.jpg, .jpeg, .png, .gif, .webp)');
+                            screenshotUrl.focus();
+                            return;
+                        }
                     }
                     
                     // Get selected project details

@@ -1,4 +1,3 @@
-
 import os
 import requests
 import json
@@ -15,20 +14,20 @@ class AirtableService:
         }
         # Use URL-encoded table name for spaces
         self.base_url = f'https://api.airtable.com/v0/{self.base_id}/{self.table_name.replace(" ", "%20")}'
-    
+
     def list_tables(self):
         """List all tables in the base to help with troubleshooting"""
         if not self.api_token:
             print("Warning: AIRTABLE_TOKEN environment variable is not set")
             return None
-            
+
         try:
             base_url = f"https://api.airtable.com/v0/meta/bases/{self.base_id}/tables"
             response = requests.get(
                 base_url,
                 headers=self.headers
             )
-            
+
             if response.status_code == 200:
                 tables = response.json().get('tables', [])
                 table_names = [table.get('name') for table in tables]
@@ -37,24 +36,24 @@ class AirtableService:
             else:
                 print(f"Error listing tables: {response.status_code} - {response.text}")
                 return None
-                
+
         except Exception as e:
             print(f"Exception when listing tables: {str(e)}")
             return None
-            
+
     def list_fields(self):
         """List fields in the table to help with troubleshooting"""
         if not self.api_token:
             print("Warning: AIRTABLE_TOKEN environment variable is not set")
             return None
-            
+
         try:
             base_url = f"https://api.airtable.com/v0/meta/bases/{self.base_id}/tables"
             response = requests.get(
                 base_url,
                 headers=self.headers
             )
-            
+
             if response.status_code == 200:
                 tables = response.json().get('tables', [])
                 for table in tables:
@@ -67,26 +66,26 @@ class AirtableService:
             else:
                 print(f"Error listing fields: {response.status_code} - {response.text}")
                 return None
-                
+
         except Exception as e:
             print(f"Exception when listing fields: {str(e)}")
             return None
-    
+
     def log_pizza_grant(self, submission_data):
         """Log a pizza grant submission to Airtable"""
         if not self.api_token:
             print("Warning: AIRTABLE_TOKEN environment variable is not set")
             return None
-            
+
         # Try to list tables first to validate access and see available tables
         tables = self.list_tables()
-        
+
         # List fields to help troubleshoot
         fields_list = self.list_fields()
-        
+
         # Format address for readability
         address = submission_data.get('shipping_address', {})
-        
+
         # Format data for Airtable - adjusted for YSWS Project Submission table
         # These fields should match exactly what's in your Airtable
         fields = {
@@ -102,11 +101,8 @@ class AirtableService:
             'What are we doing well?': submission_data.get('doing_well', ''),
             'How can we improve?': submission_data.get('improve', ''),
             'How did you hear about this?': 'Hack Club Spaces Pizza Grants',
-            'Total Hours': float(submission_data.get('project_hours', 0)),
+            'Hours': float(submission_data.get('project_hours', 0)),
             'Grant Amount': f"${submission_data.get('grant_amount', 0)}",
-            # Remove computed fields that cannot accept values
-            # 'Automation - Status': 'pending',
-            # 'Automation - First Submitted At': datetime.now().isoformat(),
             'Address (Line 1)': address.get('address1', ''),
             'Address (Line 2)': address.get('address2', ''),
             'City': address.get('city', ''),
@@ -117,10 +113,10 @@ class AirtableService:
             'Optional - Override Hours Spent Justification': 'Tracked via Hackatime',
             'Birthday': submission_data.get('birthday', '')
         }
-        
+
         # Remove any empty fields
         fields = {k: v for k, v in fields.items() if v}
-        
+
         payload = {
             'records': [
                 {
@@ -128,7 +124,7 @@ class AirtableService:
                 }
             ]
         }
-        
+
         try:
             # Send request to Airtable
             response = requests.post(
@@ -136,7 +132,7 @@ class AirtableService:
                 headers=self.headers,
                 json=payload
             )
-            
+
             if response.status_code == 200 or response.status_code == 201:
                 print(f"Successfully logged to Airtable table: {self.table_name}")
                 return response.json()
@@ -144,7 +140,7 @@ class AirtableService:
                 print(f"Error logging to Airtable: {response.status_code} - {response.text}")
                 print(f"Payload sent: {json.dumps(payload)}")
                 return None
-                
+
         except Exception as e:
             print(f"Exception when logging to Airtable: {str(e)}")
             return None

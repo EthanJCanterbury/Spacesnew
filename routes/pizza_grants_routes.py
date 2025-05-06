@@ -93,6 +93,10 @@ def submit_pizza_grant():
         if not is_valid_image_url:
             return jsonify({'success': False, 'message': 'Screenshot URL must point to an image file (with .jpg, .png, .gif, or similar extension)'}), 400
             
+        # Format screenshot URL as an array of objects for Airtable if it's a valid URL
+        if is_valid_image_url:
+            data['screenshot'] = [{"url": screenshot_url}]
+            
         # Validate submitter is authorized (either submitting for self or as club leader/co-leader)
         is_authorized = False
         target_user_id = int(data['user_id'])
