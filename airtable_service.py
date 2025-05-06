@@ -94,18 +94,24 @@ class AirtableService:
         # These fields should match exactly what's in your Airtable
         fields = {
             'Project Name': submission_data.get('project_name'),
-            'Username': submission_data.get('username'),
+            'GitHub Username': submission_data.get('username'),
             'Description': submission_data.get('project_description'),
             'Hours': float(submission_data.get('project_hours', 0)),
-            'GitHub URL': submission_data.get('github_url'),
-            'Live URL': submission_data.get('live_url'),
-            'What I Learned': submission_data.get('what_learned', ''),
+            'Code URL': submission_data.get('github_url'),
+            'Playable URL': submission_data.get('live_url'),
+            'What are we doing well?': submission_data.get('what_learned', ''),
             'Email': submission_data.get('email', ''),
-            'Status': submission_data.get('status', 'pending'),
-            'Submission Date': submission_data.get('submitted_at', datetime.now().isoformat()),
+            'Automation - Status': submission_data.get('status', 'pending'),
+            'Automation - First Submitted At': submission_data.get('submitted_at', datetime.now().isoformat()),
             'Club ID': str(submission_data.get('club_id')),
-            'Shipping Address': formatted_address,
-            'Grant Amount': float(submission_data.get('grant_amount', 0))
+            'Address (Line 1)': address.get('address1', ''),
+            'Address (Line 2)': address.get('address2', ''),
+            'City': address.get('city', ''),
+            'State / Province': address.get('state', ''),
+            'ZIP / Postal Code': address.get('zip', ''),
+            'Country': address.get('country', ''),
+            'Optional - Override Hours Spent': float(submission_data.get('project_hours', 0)),
+            'How can we improve?': 'Submitted via Pizza Grant Form'
         }
         
         payload = {
