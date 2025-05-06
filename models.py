@@ -237,6 +237,7 @@ class User(UserMixin, db.Model):
     avatar = db.Column(db.String(500), nullable=True)
     profile_banner = db.Column(db.String(500), nullable=True)
     is_profile_public = db.Column(db.Boolean, default=False)
+    is_staff = db.Column(db.Boolean, default=False)
     
     @property
     def is_club_leader(self):
