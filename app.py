@@ -5573,3 +5573,34 @@ if __name__ == '__main__':
 
     app.logger.info("Server running on http://0.0.0.0:3000")
     app.run(host='0.0.0.0', port=3000, debug=True)
+@app.route('/api/sites/bulk-delete', methods=['DELETE'])
+@login_required
+def bulk_delete_sites():
+    try:
+        data = request.get_json()
+        site_ids = data.get('site_ids', [])
+        
+        if not site_ids:
+            return jsonify({'success': False, 'message': 'No site IDs provided'}), 400
+        
+        deleted_count = 0
+        for site_id in site_ids:
+            site = Site.query.filter_by(id=site_id, user_id=current_user.id).first()
+            if site:
+                # Delete related collaborations
+                Collaboration.query.filter_by(site_id=site.id).delete()
+                
+                # Delete the site
+                db.session.delete(site)
+                deleted_count += 1
+        
+        if deleted_count > 0:
+            db.session.commit()
+            return jsonify({'success': True, 'message': f'Successfully deleted {deleted_count} sites'})
+        else:
+            return jsonify({'success': False, 'message': 'No sites found or permission denied'}), 404
+            
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error in bulk delete: {str(e)}")
+        return jsonify({'success': False, 'message': f'Error: {str(e)}'}), 500

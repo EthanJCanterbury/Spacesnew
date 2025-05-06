@@ -203,6 +203,64 @@
         transform: translateY(-5px);
         box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
     }
+    
+    .site-checkbox {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+    }
+    
+    .site-checkbox input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        accent-color: var(--primary);
+    }
+    
+    .bulk-actions-container {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        padding: 0 10px;
+    }
+    
+    .bulk-actions-container button {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 15px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .bulk-actions-container .btn-danger {
+        background-color: #dc3545;
+        border: none;
+        color: white;
+    }
+    
+    .bulk-actions-container .btn-danger:hover {
+        background-color: #c82333;
+    }
+    
+    .bulk-actions-container .btn-danger:disabled {
+        background-color: #e9a2a9;
+        cursor: not-allowed;
+    }
+    
+    .bulk-actions-container .btn-secondary {
+        background-color: #f1f5f9;
+        border: none;
+        color: #334155;
+    }
+    
+    .bulk-actions-container .btn-secondary:hover {
+        background-color: #e2e8f0;
+    }
 
     .site-preview {
         padding: 1.5rem;
@@ -615,11 +673,23 @@
                 <i class="fas fa-users"></i> Shared Spaces
             </button>
         </div>
+        
+        <div class="bulk-actions-container">
+            <button id="bulkDeleteBtn" class="btn-danger" onclick="openBulkDeleteModal()" disabled>
+                <i class="fas fa-trash-alt"></i> Delete Selected Spaces
+            </button>
+            <button id="selectAllBtn" class="btn-secondary" onclick="toggleSelectAll()">
+                <i class="fas fa-check-square"></i> Select All
+            </button>
+        </div>
 
         <div id="mySpacesContent" class="tab-content active">
             <div class="sites-grid">
                 {% for site in sites %}
                 <div class="site-card">
+                    <div class="site-checkbox">
+                        <input type="checkbox" class="space-select" data-site-id="{{ site.id }}" data-site-name="{{ site.name }}">
+                    </div>
                     <div class="site-preview">
                         {% if site.site_type == 'python' %}
                         <div class="site-icon python">
@@ -859,10 +929,31 @@
     </div>
 </div>
 
+<div id="bulkDeleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-exclamation-triangle"></i> Delete Multiple Spaces?</h2>
+            <button class="close-btn" onclick="closeBulkDeleteModal()">&times;</button>
+        </div>
+        <p style="padding: 0 1.5rem;">Are you sure you want to delete the selected spaces? This action cannot be undone.</p>
+        <div id="selectedSpacesList" style="padding: 0 1.5rem; max-height: 200px; overflow-y: auto;"></div>
+        <div class="modal-actions">
+            <button class="btn-secondary" onclick="closeBulkDeleteModal()">
+                Cancel
+            </button>
+            <button class="btn-danger" onclick="bulkDeleteSites()">
+                <i class="fas fa-trash-alt"></i>
+                Delete Selected Spaces
+            </button>
+        </div>
+    </div>
+</div>
+
 <div id="toast-container"></div>
 
 <script>
 let currentSiteId = null;
+let selectAllActive = false;
 
 function openNewSpaceModal() {
     const modal = document.getElementById('newSpaceModal');
@@ -1065,6 +1156,123 @@ async function leaveSharedSpace(collaborationId) {
     }
 }
 
+// Bulk delete related functions
+function updateSelectedCount() {
+    const selectedCheckboxes = document.querySelectorAll('.space-select:checked');
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    
+    if (selectedCheckboxes.length > 0) {
+        bulkDeleteBtn.disabled = false;
+        bulkDeleteBtn.innerHTML = `<i class="fas fa-trash-alt"></i> Delete Selected (${selectedCheckboxes.length})`;
+    } else {
+        bulkDeleteBtn.disabled = true;
+        bulkDeleteBtn.innerHTML = `<i class="fas fa-trash-alt"></i> Delete Selected`;
+    }
+}
+
+function toggleSelectAll() {
+    const checkboxes = document.querySelectorAll('.space-select');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    
+    selectAllActive = !selectAllActive;
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllActive;
+    });
+    
+    if (selectAllActive) {
+        selectAllBtn.innerHTML = '<i class="fas fa-times-square"></i> Deselect All';
+    } else {
+        selectAllBtn.innerHTML = '<i class="fas fa-check-square"></i> Select All';
+    }
+    
+    updateSelectedCount();
+}
+
+function openBulkDeleteModal() {
+    const selectedCheckboxes = document.querySelectorAll('.space-select:checked');
+    
+    if (selectedCheckboxes.length === 0) return;
+    
+    const selectedSpacesList = document.getElementById('selectedSpacesList');
+    selectedSpacesList.innerHTML = '';
+    
+    const ul = document.createElement('ul');
+    ul.style.paddingLeft = '20px';
+    
+    selectedCheckboxes.forEach(checkbox => {
+        const li = document.createElement('li');
+        li.textContent = checkbox.dataset.siteName;
+        ul.appendChild(li);
+    });
+    
+    selectedSpacesList.appendChild(ul);
+    
+    const modal = document.getElementById('bulkDeleteModal');
+    modal.style.display = 'flex';
+    modal.offsetHeight;
+    modal.classList.add('show');
+}
+
+function closeBulkDeleteModal() {
+    const modal = document.getElementById('bulkDeleteModal');
+    modal.classList.remove('show');
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 300);
+}
+
+async function bulkDeleteSites() {
+    const selectedCheckboxes = document.querySelectorAll('.space-select:checked');
+    const siteIds = Array.from(selectedCheckboxes).map(checkbox => checkbox.dataset.siteId);
+    
+    if (siteIds.length === 0) return;
+    
+    const deleteBtn = document.querySelector('#bulkDeleteModal .btn-danger');
+    const originalHtml = deleteBtn.innerHTML;
+    deleteBtn.disabled = true;
+    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+
+    try {
+        // Check for GitHub repos and disconnect them
+        for (const siteId of siteIds) {
+            const repoResponse = await fetch(`/api/github/repo-info?site_id=${siteId}`);
+            if (repoResponse.ok) {
+                await fetch(`/api/github/disconnect-repo?site_id=${siteId}`, {
+                    method: 'POST'
+                });
+            }
+        }
+
+        // Perform bulk delete
+        const response = await fetch(`/api/sites/bulk-delete`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ site_ids: siteIds })
+        });
+
+        if (response.ok) {
+            const count = siteIds.length;
+            showToast('success', `${count} space${count !== 1 ? 's' : ''} deleted successfully!`);
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            const data = await response.json();
+            showToast('error', data.message || 'Failed to delete spaces');
+        }
+    } catch (error) {
+        console.error('Error during bulk delete:', error);
+        showToast('error', 'An error occurred while deleting spaces');
+    } finally {
+        deleteBtn.disabled = false;
+        deleteBtn.innerHTML = originalHtml;
+        closeBulkDeleteModal();
+    }
+}
+
 function openRenameModal(siteId, siteName) {
     const modal = document.getElementById('renameSiteModal');
     modal.style.display = 'flex';
@@ -1146,6 +1354,11 @@ document.addEventListener('DOMContentLoaded', function() {
     {% if message %}
     showToast('warning', '{{ message }}');
     {% endif %}
+    
+    // Add event listeners to checkboxes
+    document.querySelectorAll('.space-select').forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectedCount);
+    });
 });
 
 function showOwnerInactiveMessage() {
