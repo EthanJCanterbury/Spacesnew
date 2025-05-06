@@ -1,8 +1,7 @@
-
 {% extends "errors/base_error.html" %}
 
 {% block error_icon %}
-<i class="fas fa-map-marker-alt"></i>
+<i class="fas fa-map-marker-alt" style="color: #ec3750;"></i>
 {% endblock %}
 
 {% block error_title %}
@@ -10,8 +9,10 @@ Page Not Found
 {% endblock %}
 
 {% block error_message %}
-<p>Oops! It seems you've wandered into uncharted territory.</p>
-<p>We couldn't find the page you were looking for. It might have been moved, deleted, or perhaps it never existed in the first place.</p>
+<div class="error-content">
+  <p>Oops! It seems you've wandered into uncharted territory.</p>
+  <p>We couldn't find the page you were looking for. It might have been moved, deleted, or perhaps it never existed in the first place.</p>
+</div>
 {% endblock %}
 
 {% block error_actions %}
