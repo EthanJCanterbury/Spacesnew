@@ -13,5 +13,20 @@
     "submitted_by": 149,
     "submitted_by_username": "EthanAtHackClub",
     "id": 1746496794567
+  },
+  {
+    "club_id": 41,
+    "user_id": 149,
+    "username": "EthanAtHackClub",
+    "project_name": "EthansPortfolio",
+    "project_description": "A built this cool portfolio",
+    "project_url": "",
+    "project_hours": 2.15,
+    "grant_amount": 10,
+    "status": "pending",
+    "submitted_at": "2025-05-06T20:07:52.221Z",
+    "submitted_by": 149,
+    "submitted_by_username": "EthanAtHackClub",
+    "id": 1746562072431
   }
 ]
