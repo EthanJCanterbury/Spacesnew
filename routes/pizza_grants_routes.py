@@ -39,6 +39,8 @@ def save_submissions(submissions):
 def submit_pizza_grant():
     """Submit a new pizza grant request"""
     try:
+        from models import Club, ClubMembership
+        
         # Get request data
         data = request.get_json()
         
@@ -52,9 +54,53 @@ def submit_pizza_grant():
             if field not in data:
                 return jsonify({'success': False, 'message': f'Missing required field: {field}'}), 400
         
-        # Validate user_id matches current user
-        if data['user_id'] != current_user.id:
-            return jsonify({'success': False, 'message': 'User ID mismatch'}), 403
+        # Validate submitter is authorized (either submitting for self or as club leader/co-leader)
+        is_authorized = False
+        target_user_id = data['user_id']
+        
+        if target_user_id == current_user.id or current_user.is_admin:
+            is_authorized = True
+        else:
+            # Check if current user is a club leader for this club
+            club = Club.query.filter_by(
+                id=data['club_id'],
+                leader_id=current_user.id
+            ).first()
+            
+            if club:
+                # Verify target user is a member of this club
+                membership = ClubMembership.query.filter_by(
+                    club_id=club.id,
+                    user_id=target_user_id
+                ).first()
+                
+                if membership:
+                    is_authorized = True
+            
+            # If not a leader, check if co-leader
+            if not is_authorized:
+                coleader_membership = ClubMembership.query.filter_by(
+                    club_id=data['club_id'],
+                    user_id=current_user.id,
+                    role='co-leader'
+                ).first()
+                
+                if coleader_membership:
+                    # Verify target user is a member of this club
+                    membership = ClubMembership.query.filter_by(
+                        club_id=data['club_id'],
+                        user_id=target_user_id
+                    ).first()
+                    
+                    if membership:
+                        is_authorized = True
+        
+        if not is_authorized:
+            return jsonify({'success': False, 'message': 'Unauthorized to submit for this user'}), 403
+        
+        # Add additional metadata
+        data['submitted_by'] = current_user.id
+        data['submitted_by_username'] = current_user.username
         
         # Add submission ID and timestamp if not provided
         if 'id' not in data:
@@ -92,11 +138,45 @@ def submit_pizza_grant():
 def get_user_submissions(user_id):
     """Get all submissions for a specific user"""
     try:
+        from models import Club, ClubMembership
+        
         # Validate that the requested user_id matches the current user
         # or current user is an admin/club leader
-        if user_id != current_user.id and not current_user.is_admin:
-            # Check if current user is a club leader where the requested user is a member
-            # (This check would be more complex in a real app)
+        is_authorized = False
+        
+        if user_id == current_user.id or current_user.is_admin:
+            is_authorized = True
+        else:
+            # Check if current user is a club leader
+            led_clubs = Club.query.filter_by(leader_id=current_user.id).all()
+            for club in led_clubs:
+                # Check if requested user is a member of this club
+                membership = ClubMembership.query.filter_by(
+                    club_id=club.id,
+                    user_id=user_id
+                ).first()
+                if membership:
+                    is_authorized = True
+                    break
+                    
+            # Check if current user is a co-leader
+            if not is_authorized:
+                coleader_memberships = ClubMembership.query.filter_by(
+                    user_id=current_user.id,
+                    role='co-leader'
+                ).all()
+                
+                for membership in coleader_memberships:
+                    # Check if requested user is a member of this club
+                    user_membership = ClubMembership.query.filter_by(
+                        club_id=membership.club_id,
+                        user_id=user_id
+                    ).first()
+                    if user_membership:
+                        is_authorized = True
+                        break
+        
+        if not is_authorized:
             return jsonify({'success': False, 'message': 'Unauthorized to view these submissions'}), 403
         
         # Load all submissions
@@ -111,6 +191,8 @@ def get_user_submissions(user_id):
         })
     
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({'success': False, 'message': f'Error fetching submissions: {str(e)}'}), 500
 
 @pizza_grants_bp.route('/club/<int:club_id>', methods=['GET'])
