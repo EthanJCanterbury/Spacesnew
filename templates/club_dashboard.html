@@ -3702,11 +3702,7 @@
                         return;
                     }
                     
-                    // Get selected project details
-                    const selectedOption = projectSelect.options[projectSelect.selectedIndex];
-                    const hours = parseFloat(selectedOption.dataset.hours) || 0;
-                    
-                    // Calculate grant amount
+                    // Calculate grant amount based on the project hours
                     let grantAmount = 0;
                     if (hours >= 2) {
                         grantAmount = 10; // $10 for 2+ hour projects
