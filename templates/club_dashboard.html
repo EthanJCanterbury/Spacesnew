@@ -3673,6 +3673,9 @@
                     const liveUrl = document.getElementById('live-url');
                     const whoAreYou = document.getElementById('who-are-you');
                     const email = document.getElementById('email');
+                    const firstName = document.getElementById('firstName');
+                    const lastName = document.getElementById('lastName');
+                    const birthday = document.getElementById('birthday');
                     const address1 = document.getElementById('address1');
                     const address2 = document.getElementById('address2');
                     const city = document.getElementById('city');
@@ -3708,6 +3711,21 @@
 
                     if (!email.value.trim()) {
                         showToast('error', 'Please enter your email');
+                        return;
+                    }
+                    
+                    if (!firstName.value.trim()) {
+                        showToast('error', 'Please enter your first name');
+                        return;
+                    }
+                    
+                    if (!lastName.value.trim()) {
+                        showToast('error', 'Please enter your last name');
+                        return;
+                    }
+                    
+                    if (!birthday.value.trim()) {
+                        showToast('error', 'Please enter your birthday');
                         return;
                     }
 
@@ -3759,6 +3777,9 @@
                         grant_amount: grantAmount,
                         what_learned: whoAreYou.value.trim(),
                         email: email.value.trim(),
+                        first_name: firstName.value.trim(),
+                        last_name: lastName.value.trim(),
+                        birthday: birthday.value.trim(),
                         shipping_address: shippingAddress,
                         status: "pending",
                         submitted_at: new Date().toISOString()
