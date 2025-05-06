@@ -247,5 +247,35 @@
     "submitted_by": 149,
     "submitted_by_username": "EthanAtHackClub",
     "id": 1746568329242
+  },
+  {
+    "club_id": 41,
+    "user_id": 149,
+    "username": "EthanAtHackClub",
+    "project_name": "EthansPortfolio",
+    "project_description": "sdasdasdasdd",
+    "github_url": "ssdssdasdasd",
+    "live_url": "asdasdsda",
+    "screenshot": "https://fonts.gstatic.com/s/i/productlogos/groups/v9/web-48dp/logo_groups_color_1x_web_48dp.png",
+    "project_hours": 2.15,
+    "grant_amount": 10,
+    "what_learned": "asdasdasddas",
+    "email": "asdasdsadasdsda",
+    "first_name": "dssdasadsda",
+    "last_name": "sdsdsda",
+    "birthday": "2025-05-05",
+    "shipping_address": {
+      "address1": "fdfdfdfddfsdfs",
+      "address2": "",
+      "city": "dfdfdfsdf",
+      "state": "fdsdfdsfdfs",
+      "zip": "sdffsdsdfdfsf",
+      "country": "sdsdfsdfsdf"
+    },
+    "status": "pending",
+    "submitted_at": "2025-05-06T21:55:25.267Z",
+    "submitted_by": 149,
+    "submitted_by_username": "EthanAtHackClub",
+    "id": 1746568525365
   }
 ]
