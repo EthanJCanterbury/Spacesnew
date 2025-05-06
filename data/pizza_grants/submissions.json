@@ -217,5 +217,35 @@
     "submitted_by": 149,
     "submitted_by_username": "EthanAtHackClub",
     "id": 1746568162075
+  },
+  {
+    "club_id": 41,
+    "user_id": 149,
+    "username": "EthanAtHackClub",
+    "project_name": "PizzaForm",
+    "project_description": "fdgfgfg",
+    "github_url": "fdgfgdfg",
+    "live_url": "fgfgdfgfg",
+    "screenshot": "https://f7bc0f17-097b-438f-9bf2-0c65c59817c4-00-3il8vlkp86lkg.riker.replit.dev/club-dashboard#pizza",
+    "project_hours": 36.48,
+    "grant_amount": 10,
+    "what_learned": "gdfgfgdfgd",
+    "email": "fgdfgdgdfdfg",
+    "first_name": "fgdgfgff",
+    "last_name": "gdfgdgfdfg",
+    "birthday": "2025-05-06",
+    "shipping_address": {
+      "address1": "fgdgffgd",
+      "address2": "gfdfgd",
+      "city": "dgffgfg",
+      "state": "fgddffg",
+      "zip": "dfgdfgdfg",
+      "country": "dfgdfg"
+    },
+    "status": "pending",
+    "submitted_at": "2025-05-06T21:52:09.155Z",
+    "submitted_by": 149,
+    "submitted_by_username": "EthanAtHackClub",
+    "id": 1746568329242
   }
 ]
