@@ -3180,7 +3180,7 @@
                         </ul>
                         <div class="info-box">
                             <i class="fas fa-lightbulb"></i>
-                            <p>Projects must be tracked on Hackatime to qualify for grants. Make sure to connect your Hackatime account in your profile settings.</p>
+                            <p>Projects must be tracked on Hackatime and be at least 1 hour long to qualify for grants. Make sure to connect your Hackatime account in your profile settings.</p>
                         </div>
                     </div>
                 </div>
@@ -3669,6 +3669,16 @@
                     // Validate form
                     if (!projectSelect.value) {
                         showToast('error', 'Please select a project');
+                        return;
+                    }
+                    
+                    // Get selected project details
+                    const selectedOption = projectSelect.options[projectSelect.selectedIndex];
+                    const hours = parseFloat(selectedOption.dataset.hours) || 0;
+                    
+                    // Check if project meets minimum time requirement (1 hour)
+                    if (hours < 1) {
+                        showToast('error', 'Project must be at least 1 hour long to qualify for a pizza grant');
                         return;
                     }
                     
