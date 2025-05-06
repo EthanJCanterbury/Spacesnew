@@ -92,6 +92,10 @@ if __name__ == '__main__':
     app.logger.info(f"Server running on http://0.0.0.0:{port}")
     app.run(host='0.0.0.0', port=port, debug=True)
 
+from flask import jsonify, request
+from flask_login import login_required, current_user
+from models import User, UserActivity, db
+
 @app.route('/api/admin/users/<int:user_id>/staff-status', methods=['POST'])
 @login_required
 @admin_required
