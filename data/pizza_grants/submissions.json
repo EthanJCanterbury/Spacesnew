@@ -277,5 +277,37 @@
     "submitted_by": 149,
     "submitted_by_username": "EthanAtHackClub",
     "id": 1746568525365
+  },
+  {
+    "club_id": 41,
+    "user_id": 149,
+    "username": "EthanAtHackClub",
+    "project_name": "Other",
+    "project_description": "dffddfsfsdfsdsdf",
+    "github_url": "dsffsdsdfdf",
+    "live_url": "dfsdfsfsd",
+    "screenshot": "https://f7bc0f17-097b-438f-9bf2-0c65c59817c4-00-3il8vlkp86lkg.riker.replit.dev/static/images/logo-rounded.png",
+    "project_hours": 1.05,
+    "grant_amount": 5,
+    "what_learned": "dfssdfsdfdfssdf",
+    "doing_well": "dsffdfsdsdf",
+    "improve": "dsfdfsdfssdf",
+    "email": "dfsdfssdf",
+    "first_name": "fsdsdfdfssdf",
+    "last_name": "fdsdfdfsdfdfs",
+    "birthday": "2025-05-08",
+    "shipping_address": {
+      "address1": "sfsdfdsfsdf",
+      "address2": "dfdfsdffsdsdf",
+      "city": "sdfsdfdfs",
+      "state": "fsddfssdf",
+      "zip": "sdfsdfsdf",
+      "country": "fsdsdfdsf"
+    },
+    "status": "pending",
+    "submitted_at": "2025-05-06T22:03:14.032Z",
+    "submitted_by": 149,
+    "submitted_by_username": "EthanAtHackClub",
+    "id": 1746568994107
   }
 ]
