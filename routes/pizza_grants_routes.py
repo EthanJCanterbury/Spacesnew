@@ -47,21 +47,12 @@ def submit_pizza_grant():
         # Validate required fields
         required_fields = [
             'club_id', 'user_id', 'username', 'project_name', 
-            'project_description', 'project_hours', 'grant_amount',
-            'shipping_address'
+            'project_description', 'project_hours', 'grant_amount'
         ]
         
         for field in required_fields:
             if field not in data:
                 return jsonify({'success': False, 'message': f'Missing required field: {field}'}), 400
-        
-        # Validate shipping address fields
-        address_fields = ['address1', 'city', 'state', 'zip', 'country']
-        shipping_address = data.get('shipping_address', {})
-        
-        for field in address_fields:
-            if field not in shipping_address or not shipping_address[field]:
-                return jsonify({'success': False, 'message': f'Missing required address field: {field}'}), 400
         
         # Validate submitter is authorized (either submitting for self or as club leader/co-leader)
         is_authorized = False
