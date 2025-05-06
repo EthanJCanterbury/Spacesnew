@@ -101,8 +101,9 @@ class AirtableService:
             'What are we doing well?': submission_data.get('what_learned', ''),
             'How can we improve?': 'Submitted via Pizza Grant Form',
             'How did you hear about this?': 'Hack Club Spaces Pizza Grants',
-            'Automation - Status': 'pending',
-            'Automation - First Submitted At': datetime.now().isoformat(),
+            # Remove computed fields that cannot accept values
+            # 'Automation - Status': 'pending',
+            # 'Automation - First Submitted At': datetime.now().isoformat(),
             'Address (Line 1)': address.get('address1', ''),
             'Address (Line 2)': address.get('address2', ''),
             'City': address.get('city', ''),
