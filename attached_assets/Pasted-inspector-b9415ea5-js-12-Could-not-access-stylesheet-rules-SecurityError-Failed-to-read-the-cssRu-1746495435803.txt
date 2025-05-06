@@ -1,0 +1,31 @@
+inspector.b9415ea5.js:12 Could not access stylesheet rules: SecurityError: Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules
+    at inspector.b9415ea5.js:12:57006
+    at Array.forEach (<anonymous>)
+    at n (inspector.b9415ea5.js:12:56855)
+    at g (inspector.b9415ea5.js:12:54813)
+    at 1MLsW.@reduxjs/toolkit (inspector.b9415ea5.js:12:1920)
+    at u (inspector.b9415ea5.js:1:705)
+    at d (inspector.b9415ea5.js:1:809)
+    at fLzap../distance (inspector.b9415ea5.js:1:153444)
+    at u (inspector.b9415ea5.js:1:705)
+    at d (inspector.b9415ea5.js:1:809)
+(anonymous) @ inspector.b9415ea5.js:12Understand this warning
+api/pizza-grants/user/149:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)Understand this error
+club-dashboard:3682 Error loading submission history: Error: HTTP error! Status: 404
+    at club-dashboard:3633:35
+(anonymous) @ club-dashboard:3682Understand this error
+api/pizza-grants/submit:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)Understand this error
+club-dashboard:3611 Error submitting project: Error: HTTP error! Status: 404
+    at club-dashboard:3592:35
+(anonymous) @ club-dashboard:3611Understand this error
+club-dashboard#pizza:1 Refused to load the stylesheet 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+Understand this error
+club-dashboard#pizza:1 Refused to load the stylesheet 'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+Understand this error
+club-dashboard#pizza:1 Refused to load the stylesheet 'https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
