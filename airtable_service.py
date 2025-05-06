@@ -98,6 +98,7 @@ class AirtableService:
             'Description': submission_data.get('project_description'),
             'Code URL': submission_data.get('github_url'),
             'Playable URL': submission_data.get('live_url'),
+            'Screenshot': submission_data.get('screenshot', ''),
             'What are we doing well?': submission_data.get('what_learned', ''),
             'How can we improve?': 'Submitted via Pizza Grant Form',
             'How did you hear about this?': 'Hack Club Spaces Pizza Grants',

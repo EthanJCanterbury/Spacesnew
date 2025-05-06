@@ -3226,6 +3226,12 @@
                                 <label for="live-url">Live URL <span class="required">*</span></label>
                                 <input type="url" id="live-url" class="form-input" placeholder="https://example.com" required>
                             </div>
+                            
+                            <div class="form-group">
+                                <label for="screenshot">Screenshot <span class="required">*</span></label>
+                                <input type="url" id="screenshot" class="form-input" placeholder="URL to a screenshot of your project" required>
+                                <div class="hint">Please upload a screenshot to an image hosting service and paste the URL here</div>
+                            </div>
 
                             <div class="form-group">
                                 <label for="who-are-you">What did you learn about while making this project? <span class="required">*</span></label>
@@ -3773,6 +3779,7 @@
                         project_description: projectDescription.value.trim(),
                         github_url: githubUrl.value.trim(),
                         live_url: liveUrl.value.trim(),
+                        screenshot: document.getElementById('screenshot').value.trim(),
                         project_hours: hours,
                         grant_amount: grantAmount,
                         what_learned: whoAreYou.value.trim(),
