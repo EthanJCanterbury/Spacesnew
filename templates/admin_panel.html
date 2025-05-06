@@ -280,6 +280,11 @@
                                     Admin
                                 </span>
                                 {% endif %}
+                                {% if user.is_staff %}
+                                <span class="status-badge staff-badge">
+                                    HQ Staff
+                                </span>
+                                {% endif %}
                                 {% if user.is_profile_public %}
                                 <span class="status-badge public-profile">
                                     Public Profile
@@ -322,6 +327,10 @@
                                         <button onclick="toggleAdminStatus({{ user.id }}, '{{ user.username }}', {{ 'false' if user.is_admin else 'true' }})" class="dropdown-item">
                                             <i class="fas fa-{{ 'user-minus' if user.is_admin else 'user-shield' }}"></i>
                                             <span>{{ 'Remove Admin' if user.is_admin else 'Make Admin' }}</span>
+                                        </button>
+                                        <button onclick="toggleStaffStatus({{ user.id }}, '{{ user.username }}', {{ 'false' if user.is_staff else 'true' }})" class="dropdown-item">
+                                            <i class="fas fa-{{ 'user-minus' if user.is_staff else 'briefcase' }}"></i>
+                                            <span>{{ 'Remove Staff' if user.is_staff else 'Make Staff' }}</span>
                                         </button>
                                         <button onclick="resetUserPassword({{ user.id }}, '{{ user.username }}')" class="dropdown-item">
                                             <i class="fas fa-key"></i>
@@ -2483,6 +2492,37 @@ function toggleAdminStatus(userId, username, makeAdmin) {
     .catch(error => {
         console.error('Error updating admin status:', error);
         showToast('error', 'An error occurred while updating admin status');
+    });
+}
+
+function toggleStaffStatus(userId, username, makeStaff) {
+    if (!confirm(`Are you sure you want to ${makeStaff ? 'make' : 'remove'} ${username} ${makeStaff ? 'a staff member' : 'from staff role'}?`)) {
+        return;
+    }
+    
+    fetch(`/api/admin/users/${userId}/staff-status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ is_staff: makeStaff })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('success', `User ${makeStaff ? 'is now a staff member' : 'is no longer a staff member'}`);
+            
+            // Update UI
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            showToast('error', data.message || 'Failed to update staff status');
+        }
+    })
+    .catch(error => {
+        console.error('Error updating staff status:', error);
+        showToast('error', 'An error occurred while updating staff status');
     });
 }
 
@@ -4666,6 +4706,12 @@ input:checked + .slider:before {
     background-color: rgba(46, 204, 113, 0.15);
     color: #2ecc71;
     border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.status-badge.staff-badge {
+    background-color: rgba(255, 140, 55, 0.15);
+    color: #ff8c37;
+    border: 1px solid rgba(255, 140, 55, 0.3);
 }
 
 .toggle-switch {
