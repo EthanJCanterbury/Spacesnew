@@ -3722,8 +3722,8 @@
                     const memberSelect = document.getElementById('member-select');
                     if (memberSelect) {
                         userId = parseInt(memberSelect.value);
-                        const selectedOption = memberSelect.options[memberSelect.selectedIndex];
-                        username = selectedOption.dataset.username;
+                        const memberOption = memberSelect.options[memberSelect.selectedIndex];
+                        username = memberOption.dataset.username;
                     }
                     
                     // Build shipping address object
