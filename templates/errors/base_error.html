@@ -1,235 +1,463 @@
+
 {% extends "base.html" %}
 
 {% block head %}
 <style>
 :root {
-    --primary-color: #6a0dad;
-    --error-color: #ed6663;
-    --success-color: #4caf50;
-    --warning-color: #ff9800;
-    --info-color: #2196f3;
+  --primary-color: #ec3750;
+  --secondary-color: #ff8c37;
+  --dark-color: #121217;
+  --light-color: #f5f5f7;
+  --success-color: #33d6a6;
+  --info-color: #338eda;
+  --warning-color: #ffaf26;
+  --error-color: #ff5a5f;
 }
 
 .error-container {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
-    text-align: center;
-    background: linear-gradient(135deg, #f5f7fa 0%, #f8f9fa 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  text-align: center;
+  background: linear-gradient(135deg, var(--dark-color) 0%, #2d3748 100%);
+  color: var(--light-color);
 }
 
 .error-box {
-    background: white;
-    padding: 3rem;
-    border-radius: 1rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-    animation: slideIn 0.5s ease-out;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 3rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  max-width: 650px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.6s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .error-icon {
-    font-size: 4rem;
-    margin-bottom: 1.5rem;
-    animation: bounce 2s infinite;
-    color: var(--error-color);
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  color: var(--primary-color);
+  animation: pulse 2s infinite;
 }
 
 .error-title {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    color: #2d3436;
-    font-weight: 700;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: var(--light-color);
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .error-message {
-    font-size: 1.2rem;
-    color: #636e72;
-    margin-bottom: 2rem;
-    line-height: 1.6;
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 2rem;
+  line-height: 1.6;
 }
 
 .error-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2rem;
 }
 
 .error-btn {
-    padding: 0.8rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+  padding: 0.8rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .error-btn-primary {
-    background: var(--primary-color);
-    color: white;
+  background: var(--primary-color);
+  color: white;
+  border: none;
 }
 
 .error-btn-secondary {
-    background: transparent;
-    color: var(--primary-color);
-    border: 2px solid var(--primary-color);
+  background: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+}
+
+.error-btn-github {
+  background: #24292e;
+  color: white;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .error-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
 }
 
 .error-btn:active {
-    transform: translateY(0);
+  transform: translateY(-1px);
 }
 
 .error-details {
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid #eee;
-    font-size: 0.9rem;
-    color: #888;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.error-details pre {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  text-align: left;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 1rem;
+}
+
+.blobs-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+  animation: float 15s infinite alternate;
+}
+
+.blob-1 {
+  width: 300px;
+  height: 300px;
+  background: var(--primary-color);
+  top: 20%;
+  left: 15%;
+  animation-delay: 0s;
+}
+
+.blob-2 {
+  width: 350px;
+  height: 350px;
+  background: var(--info-color);
+  top: 60%;
+  right: 15%;
+  animation-delay: -5s;
+}
+
+.blob-3 {
+  width: 200px;
+  height: 200px;
+  background: var(--secondary-color);
+  bottom: 10%;
+  left: 30%;
+  animation-delay: -10s;
+}
+
+.stars-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: twinkle 4s infinite alternate;
 }
 
 /* Animations */
-@keyframes slideIn {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-@keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-    }
-    40% {
-        transform: translateY(-20px);
-    }
-    60% {
-        transform: translateY(-10px);
-    }
-}
-
-.particles {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    pointer-events: none;
-}
-
-.particle {
-    position: absolute;
-    background: var(--primary-color);
-    border-radius: 50%;
-    opacity: 0.3;
-    animation: float 3s infinite ease-in-out;
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
 }
 
 @keyframes float {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-20px);
-    }
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  100% {
+    transform: translate(30px, 30px) rotate(10deg);
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Code block styling */
+.code-block {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 15px;
+  text-align: left;
+  margin: 20px 0;
+  overflow: auto;
+  max-height: 200px;
+}
+
+.code-block code {
+  font-family: 'Fira Code', monospace;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.highlight {
+  background: rgba(236, 55, 80, 0.2);
+  border-left: 3px solid var(--primary-color);
+  padding-left: 10px;
+}
+
+/* Toast notification */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideIn 0.3s ease-out forwards;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .error-box {
-        padding: 2rem;
-    }
-    
-    .error-title {
-        font-size: 2rem;
-    }
-    
-    .error-message {
-        font-size: 1rem;
-    }
-    
-    .error-actions {
-        flex-direction: column;
-    }
-    
-    .error-btn {
-        width: 100%;
-    }
+  .error-box {
+    padding: 2rem;
+  }
+  
+  .error-title {
+    font-size: 2rem;
+  }
+  
+  .error-message {
+    font-size: 1rem;
+  }
+  
+  .error-actions {
+    flex-direction: column;
+  }
+  
+  .error-btn {
+    width: 100%;
+  }
+  
+  .blob {
+    opacity: 0.2;
+  }
 }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="error-container">
-    <div class="particles" id="particles"></div>
-    <div class="error-box">
-        <div class="error-icon">
-            {% block error_icon %}
-            <i class="fas fa-exclamation-circle"></i>
-            {% endblock %}
-        </div>
-        <h1 class="error-title">
-            {% block error_title %}
-            Error
-            {% endblock %}
-        </h1>
-        <div class="error-message">
-            {% block error_message %}
-            An error has occurred.
-            {% endblock %}
-        </div>
-        <div class="error-actions">
-            {% block error_actions %}
-            <a href="{{ url_for('welcome') }}" class="error-btn error-btn-primary">
-                <i class="fas fa-home"></i> Back to Home
-            </a>
-            {% endblock %}
-        </div>
-        {% block error_details %}{% endblock %}
+  <div class="blobs-container">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+  
+  <div class="stars-container" id="stars"></div>
+  
+  <div class="error-box">
+    <div class="error-icon">
+      {% block error_icon %}
+      <i class="fas fa-exclamation-circle"></i>
+      {% endblock %}
     </div>
+    
+    <h1 class="error-title">
+      {% block error_title %}
+      Error
+      {% endblock %}
+    </h1>
+    
+    <div class="error-message">
+      {% block error_message %}
+      An error has occurred.
+      {% endblock %}
+    </div>
+    
+    <div class="error-actions">
+      {% block error_actions %}
+      <a href="{{ url_for('welcome') }}" class="error-btn error-btn-primary">
+        <i class="fas fa-home"></i> Back to Home
+      </a>
+      {% endblock %}
+    </div>
+    
+    {% block error_details %}{% endblock %}
+  </div>
 </div>
 
 <script>
-function createParticles() {
-    const container = document.getElementById('particles');
-    const particleCount = 20;
+// Create stars
+function createStars() {
+  const starsContainer = document.getElementById('stars');
+  const numStars = 100;
+  
+  for (let i = 0; i < numStars; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
     
-    for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        
-        // Random size between 5 and 15px
-        const size = Math.random() * 10 + 5;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        
-        // Random position
-        particle.style.left = `${Math.random() * 100}%`;
-        particle.style.top = `${Math.random() * 100}%`;
-        
-        // Random animation delay
-        particle.style.animationDelay = `${Math.random() * 2}s`;
-        
-        container.appendChild(particle);
-    }
+    // Random size between 1 and 3px
+    const size = Math.random() * 2 + 1;
+    star.style.width = `${size}px`;
+    star.style.height = `${size}px`;
+    
+    // Random position
+    star.style.left = `${Math.random() * 100}%`;
+    star.style.top = `${Math.random() * 100}%`;
+    
+    // Random animation delay
+    star.style.animationDelay = `${Math.random() * 4}s`;
+    
+    starsContainer.appendChild(star);
+  }
 }
 
-document.addEventListener('DOMContentLoaded', createParticles);
+// Create a GitHub issue with error details
+function createGitHubIssue() {
+  // Collect error information
+  const errorTitle = document.querySelector('.error-title').innerText;
+  const errorMessage = document.querySelector('.error-message').innerText;
+  const errorTime = new Date().toISOString();
+  const userAgent = navigator.userAgent;
+  const url = window.location.href;
+  
+  // Additional details if available
+  const errorCode = document.getElementById('error-code') ? 
+                    document.getElementById('error-code').innerText : 'Unknown';
+  const errorStack = document.getElementById('error-stack') ? 
+                     document.getElementById('error-stack').innerText : 'No stack trace available';
+  
+  // Prepare the GitHub issue body
+  const title = encodeURIComponent(`Error Report: ${errorTitle}`);
+  const body = encodeURIComponent(
+    `## Error Details\n\n` +
+    `**Type:** ${errorTitle}\n` +
+    `**Message:** ${errorMessage}\n` +
+    `**Error Code:** ${errorCode}\n` +
+    `**URL:** ${url}\n` +
+    `**User Agent:** ${userAgent}\n` +
+    `**Timestamp:** ${errorTime}\n\n` +
+    `## Additional Information\n` +
+    `<!-- Please add any additional details about what you were doing when the error occurred -->\n\n` +
+    `## Stack Trace\n\`\`\`\n${errorStack}\n\`\`\``
+  );
+  
+  // Open GitHub issue creation page
+  window.open(`https://github.com/hackclub/spaces/issues/new?title=${title}&body=${body}`, '_blank');
+  
+  // Show a confirmation toast
+  showToast('success', 'GitHub issue template prepared');
+}
+
+// Show toast notification
+function showToast(type, message) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  
+  const icon = document.createElement('i');
+  if (type === 'success') {
+    icon.className = 'fas fa-check-circle';
+  } else if (type === 'error') {
+    icon.className = 'fas fa-exclamation-circle';
+  } else {
+    icon.className = 'fas fa-info-circle';
+  }
+  
+  toast.appendChild(icon);
+  
+  const messageElem = document.createElement('span');
+  messageElem.textContent = message;
+  toast.appendChild(messageElem);
+  
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s forwards';
+    setTimeout(() => {
+      document.body.removeChild(toast);
+    }, 300);
+  }, 3000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  createStars();
+  
+  // Add GitHub issue button functionality
+  const githubButtons = document.querySelectorAll('.js-github-issue');
+  githubButtons.forEach(button => {
+    button.addEventListener('click', createGitHubIssue);
+  });
+});
 </script>
 {% endblock %}
