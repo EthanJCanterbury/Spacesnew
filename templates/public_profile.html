@@ -27,6 +27,11 @@
                         <i class="fas fa-shield-alt"></i> Admin
                     </span>
                     {% endif %}
+                    {% if profile_user.is_staff %}
+                    <span class="role-badge staff-badge" title="Hack Club HQ Staff">
+                        <i class="fas fa-briefcase"></i> HQ Staff
+                    </span>
+                    {% endif %}
                     {% if profile_user.is_club_leader %}
                     <span class="role-badge leader-badge" title="Club Leader">
                         <i class="fas fa-crown"></i> Leader
@@ -244,6 +249,12 @@
     background-color: rgba(138, 100, 235, 0.15);
     color: #8a64eb;
     border: 1px solid rgba(138, 100, 235, 0.3);
+}
+
+.staff-badge {
+    background-color: rgba(255, 140, 55, 0.15);
+    color: #ff8c37;
+    border: 1px solid rgba(255, 140, 55, 0.3);
 }
 
 .profile-social-links {
