@@ -5587,8 +5587,8 @@ def bulk_delete_sites():
         for site_id in site_ids:
             site = Site.query.filter_by(id=site_id, user_id=current_user.id).first()
             if site:
-                # Delete related collaborations
-                Collaboration.query.filter_by(site_id=site.id).delete()
+                # Delete related site pages
+                SitePage.query.filter_by(site_id=site.id).delete()
                 
                 # Delete the site
                 db.session.delete(site)
