@@ -48,10 +48,8 @@ def submit_pizza_grant():
         required_fields = [
             'club_id', 'user_id', 'username', 'project_name', 
             'project_description', 'project_hours', 'grant_amount',
-            'shipping_address'
+            'shipping_address', 'github_url', 'live_url'
         ]
-        # These fields are optional but will be stored if provided
-        # 'project_url' becomes github_url, and we add live_url
         
         for field in required_fields:
             if field not in data:
