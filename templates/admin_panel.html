@@ -332,10 +332,6 @@
                                             <i class="fas fa-{{ 'user-minus' if user.is_staff else 'briefcase' }}"></i>
                                             <span>{{ 'Remove Staff' if user.is_staff else 'Make Staff' }}</span>
                                         </button>
-                                        <button onclick="toggleStaffStatus({{ user.id }}, '{{ user.username }}', {{ 'false' if user.is_staff else 'true' }})" class="dropdown-item">
-                                            <i class="fas fa-{{ 'user-minus' if user.is_staff else 'briefcase' }}"></i>
-                                            <span>{{ 'Remove Staff' if user.is_staff else 'Make Staff' }}</span>
-                                        </button>
                                         <button onclick="resetUserPassword({{ user.id }}, '{{ user.username }}')" class="dropdown-item">
                                             <i class="fas fa-key"></i>
                                             <span>Reset Password</span>
