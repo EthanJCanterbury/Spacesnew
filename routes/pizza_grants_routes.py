@@ -5,6 +5,7 @@ import json
 import os
 import time
 from datetime import datetime
+from airtable_service import airtable_service
 
 pizza_grants_bp = Blueprint('pizza_grants', __name__, url_prefix='/api/pizza-grants')
 
@@ -131,10 +132,14 @@ def submit_pizza_grant():
         # Save updated submissions
         save_submissions(submissions)
         
+        # Log to Airtable
+        airtable_result = airtable_service.log_pizza_grant(data)
+        
         return jsonify({
             'success': True, 
             'message': 'Pizza grant submitted successfully',
-            'submission_id': data['id']
+            'submission_id': data['id'],
+            'airtable_logged': airtable_result is not None
         })
     
     except Exception as e:
