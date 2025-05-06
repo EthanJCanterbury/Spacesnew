@@ -45,11 +45,29 @@ def submit_pizza_grant():
         # Get request data
         data = request.get_json()
         
+        # Extract first and last name from username or user model if available
+        if 'username' in data and ('first_name' not in data or 'last_name' not in data):
+            from models import User
+            user = User.query.filter_by(id=data.get('user_id')).first()
+            if user:
+                data['first_name'] = getattr(user, 'first_name', '') or ''
+                data['last_name'] = getattr(user, 'last_name', '') or ''
+                data['email'] = getattr(user, 'email', '') or data.get('email', '')
+            else:
+                # If we can't find the user, use the username as first name
+                name_parts = data['username'].split()
+                if len(name_parts) > 1:
+                    data['first_name'] = name_parts[0]
+                    data['last_name'] = ' '.join(name_parts[1:])
+                else:
+                    data['first_name'] = data['username']
+                    data['last_name'] = ''
+        
         # Validate required fields
         required_fields = [
             'club_id', 'user_id', 'username', 'project_name', 
             'project_description', 'project_hours', 'grant_amount',
-            'shipping_address', 'github_url', 'live_url'
+            'shipping_address', 'github_url', 'live_url', 'email'
         ]
         
         for field in required_fields:

@@ -86,24 +86,23 @@ class AirtableService:
         
         # Format address for readability
         address = submission_data.get('shipping_address', {})
-        formatted_address = f"{address.get('address1', '')}, {address.get('city', '')}, {address.get('state', '')} {address.get('zip', '')}, {address.get('country', '')}"
-        if address.get('address2'):
-            formatted_address = f"{address.get('address1', '')}, {address.get('address2', '')}, {address.get('city', '')}, {address.get('state', '')} {address.get('zip', '')}, {address.get('country', '')}"
         
         # Format data for Airtable - adjusted for YSWS Project Submission table
         # These fields should match exactly what's in your Airtable
         fields = {
-            'Project Name': submission_data.get('project_name'),
+            'Hackatime Project': submission_data.get('project_name'),
+            'First Name': submission_data.get('first_name', ''),
+            'Last Name': submission_data.get('last_name', ''),
             'GitHub Username': submission_data.get('username'),
+            'Email': submission_data.get('email', ''),
             'Description': submission_data.get('project_description'),
-            'Hours': float(submission_data.get('project_hours', 0)),
             'Code URL': submission_data.get('github_url'),
             'Playable URL': submission_data.get('live_url'),
             'What are we doing well?': submission_data.get('what_learned', ''),
-            'Email': submission_data.get('email', ''),
-            'Automation - Status': submission_data.get('status', 'pending'),
-            'Automation - First Submitted At': submission_data.get('submitted_at', datetime.now().isoformat()),
-            'Club ID': str(submission_data.get('club_id')),
+            'How can we improve?': 'Submitted via Pizza Grant Form',
+            'How did you hear about this?': 'Hack Club Spaces Pizza Grants',
+            'Automation - Status': 'pending',
+            'Automation - First Submitted At': datetime.now().isoformat(),
             'Address (Line 1)': address.get('address1', ''),
             'Address (Line 2)': address.get('address2', ''),
             'City': address.get('city', ''),
@@ -111,8 +110,12 @@ class AirtableService:
             'ZIP / Postal Code': address.get('zip', ''),
             'Country': address.get('country', ''),
             'Optional - Override Hours Spent': float(submission_data.get('project_hours', 0)),
-            'How can we improve?': 'Submitted via Pizza Grant Form'
+            'Optional - Override Hours Spent Justification': 'Tracked via Hackatime',
+            'Birthday': submission_data.get('birthday', '')
         }
+        
+        # Remove any empty fields
+        fields = {k: v for k, v in fields.items() if v}
         
         payload = {
             'records': [
