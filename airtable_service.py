@@ -76,6 +76,16 @@ class AirtableService:
         if not self.api_token:
             print("Warning: AIRTABLE_TOKEN environment variable is not set")
             return None
+            
+        # Fix screenshot URL format if it exists
+        if 'screenshot' in submission_data and isinstance(submission_data['screenshot'], list):
+            # Check if the screenshot has nested URL format
+            if isinstance(submission_data['screenshot'][0], dict) and 'url' in submission_data['screenshot'][0]:
+                url_value = submission_data['screenshot'][0]['url']
+                # If URL is a list with dict, extract the actual URL string
+                if isinstance(url_value, list) and len(url_value) > 0 and isinstance(url_value[0], dict) and 'url' in url_value[0]:
+                    # Correct format: [{"url": "https://..."}]
+                    submission_data['screenshot'] = [{"url": url_value[0]['url']}]
 
         # Try to list tables first to validate access and see available tables
         tables = self.list_tables()
