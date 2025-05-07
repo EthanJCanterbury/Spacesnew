@@ -523,5 +523,42 @@
     "submitted_by": 149,
     "submitted_by_username": "EthanAtHackClub",
     "id": 1746571576948
+  },
+  {
+    "club_id": 41,
+    "user_id": 149,
+    "username": "EthanAtHackClub",
+    "project_name": "EthansPortfolio",
+    "project_description": "dfsfddfdfdsfdsfdsfsdfdsf",
+    "github_url": "dsfdsfsdfdsfdsf",
+    "live_url": "sdfdsfsdfsdf",
+    "screenshot": [
+      {
+        "url": "https://f7bc0f17-097b-438f-9bf2-0c65c59817c4-00-3il8vlkp86lkg.riker.replit.dev/static/images/logo-rounded.png"
+      }
+    ],
+    "project_hours": 2.15,
+    "grant_amount": 10,
+    "what_learned": "sdfdsffsdsdf",
+    "doing_well": "dsfdfsdfdfdfdfdfdf",
+    "improve": "sdfdffsdfsdsdfdfs",
+    "email": "dfsdfdfsdfs",
+    "first_name": "sdffsddffds",
+    "last_name": "dfsfsddfs",
+    "birthday": "2025-05-05",
+    "shipping_address": {
+      "address1": "fsdsdfdfsfdf",
+      "address2": "",
+      "city": "dfdfsdfdf",
+      "state": "dfdfssdfdf",
+      "zip": "dsfdfdf",
+      "country": "dfsdfsdfs"
+    },
+    "status": "pending",
+    "submitted_at": "2025-05-06T22:49:40.942Z",
+    "submitted_by": 149,
+    "submitted_by_username": "EthanAtHackClub",
+    "id": 1746571780964,
+    "club_name": "Hack Somerset NJ"
   }
 ]
