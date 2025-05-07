@@ -310,8 +310,23 @@
                                     }
                                 }
                             }
+                            
+                            // Add event listener when DOM is loaded
+                            document.addEventListener('DOMContentLoaded', function() {
+                                console.log('Adding event listener for join code button');
+                                const joinCodeBtn = document.querySelector('.btn-join-code');
+                                if (joinCodeBtn) {
+                                    console.log('Join code button found');
+                                    joinCodeBtn.addEventListener('click', function(e) {
+                                        console.log('Join code button clicked via event listener');
+                                        generateJoinCode();
+                                    });
+                                } else {
+                                    console.log('Join code button not found');
+                                }
+                            });
                         </script>
-                        <button class="btn-join-code" onclick="generateJoinCode()">
+                        <button class="btn-join-code" id="join-code-btn" onclick="console.log('Join code button clicked via onclick'); generateJoinCode();">
                             <i class="fas fa-key"></i> Join Code: <span id="join-code-display">{{ club.join_code }}</span>
                         </button>
                     {% else %}
@@ -458,8 +473,8 @@
             <div class="club-info-bar">
                 <div class="club-code-box">
                     <span class="club-code-label"><i class="fas fa-key"></i> Join Code:</span>
-                    <span class="club-code-value">{{ club.join_code }}</span>
-                    <button class="refresh-code-btn" onclick="generateJoinCode()" title="Refresh Join Code">
+                    <span class="club-code-value code-box">{{ club.join_code }}</span>
+                    <button class="refresh-code-btn" onclick="console.log('Refresh button clicked'); generateJoinCode();" title="Refresh Join Code">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
@@ -1441,17 +1456,24 @@
                             // Show a loading toast
                             showToast('info', 'Generating new join code...');
                             
-                            fetch(`/api/clubs/{{ club.id }}/join-code`, {
+                            // Log the full request URL for debugging
+                            const requestUrl = `/api/clubs/{{ club.id }}/join-code`;
+                            console.log('Sending request to:', requestUrl);
+                            
+                            fetch(requestUrl, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                     'X-Requested-With': 'XMLHttpRequest'
                                 },
                                 // Include credentials to ensure cookies are sent
-                                credentials: 'same-origin'
+                                credentials: 'same-origin',
+                                // Add an empty body to ensure the request is properly formed
+                                body: JSON.stringify({})
                             })
                             .then(response => {
-                                console.log('Join code response status:', response.status);
+                                console.log('Join code response received:', response.status);
+                                console.log('Response headers:', [...response.headers.entries()]);
                                 if (!response.ok) {
                                     throw new Error(`Error: ${response.status}`);
                                 }
@@ -1459,19 +1481,32 @@
                             })
                             .then(data => {
                                 console.log('Join code response data:', data);
+                                console.log('Join code response data:', data);
                                 if (data.error) {
                                     showToast('error', data.error);
                                 } else {
-                                    // Update join code displays
+                                    // Update all join code displays
                                     const codeDisplay = document.getElementById('join-code-display');
                                     if (codeDisplay) {
+                                        console.log('Updating join-code-display with:', data.join_code);
                                         codeDisplay.textContent = data.join_code;
+                                    } else {
+                                        console.log('join-code-display element not found');
                                     }
                                     
-                                    const joinCodeBox = document.querySelector('.code-box');
-                                    if (joinCodeBox) {
-                                        joinCodeBox.textContent = data.join_code;
-                                    }
+                                    // Update all code-box elements
+                                    const joinCodeBoxes = document.querySelectorAll('.code-box');
+                                    console.log('Found', joinCodeBoxes.length, 'code-box elements');
+                                    joinCodeBoxes.forEach(box => {
+                                        box.textContent = data.join_code;
+                                    });
+                                    
+                                    // Also update club-code-value elements
+                                    const codeValues = document.querySelectorAll('.club-code-value');
+                                    console.log('Found', codeValues.length, 'club-code-value elements');
+                                    codeValues.forEach(value => {
+                                        value.textContent = data.join_code;
+                                    });
                                     
                                     showToast('success', 'Join code regenerated successfully');
                                 }
