@@ -1,4 +1,3 @@
-
 function showToast(type, message) {
   const toastContainer = document.getElementById('toast-container');
   if (!toastContainer) {
@@ -9,7 +8,7 @@ function showToast(type, message) {
     showToast(type, message);
     return;
   }
-  
+
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
   toast.innerHTML = `
@@ -19,14 +18,14 @@ function showToast(type, message) {
     </div>
     <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
   `;
-  
+
   toastContainer.appendChild(toast);
-  
+
   // Add show class after a small delay to trigger animation
   setTimeout(() => {
     toast.classList.add('show');
   }, 10);
-  
+
   setTimeout(() => {
     if (toast.parentElement) {
       toast.classList.remove('show');
@@ -38,19 +37,32 @@ function showToast(type, message) {
 function openModal(modalId) {
   const modal = document.getElementById(modalId);
   if (!modal) return;
-  
+
+  // Prevent body scrolling when modal is open
+  document.body.style.overflow = 'hidden';
+
   modal.style.display = 'flex';
-  modal.offsetHeight; 
-  modal.classList.add('show');
+  setTimeout(() => {
+    modal.classList.add('show');
+
+    // Focus first input if exists
+    const firstInput = modal.querySelector('input:not([type="hidden"]), textarea, select');
+    if (firstInput) {
+      firstInput.focus();
+    }
+  }, 10);
 }
 
 function closeModal(modalId) {
   const modal = document.getElementById(modalId);
   if (!modal) return;
-  
+
   modal.classList.remove('show');
   setTimeout(() => {
     modal.style.display = 'none';
+
+    // Re-enable body scrolling
+    document.body.style.overflow = '';
   }, 300);
 }
 
@@ -87,7 +99,7 @@ function initModals() {
       }
     });
   });
-  
+
   document.querySelectorAll('.close-btn').forEach(btn => {
     btn.addEventListener('click', function() {
       const modal = this.closest('.modal');
@@ -106,7 +118,7 @@ function initTooltips() {
     const tooltip = document.createElement('div');
     tooltip.classList.add('tooltip');
     tooltip.textContent = tooltipText;
-    
+
     element.addEventListener('mouseenter', () => {
       document.body.appendChild(tooltip);
       const rect = element.getBoundingClientRect();
@@ -114,7 +126,7 @@ function initTooltips() {
       tooltip.style.top = `${rect.top - tooltip.offsetHeight - 10}px`;
       setTimeout(() => tooltip.classList.add('visible'), 10);
     });
-    
+
     element.addEventListener('mouseleave', () => {
       tooltip.classList.remove('visible');
       setTimeout(() => {
@@ -129,7 +141,7 @@ function initTooltips() {
 document.addEventListener('DOMContentLoaded', function() {
   initModals();
   initTooltips();
-  
+
   const splitViewToggle = document.getElementById('splitViewToggle');
   if (splitViewToggle) {
     splitViewToggle.style.position = 'fixed';
