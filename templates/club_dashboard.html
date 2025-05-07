@@ -1438,15 +1438,23 @@
                     <script>
                         function generateJoinCode() {
                             console.log('Generating join code for club ID:', {{ club.id }});
+                            // Show a loading toast
+                            showToast('info', 'Generating new join code...');
+                            
                             fetch(`/api/clubs/{{ club.id }}/join-code`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                     'X-Requested-With': 'XMLHttpRequest'
-                                }
+                                },
+                                // Include credentials to ensure cookies are sent
+                                credentials: 'same-origin'
                             })
                             .then(response => {
                                 console.log('Join code response status:', response.status);
+                                if (!response.ok) {
+                                    throw new Error(`Error: ${response.status}`);
+                                }
                                 return response.json();
                             })
                             .then(data => {
@@ -1454,20 +1462,23 @@
                                 if (data.error) {
                                     showToast('error', data.error);
                                 } else {
+                                    // Update join code displays
                                     const codeDisplay = document.getElementById('join-code-display');
                                     if (codeDisplay) {
                                         codeDisplay.textContent = data.join_code;
                                     }
+                                    
                                     const joinCodeBox = document.querySelector('.code-box');
                                     if (joinCodeBox) {
                                         joinCodeBox.textContent = data.join_code;
                                     }
-                                    showToast('success', 'Join code generated successfully');
+                                    
+                                    showToast('success', 'Join code regenerated successfully');
                                 }
                             })
                             .catch(error => {
                                 console.error('Error generating join code:', error);
-                                showToast('error', 'Failed to generate join code');
+                                showToast('error', `Failed to generate join code: ${error.message}`);
                             });
                         }
                         
