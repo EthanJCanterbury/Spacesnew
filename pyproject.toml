@@ -14,7 +14,7 @@ dependencies = [
     "psycopg2-binary==2.9.9",
     "flask-migrate>=0.4.0",
     "slugify>=0.0.1",
-    "werkzeug>=3.0.0",
+    "werkzeug==2.3.7",
     "sqlalchemy>=2.0.0",
     "PyGithub==2.1.1",
     "groq>=0.4.0",
