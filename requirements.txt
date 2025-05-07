@@ -1,4 +1,5 @@
-Flask==2.3.2
+Flask==2.0.3
+Werkzeug==2.0.3
 Flask-SQLAlchemy==3.0.3
 Flask-Login==0.6.2
 Flask-Migrate==4.0.4
@@ -11,3 +12,4 @@ cryptography==41.0.1
 python-dotenv==1.0.0
 pyotp==2.8.0
 requests==2.31.0
+groq
