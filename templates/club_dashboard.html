@@ -3338,25 +3338,10 @@
                             <div class="success-state">
                                 <i class="fas fa-check-circle"></i>
                                 <h4>Project Submitted!</h4>
-                                <p>Your project has been submitted for a pizza grant. We'll review it and get back to you soon.</p>
+                                <p>Your project has been submitted for a pizza grant. Your submission is pending review and you will be updated via email.</p>
                                 <button type="button" class="btn-secondary" id="submit-another-btn">
                                     <i class="fas fa-plus"></i> Submit Another Project
                                 </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="pizza-history-card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-history"></i> Submission History</h3>
-                    </div>
-                    <div class="card-content">
-                        <div id="pizza-history-list">
-                            <!-- Submissions will be listed here -->
-                            <div class="loading-state">
-                                <div class="loading-spinner"></div>
-                                <p>Loading your submissions...</p>
                             </div>
                         </div>
                     </div>
@@ -3564,9 +3549,6 @@
                     
                     // Load user's projects
                     loadUserProjects();
-                    
-                    // Load submission history
-                    loadSubmissionHistory();
                 }
                 
                 function checkHackatimeConnection() {
@@ -3839,10 +3821,7 @@
                             document.getElementById('pizza-grant-form').style.display = 'none';
                             document.getElementById('pizza-success').style.display = 'block';
                             
-                            // Reload submission history
-                            loadSubmissionHistory();
-                            
-                            showToast('success', 'Project submitted successfully');
+                            showToast('success', 'Project submitted successfully. You will be updated via email.');
                         } else {
                             showToast('error', data.message || 'Failed to submit project');
                         }
@@ -3865,65 +3844,7 @@
                     document.getElementById('pizza-success').style.display = 'none';
                 }
                 
-                function loadSubmissionHistory() {
-                    // Get submissions for current user
-                    fetch(`/api/pizza-grants/user/{{ current_user.id }}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! Status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        const historyList = document.getElementById('pizza-history-list');
-                        
-                        if (data.submissions && data.submissions.length > 0) {
-                            // Sort submissions by date (newest first)
-                            data.submissions.sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
-                            
-                            // Clear and populate history list
-                            historyList.innerHTML = '';
-                            
-                            data.submissions.forEach(submission => {
-                                const submissionDate = new Date(submission.submitted_at);
-                                const formattedDate = submissionDate.toLocaleDateString('en-US', {
-                                    year: 'numeric', 
-                                    month: 'short', 
-                                    day: 'numeric'
-                                });
-                                
-                                // Create submission item
-                                const submissionItem = document.createElement('div');
-                                submissionItem.className = 'submission-item';
-                                
-                                // Set status class
-                                const statusClass = `status-${submission.status}`;
-                                
-                                submissionItem.innerHTML = `
-                                    <div class="submission-header">
-                                        <h4 class="submission-title">${submission.project_name}</h4>
-                                        <span class="submission-date">${formattedDate}</span>
-                                    </div>
-                                    <span class="submission-status ${statusClass}">${submission.status.charAt(0).toUpperCase() + submission.status.slice(1)}</span>
-                                    <div class="submission-details">
-                                        <p>${submission.project_description}</p>
-                                        <p>Time: <strong>${submission.project_hours.toFixed(2)} hrs</strong> | Grant: <span class="submission-amount">$${submission.grant_amount}</span></p>
-                                    </div>
-                                `;
-                                
-                                historyList.appendChild(submissionItem);
-                            });
-                        } else {
-                            // No submissions
-                            historyList.innerHTML = '<div class="empty-state">No submissions yet. Submit a project to get started!</div>';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading submission history:', error);
-                        const historyList = document.getElementById('pizza-history-list');
-                        historyList.innerHTML = '<div class="error-state">Error loading submission history</div>';
-                    });
-                }
+                // Submission history function removed as we no longer store submissions locally
             </script>
         </section>
 

@@ -165,23 +165,19 @@ def submit_pizza_grant():
         else:
             data['club_name'] = "Unknown Club"
 
-        # Load existing submissions
-        submissions = load_submissions()
-
-        # Add new submission
-        submissions.append(data)
-
-        # Save updated submissions
-        save_submissions(submissions)
-
-        # Log to Airtable
+        # Log to Airtable only, no longer saving locally
         airtable_result = airtable_service.log_pizza_grant(data)
+
+        if airtable_result is None:
+            return jsonify({
+                'success': False,
+                'message': 'Failed to submit to Airtable'
+            }), 500
 
         return jsonify({
             'success': True, 
             'message': 'Pizza grant submitted successfully',
-            'submission_id': data['id'],
-            'airtable_logged': airtable_result is not None
+            'submission_id': data['id']
         })
 
     except Exception as e:
@@ -235,15 +231,11 @@ def get_user_submissions(user_id):
         if not is_authorized:
             return jsonify({'success': False, 'message': 'Unauthorized to view these submissions'}), 403
 
-        # Load all submissions
-        all_submissions = load_submissions()
-
-        # Filter submissions for the requested user
-        user_submissions = [s for s in all_submissions if s.get('user_id') == user_id]
-
+        # We no longer store submissions locally, so return an empty list
+        # You could implement an Airtable fetch here if needed in the future
         return jsonify({
             'success': True,
-            'submissions': user_submissions
+            'submissions': []
         })
 
     except Exception as e:
