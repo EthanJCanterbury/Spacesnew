@@ -1437,21 +1437,37 @@
                     {% endif %}
                     <script>
                         function generateJoinCode() {
+                            console.log('Generating join code for club ID:', {{ club.id }});
                             fetch(`/api/clubs/{{ club.id }}/join-code`, {
-                                method: 'POST'
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
                             })
-                            .then(response => response.json())
+                            .then(response => {
+                                console.log('Join code response status:', response.status);
+                                return response.json();
+                            })
                             .then(data => {
+                                console.log('Join code response data:', data);
                                 if (data.error) {
                                     showToast('error', data.error);
                                 } else {
-                                    document.getElementById('join-code-display').textContent = data.join_code;
+                                    const codeDisplay = document.getElementById('join-code-display');
+                                    if (codeDisplay) {
+                                        codeDisplay.textContent = data.join_code;
+                                    }
+                                    const joinCodeBox = document.querySelector('.code-box');
+                                    if (joinCodeBox) {
+                                        joinCodeBox.textContent = data.join_code;
+                                    }
                                     showToast('success', 'Join code generated successfully');
                                 }
                             })
                             .catch(error => {
+                                console.error('Error generating join code:', error);
                                 showToast('error', 'Failed to generate join code');
-                                console.error('Error:', error);
                             });
                         }
                         
