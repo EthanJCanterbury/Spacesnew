@@ -2933,6 +2933,54 @@ def toggle_staff_status(user_id):
             'message': f'Failed to update staff status: {str(e)}'
         }), 500
 
+@app.route('/api/clubs/<int:club_id>/join-code', methods=['POST'])
+@login_required
+def generate_join_code(club_id):
+    """Generate a new join code for a club."""
+    try:
+        club = Club.query.get_or_404(club_id)
+        
+        # Check if user is club leader or co-leader
+        is_leader = club.leader_id == current_user.id
+        is_co_leader = ClubMembership.query.filter_by(
+            club_id=club_id, 
+            user_id=current_user.id, 
+            role='co-leader'
+        ).first() is not None
+        
+        if not (is_leader or is_co_leader or current_user.is_admin):
+            return jsonify({
+                'error': 'Only club leaders and co-leaders can generate join codes'
+            }), 403
+        
+        # Generate new join code
+        join_code = club.generate_join_code()
+        
+        # Save changes to the database
+        db.session.commit()
+        
+        # Record the activity
+        activity = UserActivity(
+            activity_type="club_action",
+            message=f"{{username}} generated a new join code for club '{club.name}'",
+            username=current_user.username,
+            user_id=current_user.id
+        )
+        db.session.add(activity)
+        db.session.commit()
+        
+        return jsonify({
+            'join_code': join_code,
+            'message': 'Join code generated successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Error generating join code: {str(e)}')
+        return jsonify({
+            'error': f'Failed to generate join code: {str(e)}'
+        }), 500
+
 @app.route('/api/admin/export-users', methods=['POST'])
 @login_required
 @admin_required
