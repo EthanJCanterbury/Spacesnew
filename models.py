@@ -47,6 +47,7 @@ class Club(db.Model):
             # Make sure code is unique
             if not Club.query.filter_by(join_code=code).first():
                 self.join_code = code
+                db.session.flush()  # Ensure the code is saved to the session
                 return code
     
     def __repr__(self):
