@@ -1451,30 +1451,30 @@
                                 credentials: 'same-origin'
                             })
                             .then(response => {
-                                console.log('Join code response status:', response.status);
                                 if (!response.ok) {
-                                    throw new Error(`Error: ${response.status}`);
+                                    throw new Error('Network response was not ok');
                                 }
                                 return response.json();
                             })
                             .then(data => {
-                                console.log('Join code response data:', data);
                                 if (data.error) {
-                                    showToast('error', data.error);
-                                } else {
-                                    // Update join code displays
-                                    const codeDisplay = document.getElementById('join-code-display');
-                                    if (codeDisplay) {
-                                        codeDisplay.textContent = data.join_code;
-                                    }
-                                    
-                                    const joinCodeBox = document.querySelector('.code-box');
-                                    if (joinCodeBox) {
-                                        joinCodeBox.textContent = data.join_code;
-                                    }
-                                    
-                                    showToast('success', 'Join code regenerated successfully');
+                                    throw new Error(data.error);
                                 }
+                                
+                                // Update all join code displays
+                                const codeDisplays = [
+                                    document.getElementById('join-code-display'),
+                                    document.querySelector('.club-code-value'),
+                                    document.querySelector('.code-box')
+                                ];
+                                
+                                codeDisplays.forEach(element => {
+                                    if (element) {
+                                        element.textContent = data.join_code;
+                                    }
+                                });
+                                
+                                showToast('success', 'Join code regenerated successfully');
                             })
                             .catch(error => {
                                 console.error('Error generating join code:', error);
@@ -6649,19 +6649,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 1500);
     };
     
-    window.generateJoinCode = function() {
-        // Simulate API call
-        showToast('info', 'Generating join code...');
-        
-        setTimeout(() => {
-            const newCode = 'ABC123';
-            const codeDisplay = document.getElementById('join-code-display');
-            if (codeDisplay) {
-                codeDisplay.textContent = newCode;
-            }
-            showToast('success', 'New join code generated!');
-        }, 1000);
-    };
+
     
     window.copyJoinCode = function() {
         const codeDisplay = document.getElementById('join-code-display');
